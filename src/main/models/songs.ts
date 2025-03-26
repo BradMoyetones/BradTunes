@@ -261,9 +261,9 @@ export async function verifyVersion() {
     );
 
     // Limpiar espacios en blanco y extraer la versión correctamente
+    // Limpiar espacios en blanco y extraer la versión correctamente
     const latestVersionData = JSON.parse(latestVersionInfo);
-    const match = latestVersionData?.tag_name?.trim().match(/"tag_name":\s*"v?([\d.]+)"/);
-    const latestVersion = match ? match[1] : null;
+    const latestVersion = latestVersionData?.tag_name?.replace(/^v/, '') || null;
 
     return {
       currentVersion: currentVersion.trim(),
