@@ -1,0 +1,16 @@
+node_modules
+.vscode
+dist
+out
+.DS_Store
+*.log*
+src/renderer/public/musicData.db
+src/renderer/public/ffmpeg
+src/renderer/public/ffmpeg.exe
+src/renderer/public/ffplay.exe
+src/renderer/public/ffprobe.exe
+src/renderer/public/yt-dlp.exe
+src/renderer/public/yt-dlp_macos
+src/renderer/public/music/*
+src/renderer/public/music/img/*
+src/renderer/public/music/img/playlists/*
