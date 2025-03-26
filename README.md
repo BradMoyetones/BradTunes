@@ -10,7 +10,6 @@
 [![linkedin](https://img.shields.io/badge/linkedin-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://co.linkedin.com/in/brad-salom%C3%B3n-moyetones-navas-726b9a1a8)
 [![Instagram](https://img.shields.io/badge/instagram-E1306C?style=for-the-badge&logo=instagram&logoColor=white)](https://www.instagram.com/bradnavas_/)
 [![License: MIT](https://img.shields.io/badge/-MIT-blue.svg?style=for-the-badge)](LICENSE "License")
-[![CI Status](https://img.shields.io/github/actions/workflow/status/yt-dlp/yt-dlp/core.yml?branch=master&label=Tests&style=for-the-badge)](https://github.com/yt-dlp/yt-dlp/actions "CI Status")
 [![Commits](https://img.shields.io/github/commit-activity/m/BradMoyetones/BradTunes?label=commits&style=for-the-badge)](https://github.com/BradMoyetones/BradTunes/commits "Commit History")
 [![Last Commit](https://img.shields.io/github/last-commit/BradMoyetones/BradTunes/main?label=&style=for-the-badge&display_timestamp=committer)](https://github.com/BradMoyetones/BradTunes/pulse/monthly "Last activity")
 
