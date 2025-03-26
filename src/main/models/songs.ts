@@ -261,7 +261,6 @@ export async function verifyVersion() {
     );
 
     // Limpiar espacios en blanco y extraer la versión correctamente
-    // Limpiar espacios en blanco y extraer la versión correctamente
     const latestVersionData = JSON.parse(latestVersionInfo);
     const latestVersion = latestVersionData?.tag_name?.replace(/^v/, '') || null;
 
