@@ -19,7 +19,7 @@ This is an open-source app built with **Electron** and **yt-dlp** for downloadin
 Clone the project
 
 ```bash
-  $ git clone https://link-to-project
+  $ git clone https://github.com/BradMoyetones/BradTunes.git
 ```
 
 Go to the project directory
