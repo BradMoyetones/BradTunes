@@ -124,16 +124,6 @@ export async function installLatestVersionApp() {
       return { currentVersion: checkUpdate.currentVersion, newVersion: checkUpdate.newVersion, message: "Update canceled." };
     }
 
-    // Iniciar la descarga con una barra de progreso
-    let progressBar = new ProgressBar({
-      indeterminate: false,
-      text: "Downloading update...",
-      detail: "Please wait...",
-      abortOnError: true,
-      closeOnComplete: false,
-      browserWindow: { alwaysOnTop: true },
-    });
-
     // Obtener los datos de la última versión desde GitHub
     const releaseData = await releasesLatest();
 
@@ -189,6 +179,23 @@ export async function installLatestVersionApp() {
         message: `Download the latest version for macOS: ${downloadUrl}. Please drag the app to your Applications folder.`,
       };
     }
+
+    let progressBar = new ProgressBar({
+      indeterminate: false,
+      text: "Downloading update...",
+      detail: "Please wait...",
+      abortOnError: true,
+      closeOnComplete: false,
+      browserWindow: { alwaysOnTop: true },
+    });
+
+    progressBar
+      .on("completed", () => {
+        progressBar.detail = "Update downloaded. Preparing installation...";
+      })
+      .on("progress", (value) => {
+        progressBar.detail = `Downloaded ${value}%...`;
+      });
 
     // Si es Windows, comenzamos la descarga utilizando el autoUpdater
     autoUpdater.setFeedURL({

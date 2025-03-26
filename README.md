@@ -55,4 +55,3 @@ $ npm run build:mac
 ## ⚖ License
 
 [MIT](https://choosealicense.com/licenses/mit/)
-
