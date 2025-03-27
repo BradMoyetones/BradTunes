@@ -53,5 +53,7 @@ appImage:
 npmRebuild: false
 publish:
   provider: github
+  owner: BradMoyetones
+  repo: BradTunes
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/

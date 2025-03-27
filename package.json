@@ -4,10 +4,14 @@
   "description": "Hi! I’m Brad, and this is BradTunes, an app that combines a full-featured music player with the power of yt-dlp downloads.",
   "main": "./out/main/index.js",
   "author": "Brad Moyetones",
-  "repository": "https://github.com/BradMoyetones/BradTunes",
-  "homepage": "https://electron-vite.org",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BradMoyetones/BradTunes.git"
+  },
+  "homepage": "https://github.com/BradMoyetones/BradTunes#readme",
+  "license": "MIT",
   "bugs": {
-    "url": "https://portfolio-brad.vercel.app"
+    "url": "https://github.com/BradMoyetones/BradTunes/issues"
   },
   "publish": {
     "provider": "github",
@@ -47,6 +51,7 @@
     "@radix-ui/react-slider": "^1.2.2",
     "@radix-ui/react-slot": "^1.1.2",
     "@radix-ui/react-tooltip": "^1.1.8",
+    "axios": "^1.8.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
@@ -61,6 +66,7 @@
     "react-hook-form": "^7.54.2",
     "react-lazy-load-image-component": "^1.6.3",
     "react-router-dom": "^7.1.1",
+    "semver": "^7.7.1",
     "sonner": "^1.7.1",
     "sqlite3": "5.1.6",
     "tailwind-merge": "^2.6.0",
