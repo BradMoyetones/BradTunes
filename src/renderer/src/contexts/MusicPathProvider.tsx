@@ -23,6 +23,12 @@ export const MusicPathProvider = ({ children }: { children: React.ReactNode }) =
             setIsLoading(true);
             try {
                 const path = await window.api.getMusicPath();
+                const ytDlpPath = await window.api.ytDlpPath();
+                const ffmpegPath = await window.api.ffmpegPath();
+
+                console.log("ytDlpPath", ytDlpPath);
+                console.log("ffmpegPath", ffmpegPath);
+                
                 setMusicPath(path);
                 setMusicPathInStore(path);
                 await varifyDefaultPath();

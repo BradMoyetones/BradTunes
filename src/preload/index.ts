@@ -23,6 +23,9 @@ const api = {
 
   getAppVersion: () => ipcRenderer.invoke("get-app-version"),
 
+  ytDlpPath: () => ipcRenderer.invoke("ytDlpPath"),
+  ffmpegPath: () => ipcRenderer.invoke("ffmpegPath"),
+
   // PLAYLISTS
   playlists: () => ipcRenderer.invoke('playlists'),
   createPlaylist: (title: string, color: string, cover: string | undefined) => ipcRenderer.invoke('createPlaylist', title, color, cover),

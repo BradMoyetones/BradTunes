@@ -5,7 +5,7 @@ import icon from '../../resources/icon.png?asset'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { initializeDatabase } from './config/database'
-import { deleteSong, downloadSong, songs, updateSong, songsXplaylist, verifyVersion, installLatestVersion, getSongById, verifyVersionApp, installLatestVersionApp } from './models/songs'
+import { deleteSong, downloadSong, songs, updateSong, songsXplaylist, verifyVersion, installLatestVersion, getSongById, verifyVersionApp, installLatestVersionApp, ytDlpPath, ffmpegPath } from './models/songs'
 import { createPlaylist, deletePlaylist, playlists, updatePlaylist } from './models/playlists'
 import { addMusicToPlaylist, deletePlaylistSong, playlistSong } from './models/playlist_songs'
 import { getMusicPath, isDefaultMusicPath, resetMusicPath, setMusicPath } from './config/storage'
@@ -218,7 +218,12 @@ ipcMain.handle("show-restart-dialog", async () => {
   }
 });
 
-
+ipcMain.handle('ytDlpPath', (_event) => {
+  return ytDlpPath;
+});
+ipcMain.handle('ffmpegPath', (_event) => {
+  return ffmpegPath;
+});
 
 // PLAYLISTS
 ipcMain.handle('playlists', (_event) => {

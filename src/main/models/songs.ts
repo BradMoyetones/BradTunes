@@ -23,8 +23,8 @@ const isWindows = process.platform === 'win32';
 const isMac = process.platform === 'darwin';
 
 
-const ytDlpPath = isWindows ? path.join(basePath, 'yt-dlp.exe') : isMac ? path.join(basePath, 'yt-dlp_macos') : '';
-const ffmpegPath = isWindows ? path.join(basePath, 'ffmpeg.exe') : isMac ? path.join(basePath, 'ffmpeg') : '';
+export const ytDlpPath = isWindows ? path.join(basePath, 'yt-dlp.exe') : isMac ? path.join(basePath, 'yt-dlp_macos') : '';
+export const ffmpegPath = isWindows ? path.join(basePath, 'ffmpeg.exe') : isMac ? path.join(basePath, 'ffmpeg') : '';
 
 // console.log('YT-DLP Path:', ytDlpPath);
 // console.log('FFmpeg Path:', ffmpegPath);
@@ -354,8 +354,8 @@ export async function downloadSong(videoUrl: string) {
 
       // const command = `"${ytDlpPath}" -x --audio-format mp3 --write-thumbnail -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}"`;
       // const command = `"${ytDlpPath}" -x --audio-format mp3 --write-thumbnail -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}" && "${ytDlpPath}" -f mp4 -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}"`;
-      // const command = `"${ytDlpPath}" -x --audio-format mp3 --write-thumbnail -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}" && "${ytDlpPath}" -f "bestvideo[ext=mp4][fps>30]+bestaudio[ext=m4a]/best[ext=mp4]" --merge-output-format mp4 -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}"`;
-      const command = `"${ytDlpPath}" -x --audio-format mp3 --write-thumbnail -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}" && "${ytDlpPath}" -f "bv*[ext=mp4][height<=720]+ba[ext=m4a]/b[ext=mp4]" --merge-output-format mp4 -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}"`;
+      // const command = `"${ytDlpPath}" -x --audio-format mp3 --write-thumbnail -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}" && "${ytDlpPath}" -f "bv*[ext=mp4][height<=720]+ba[ext=m4a]/b[ext=mp4]" --merge-output-format mp4 -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}"`;
+      const command = `"${ytDlpPath}" --ffmpeg-location "${ffmpegPath}" -x --audio-format mp3 --write-thumbnail -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}" && "${ytDlpPath}" --ffmpeg-location "${ffmpegPath}" -f "bv*[ext=mp4][height<=720]+ba[ext=m4a]/b[ext=mp4]" --merge-output-format mp4 -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}"`;
 
       exec(command, (error, _stdout, stderr) => {
         if (error) {

@@ -42,6 +42,9 @@ declare global {
 
       getAppVersion: () => Promise<string>
 
+      ytDlpPath: () => Promise<string>
+      ffmpegPath: () => Promise<string>
+
 
       playlists: () => Promise<PlaylistsFull[]>
       createPlaylist: (title: string, color: { accent: string, dark: string }, cover: string | undefined | null) => Promise<PlaylistsFull>
