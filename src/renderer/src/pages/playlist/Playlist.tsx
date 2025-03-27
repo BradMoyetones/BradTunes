@@ -2,6 +2,7 @@ import { CardPlayButton } from "@/components/CardPlayButton";
 import { MusicsTable } from "@/components/MusicsTable";
 import { useTheme } from "@/components/theme-provider";
 import { useData } from "@/contexts/DataProvider";
+import { useMusicPathStore } from "@/store/useMusicPathStore";
 import { PlaylistsFull, SongFull } from "@/types/data";
 import { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
@@ -11,6 +12,7 @@ export default function Playlist() {
     const { theme } = useTheme();
     const { id } = useParams<{ id: string }>();
     const [songs, setSongs] = useState<SongFull[]>([]);
+    const { musicPath } = useMusicPathStore();
 
     // Inicializar estado local
     const [artistsString, setArtistsString] = useState<string>("");
@@ -75,7 +77,7 @@ export default function Playlist() {
             <header className="flex flex-row gap-8 px-6 mt-12">
                 <picture className="aspect-square w-52 h-52 flex-none">
                     <img
-                        src={playlist?.cover}
+                        src={`safe-file://${musicPath}/img/playlists/${playlist?.cover}`}
                         alt={`Cover of ${playlist?.title}`}
                         className="object-cover w-full h-full shadow-lg rounded-lg"
                         style={{ viewTransitionName: `playlist-image-${id}` }}

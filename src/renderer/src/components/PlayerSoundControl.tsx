@@ -5,16 +5,17 @@ import { usePlayerManager } from "@/contexts/PlayerManagerContext";
 import { useVideoFullScreen } from "@/contexts/VideoFullScreenContext";
 
 export const PlayerSoundControl = () => {
-  const player = usePlayerManager(); // Obtiene el reproductor
-  const { currentTime, currentSong } = usePlayerStore((state) => state); // Estado global del tiempo actual y canción
+  const player = usePlayerManager();
+  const { currentTime, currentSong } = usePlayerStore((state) => state);
   const [duration, setDuration] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [hoverTime, setHoverTime] = useState<number | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState(0);
   const sliderRef = useRef<HTMLDivElement>(null);
+  const lastUpdateTime = useRef(0); // 🟢 Evita actualizaciones constantes
   const { isFullScreen } = useVideoFullScreen();
 
-  // 🟢 Función para convertir duración de "0:00" a segundos
+  // Convierte "0:00" a segundos
   const parseDuration = (durationStr: string): number => {
     const [minutes, seconds] = durationStr.split(":").map(Number);
     return minutes * 60 + seconds;
@@ -25,12 +26,10 @@ export const PlayerSoundControl = () => {
 
     const audio = player.audioRef;
 
-    // 🟢 Si la canción tiene duración en el store, úsala primero
     if (currentSong?.duration) {
       setDuration(parseDuration(currentSong.duration));
     }
 
-    // ✅ Restaurar tiempo si la canción ya había sido reproducida antes
     if (currentTime > 0) {
       audio.currentTime = currentTime;
     }
@@ -42,7 +41,9 @@ export const PlayerSoundControl = () => {
     };
 
     const handleTimeUpdate = () => {
-      if (!isDragging) {
+      const now = Date.now();
+      if (!isDragging && now - lastUpdateTime.current > 500) {
+        lastUpdateTime.current = now;
         usePlayerStore.setState({ currentTime: audio.currentTime });
       }
     };
@@ -54,7 +55,7 @@ export const PlayerSoundControl = () => {
       audio.removeEventListener("loadedmetadata", updateDuration);
       audio.removeEventListener("timeupdate", handleTimeUpdate);
     };
-  }, [player, isDragging, currentSong?.duration, player.audioRef]);
+  }, [player, isDragging, currentSong?.duration]);
 
   const formatTime = (time: number) => {
     if (!isFinite(time)) return "0:00";

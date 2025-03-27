@@ -32,6 +32,14 @@ declare global {
         message: string;
       }>
 
+      getMusicPath: () => Promise<string>;
+      setMusicPath: (newPath: string) => void;
+      resetMusicPath: () => void;
+      selectMusicFolder: () => Promise<string | null>;
+      isDefaultMusicPath: () => boolean;
+
+      showRestartDialog: () => Promise<void>;
+
       getAppVersion: () => Promise<string>
 
 

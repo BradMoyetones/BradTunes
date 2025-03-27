@@ -1,3 +1,4 @@
+import { useMusicPath } from "@/contexts/MusicPathProvider";
 import { useVideoFullScreen } from "@/contexts/VideoFullScreenContext";
 import { Link } from "react-router";
 
@@ -10,6 +11,8 @@ interface PlayerCurrentSongProps {
 
 export const PlayerCurrentSong = ({image, title, artist, id}: PlayerCurrentSongProps) => {
   const { isFullScreen } = useVideoFullScreen()
+  const { musicPath } = useMusicPath();
+  
   return (
     <div
       className={`
@@ -19,7 +22,7 @@ export const PlayerCurrentSong = ({image, title, artist, id}: PlayerCurrentSongP
       { image ?
         (
           <picture className="!w-[70px] !h-[70px] mb-2 aspect-square bg-zinc-800 rounded-md shadow-lg overflow-hidden flex">
-            <img src={image} alt={title} className="w-full h-full object-cover object-center"/>
+            <img src={`safe-file://${musicPath}/img/${image}`} alt={title} className="w-full h-full object-cover object-center"/>
           </picture>
         ): (
           <picture className="w-16 h-16 aspect-square bg-zinc-800 rounded-md shadow-lg overflow-hidden">

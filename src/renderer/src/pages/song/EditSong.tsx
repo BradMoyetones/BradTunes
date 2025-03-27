@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { usePlayer } from "@/contexts/PlayerProvider";
 import { SongFull } from "@/types/data";
 import { useData } from "@/contexts/DataProvider";
+import { useMusicPathStore } from "@/store/useMusicPathStore";
 
 // Actualización del schema para aceptar un archivo de imagen
 const FormSchema = z.object({
@@ -37,6 +38,7 @@ export default function EditSong() {
     const [isEdited, setIsEdited] = useState(false);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const navigate = useNavigate()
+    const { musicPath } = useMusicPathStore();
 
     const playlist = playlists.find((data) => data.id === Number(playlistSongId))
 
@@ -195,7 +197,7 @@ export default function EditSong() {
                                 render={({  }) => (
                                     <label className="cursor-pointer">
                                         <img
-                                            src={previewImage || song?.image}
+                                            src={`safe-file://${musicPath}/img/${previewImage || song?.image}`}
                                             alt={`Cover of ${song?.title}`}
                                             className="object-cover w-full h-full shadow-lg rounded-lg"
                                             style={{

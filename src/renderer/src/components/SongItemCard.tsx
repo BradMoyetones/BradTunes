@@ -23,6 +23,7 @@ import deleteSong from "./DeleteSong";
 import { Link } from "react-router";
 import { useData } from "@/contexts/DataProvider";
 import { usePlayer } from "@/contexts/PlayerProvider";
+import { useMusicPathStore } from "@/store/useMusicPathStore";
 
 interface PlayListItemCardProps {
   song: SongFull;
@@ -30,6 +31,7 @@ interface PlayListItemCardProps {
 
 export default function SongItemCard({ song }: PlayListItemCardProps) {
   const { id, title, image, artist } = song
+  const { musicPath } = useMusicPathStore();
 
   const { playlists, setPlaylists, setSongs } = useData()
   const [searchQuery, setSearchQuery] = useState("");
@@ -96,7 +98,7 @@ export default function SongItemCard({ song }: PlayListItemCardProps) {
           >
               <picture className={`aspect-square w-40 h-40 flex-none`}>
                 <img
-                  src={image}
+                  src={`safe-file://${musicPath}/img/${image}`}
                   alt={`Cover of ${title} by ${artist}`}
                   className="object-cover w-full h-full rounded-md object-center" 
                   style={{

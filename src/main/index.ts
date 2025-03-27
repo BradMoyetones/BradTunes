@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, dialog, protocol } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
@@ -8,6 +8,7 @@ import { initializeDatabase } from './config/database'
 import { deleteSong, downloadSong, songs, updateSong, songsXplaylist, verifyVersion, installLatestVersion, getSongById, verifyVersionApp, installLatestVersionApp } from './models/songs'
 import { createPlaylist, deletePlaylist, playlists, updatePlaylist } from './models/playlists'
 import { addMusicToPlaylist, deletePlaylistSong, playlistSong } from './models/playlist_songs'
+import { getMusicPath, isDefaultMusicPath, resetMusicPath, setMusicPath } from './config/storage'
 
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -29,7 +30,7 @@ function createWindow(): void {
       sandbox: false,
       contextIsolation: true, // Asegúrate de que esté en true
       nodeIntegration: false, // Esto debe estar en false para evitar problemas de seguridad
-      devTools: true
+      devTools: true,
     }
   })
 
@@ -108,6 +109,11 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
+  protocol.registerFileProtocol('safe-file', (request, callback) => {
+    const url = request.url.replace('safe-file://', '');
+    callback({ path: path.normalize(url) });
+  });
+
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
 
@@ -147,6 +153,71 @@ ipcMain.handle('installLatestVersion', (_event) => {
 ipcMain.handle("get-app-version", () => {
   return app.getVersion();
 });
+
+// Obtener la ruta actual de la música
+ipcMain.handle('get-music-path', async () => {
+  return getMusicPath();
+});
+
+// Permitir que el usuario seleccione una nueva ruta y guardarla
+ipcMain.handle('set-music-path', async () => {
+  const result = await dialog.showOpenDialog({
+    properties: ['openDirectory'],
+  });
+
+  if (!result.canceled && result.filePaths.length > 0) {
+    setMusicPath(result.filePaths[0]);
+    return result.filePaths[0];
+  }
+
+  return null;
+});
+
+// Restablecer la ruta a la predeterminada
+ipcMain.handle('reset-music-path', async () => {
+  resetMusicPath();
+  return getMusicPath(); // Devolver la ruta predeterminada después de resetear
+});
+
+// Seleccionar una carpeta sin guardar la ruta (opcional)
+ipcMain.handle('select-music-folder', async () => {
+  const result = await dialog.showOpenDialog({
+    properties: ['openDirectory'],
+  });
+
+  return !result.canceled && result.filePaths.length > 0 ? result.filePaths[0] : null;
+});
+
+// Validar si es el directorio default
+ipcMain.handle('isDefaultMusicPath', async () => {
+  return isDefaultMusicPath();
+});
+
+ipcMain.handle("show-restart-dialog", async () => {
+  // 🔹 Obtener todas las ventanas abiertas y deshabilitarlas
+  const allWindows = BrowserWindow.getAllWindows();
+  allWindows.forEach((win) => win.setEnabled(false));
+
+  // 🔹 Mostrar el diálogo de reinicio
+  const result = await dialog.showMessageBox({
+    type: "warning",
+    title: "Reinicio Requerido",
+    message: "Para aplicar los cambios de directorios, es necesario reiniciar la aplicación.",
+    buttons: ["Reiniciar ahora"],
+    defaultId: 0,
+    noLink: true,
+    cancelId: 0, // ❌ No permitir cerrar el diálogo sin reiniciar
+  });
+
+  // 🔥 Rehabilitar las ventanas (por si acaso, aunque se cerrará la app)
+  allWindows.forEach((win) => win.setEnabled(true));
+
+  if (result.response === 0) {
+    app.relaunch();
+    app.quit();
+  }
+});
+
 
 
 // PLAYLISTS

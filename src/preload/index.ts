@@ -13,6 +13,14 @@ const api = {
   verifyVersion: () => ipcRenderer.invoke('verifyVersion'),
   installLatestVersion: () => ipcRenderer.invoke('installLatestVersion'),
 
+  getMusicPath: () => ipcRenderer.invoke('get-music-path'),
+  setMusicPath: () => ipcRenderer.invoke('set-music-path'),
+  resetMusicPath: () => ipcRenderer.invoke('reset-music-path'),
+  selectMusicFolder: () => ipcRenderer.invoke('select-music-folder'),
+  isDefaultMusicPath: () => ipcRenderer.invoke('isDefaultMusicPath'),
+
+  showRestartDialog: () => ipcRenderer.invoke("show-restart-dialog"),
+
   getAppVersion: () => ipcRenderer.invoke("get-app-version"),
 
   // PLAYLISTS

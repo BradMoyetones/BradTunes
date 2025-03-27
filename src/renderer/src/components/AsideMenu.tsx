@@ -11,13 +11,15 @@ import { Button } from "./ui/button";
 import { useData } from "@/contexts/DataProvider";
 import { useLastVisitedPath } from "@/hooks/useLastVisitedPath";
 import { useVersion } from "@/contexts/VersionContext";
+import { useMusicPath } from "@/contexts/MusicPathProvider";
 
 export default function AsideMenu() {
     const [isDownloadDialogOpen, setIsDownloadDialogOpen] = useState(false);
     const [ isOpen, setIsOpen ] = useState(false);
     const { playlists } = useData()
     const { navigateToLastPath } = useLastVisitedPath("/settings");
-    const { versionInfo } = useVersion()
+    const { versionInfo, appVersion } = useVersion()
+    const { defaultPath } = useMusicPath();
 
     function openYoutube() {
         window.api.createNewWindow('https://www.youtube.com/')
@@ -45,7 +47,7 @@ export default function AsideMenu() {
 
                     <SideMenuItem onClick={navigateToLastPath}>
                         <div className="relative">
-                            {versionInfo?.newVersion && (
+                            {(versionInfo?.newVersion || appVersion?.newVersion || defaultPath) && (
                                 <span className="absolute w-3 h-3 bg-yellow-400 rounded-full -top-1 -right-1 animate-pulse"></span>
                             )}
                             <Cog />

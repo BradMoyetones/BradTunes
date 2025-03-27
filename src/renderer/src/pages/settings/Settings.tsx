@@ -3,6 +3,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { useMusicPath } from "@/contexts/MusicPathProvider";
 import { useVersion } from "@/contexts/VersionContext";
 import Search from "@/icons/Search";
 import { FacebookIcon, InstagramIcon, TikTokIcon, TwitterIcon, YouTubeIcon } from "@/icons/Social";
@@ -23,7 +24,8 @@ interface LinkProps {
 
 export default function Settings() {
     const [search, setSearch] = useState("");
-    const { appVersion } = useVersion()    
+    const { appVersion, versionInfo } = useVersion()
+    const { defaultPath } = useMusicPath();
 
     const LINKS: LinkProps[] = [
         {
@@ -57,12 +59,12 @@ export default function Settings() {
                 {
                     title: "Accessibility",
                     href: "/settings/accessibility",
-                    alert: false
+                    alert: defaultPath
                 },
                 {
                     title: "Advanced",
                     href: "/settings/advanced",
-                    alert: useVersion().versionInfo?.newVersion ? true : false
+                    alert: (versionInfo?.newVersion || appVersion?.newVersion) ? true : false
                 },
             ],
         }

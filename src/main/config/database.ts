@@ -1,30 +1,79 @@
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
-import { is } from '@electron-toolkit/utils';
-import fs from 'node:fs'
+import fs from 'node:fs';
+import { getMusicPath } from './storage';
 
 const require = createRequire(import.meta.url);
-const __dirname = path.dirname(fileURLToPath(import.meta.url)); // DEV
-
-// Definir la ruta de la base de datos dinámicamente
-const dbPath = is.dev
-  ? path.join(__dirname, '../../src/renderer/public/musicData.db')
-  : path.join(process.resourcesPath, 'app.asar.unpacked', 'out', 'renderer', 'musicData.db');
-
-
-const dbDir = path.dirname(dbPath);
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
-}
-
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database(dbPath);
 
-export function initializeDatabase() {
-  db.serialize(() => {
+let currentDbPath = ''; // Almacena la ruta actual de la DB
+let db: any = null; // Almacena la instancia de la DB
+
+const getDbPath = async (): Promise<string> => {
+  const musicPath = await getMusicPath(); // 🔹 Ahora se espera el resultado
+  return path.join(musicPath, '../musicData.db');
+};
+
+const ensureDbDirectoryExists = (dbPath: string) => {
+  const dbDir = path.dirname(dbPath);
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+  }
+};
+
+const isDatabaseCorrupt = (dbPath: string): boolean => {
+  if (!fs.existsSync(dbPath)) return false; // No hay archivo, no está corrupto
+
+  try {
+    const testDb = new sqlite3.Database(dbPath);
+    testDb.close();
+    return false; // Si se abre sin errores, no está corrupta
+  } catch (error) {
+    console.error(`[DB] ❌ Base de datos corrupta detectada en: ${dbPath}`);
+    return true;
+  }
+};
+
+const openDatabase = async () => {
+  const newDbPath = await getDbPath(); // 🔹 Espera la ruta de la DB
+
+  if (db && newDbPath === currentDbPath) {
+    return db;
+  }
+
+  if (db) db.close();
+
+  ensureDbDirectoryExists(newDbPath);
+
+  // Verificar si la DB está corrupta
+  if (isDatabaseCorrupt(newDbPath)) {
+    console.error(`[DB] 🔥 Eliminando base de datos corrupta: ${newDbPath}`);
+    fs.unlinkSync(newDbPath); // Eliminar la base de datos corrupta
+  }
+
+  db = new sqlite3.Database(newDbPath, (err) => {
+    if (err) {
+      console.error(`[DB] ❌ Error al abrir la base de datos: ${err.message}`);
+    } else {
+      console.log(`[DB] ✅ Base de datos abierta correctamente.`);
+      currentDbPath = newDbPath;
+    }
+  });
+
+  return db;
+};
+
+// Inicializar la base de datos correctamente
+(async () => {
+  await openDatabase();
+})();
+
+export async function initializeDatabase() {
+  const database = await openDatabase(); // 🔹 Espera la instancia de la DB
+
+  database.serialize(() => {
     // Crear tabla music
-    db.run(`
+    database.run(`
       CREATE TABLE IF NOT EXISTS songs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
@@ -39,7 +88,7 @@ export function initializeDatabase() {
     `);
 
     // Crear tabla playlists
-    db.run(`
+    database.run(`
       CREATE TABLE IF NOT EXISTS playlists (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
@@ -50,7 +99,7 @@ export function initializeDatabase() {
     `);
 
     // Crear tabla playlist_songs
-    db.run(`
+    database.run(`
       CREATE TABLE IF NOT EXISTS playlist_songs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         playlist_id INTEGER NOT NULL,
@@ -63,6 +112,6 @@ export function initializeDatabase() {
   });
 }
 
-export function getDb() {
-  return db;
+export async function getDb() {
+  return await openDatabase(); // 🔹 Ahora es asíncrono
 }

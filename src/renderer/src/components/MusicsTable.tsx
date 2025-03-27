@@ -24,6 +24,7 @@ import { useData } from "@/contexts/DataProvider";
 import MusicVisualizer from "./MusicVisualizer";
 import { usePlayer } from "@/contexts/PlayerProvider";
 import { usePlayerManager } from "@/contexts/PlayerManagerContext";
+import { useMusicPathStore } from "@/store/useMusicPathStore";
 
 interface Props {
   songs: SongFull[],
@@ -36,6 +37,7 @@ export const MusicsTable = ({songs, playlist}: Props) => {
   const [searchQuery, setSearchQuery] = useState("");
   const player = usePlayerManager()
   const { id } = useParams<{ id: string }>();
+  const { musicPath } = useMusicPathStore();
   
   if(!playlist) return
 
@@ -91,7 +93,7 @@ export const MusicsTable = ({songs, playlist}: Props) => {
                     <td className="px-4 py-2 flex gap-3">
                       <picture className="">
                         <img 
-                          src={song.image} 
+                          src={`safe-file://${musicPath}/img/${song.image}`}
                           alt={song.title} 
                           className="w-11 h-11 object-cover object-center rounded-md"
                           style={{

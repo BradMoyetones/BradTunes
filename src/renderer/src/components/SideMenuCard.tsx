@@ -13,6 +13,7 @@ import deletePlaylist from "./DeletePlaylist";
 import { useEffect, useState } from "react";
 import PlaylistDialog from "./PlaylistDialog";
 import { useData } from "@/contexts/DataProvider";
+import { useMusicPathStore } from "@/store/useMusicPathStore";
 
 interface Props {
   playlist: PlaylistsFull,
@@ -25,6 +26,7 @@ export default function SideMenuCard({ playlist, onClick }: Props) {
   const artistsString = playlist_songs.length > 0 ? playlist_songs.map(e => e.song.artist).join(", ") : "No artists found"
   const { playlists, setPlaylists } = useData();
   const [ isOpen, setIsOpen ] = useState(false);
+  const { musicPath } = useMusicPathStore();
 
   const [timestamp, setTimestamp] = useState(new Date().getTime())
 
@@ -43,7 +45,7 @@ export default function SideMenuCard({ playlist, onClick }: Props) {
         >
           <picture className="h-12 w-12 flex-none">
             <img
-              src={cover}
+              src={`safe-file://${musicPath}/img/playlists/${cover}`}
               alt={`Cover of ${title}`}
               className="object-cover w-full h-full rounded-md"
             />

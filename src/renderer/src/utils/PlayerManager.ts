@@ -1,3 +1,4 @@
+import { useMusicPathStore } from "@/store/useMusicPathStore";
 import { usePlayerStore } from "@/store/usePlayerStore";
 import { Playlist, SongFull } from "@/types/data";
 
@@ -133,12 +134,12 @@ export class PlayerManager {
                 duration: song?.duration || "0:00",
             }));
 
-            this.audioRef.src = song?.song || "";
+            this.audioRef.src = `safe-file://${useMusicPathStore.getState().musicPath}/${song?.song}` || "";
             this.audioRef.currentTime = 0;
 
             if (this.videoRef) {
                 if (song && song.video) {
-                    this.videoRef.src = song.video;
+                    this.videoRef.src = `safe-file://${useMusicPathStore.getState().musicPath}/${song.video}`;
                     this.videoRef.volume = 0;
                 } else {
                     this.videoRef.src = "";
@@ -168,13 +169,13 @@ export class PlayerManager {
     
             // Si es una nueva canción, cargarla correctamente
             if (this.audioRef.src !== song.song) {
-                this.audioRef.src = song.song;
+                this.audioRef.src = `safe-file://${useMusicPathStore.getState().musicPath}/${song.song}`;
                 this.audioRef.currentTime = 0;
             }
     
             if (this.videoRef) {
                 if (song.video && this.videoRef.src !== song.video) {
-                    this.videoRef.src = song.video;
+                    this.videoRef.src = `safe-file://${useMusicPathStore.getState().musicPath}/${song.video}`;
                     this.videoRef.volume = 0;
                 } else if (!song.video) {
                     this.videoRef.src = "";
@@ -212,7 +213,7 @@ export class PlayerManager {
         if (!this.audioRef.src) {
             if (currentSong?.song) {
                 console.warn("El audio no tiene src, cargando desde la canción actual...");
-                this.audioRef.src = currentSong.song;
+                this.audioRef.src = `safe-file://${useMusicPathStore.getState().musicPath}/${currentSong.song}`;
                 this.audioRef.currentTime = usePlayerStore.getState().currentTime || 0; // Restaurar tiempo si existe
             } else {
                 console.error("No hay una canción disponible para reproducir.");
@@ -224,7 +225,7 @@ export class PlayerManager {
             try {
                 await this.audioRef.play();
                 if (this.videoRef && currentSong?.video) {
-                    this.videoRef.src = currentSong.video; 
+                    this.videoRef.src = `safe-file://${useMusicPathStore.getState().musicPath}/${currentSong.video}`; 
                     await this.videoRef.play();
                     this.videoRef.volume = 0;
                 }

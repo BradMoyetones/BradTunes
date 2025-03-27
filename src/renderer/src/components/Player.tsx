@@ -9,12 +9,14 @@ import { usePlayerManager } from "@/contexts/PlayerManagerContext";
 import { useVideoFullScreen } from "@/contexts/VideoFullScreenContext";
 import { usePlayerStore } from "@/store/usePlayerStore";
 import PlayerMaximizeControl from "./PlayerMaximizeControl";
+import { useMusicPath } from "@/contexts/MusicPathProvider";
 
 export default function Player() {
     const playerStore = usePlayerStore();
     const player = usePlayer();
     const playerManager = usePlayerManager();
     const { isFullScreen, isButtonVisible } = useVideoFullScreen();
+    const { musicPath } = useMusicPath();
 
     // 🔥 Creamos una referencia de React para el audio
     const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -24,7 +26,7 @@ export default function Player() {
         if (audioRef.current && playerManager.audioRef && player.currentMusic.song) {
             // AUDIO
             playerManager.setAudioElement(audioRef.current);
-            playerManager.audioRef.src = player.currentMusic.song.song
+            playerManager.audioRef.src = `safe-file://${musicPath}/${player.currentMusic.song.song}`
             playerManager.audioRef.currentTime = player.currentTime; // Opcional: resetear el tiempo al cambiar la canción
             playerManager.audioRef.volume = player.volume
         }

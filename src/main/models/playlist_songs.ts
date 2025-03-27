@@ -1,8 +1,8 @@
 import { Playlist, PlaylistSongs, PlaylistSongsFull, Song } from '../../types/data';
 import { getDb } from '../config/database';
 
-export function playlistSong(playlistId: number, songId: number): Promise<PlaylistSongs | false> {
-  const db = getDb();
+export async function playlistSong(playlistId: number, songId: number): Promise<PlaylistSongs | false> {
+  const db = await getDb();
   return new Promise((resolve, reject) => {
     const query = `
       SELECT id, playlist_id, song_id, date 
@@ -19,8 +19,8 @@ export function playlistSong(playlistId: number, songId: number): Promise<Playli
   });
 }
 
-export function addMusicToPlaylist(playlistId: number, songId: number, date: string): Promise<PlaylistSongsFull> {
-  const db = getDb();
+export async function addMusicToPlaylist(playlistId: number, songId: number, date: string): Promise<PlaylistSongsFull> {
+  const db = await getDb();
   return new Promise((resolve, reject) => {
     // Paso 1: Insertar el nuevo registro en playlist_songs
     const query = 'INSERT INTO playlist_songs (playlist_id, song_id, date) VALUES (?, ?, ?)';
@@ -60,8 +60,8 @@ export function addMusicToPlaylist(playlistId: number, songId: number, date: str
   });
 }
 
-export function deletePlaylistSong(playlistId: number, songId: number): Promise<boolean> {
-  const db = getDb();
+export async function deletePlaylistSong(playlistId: number, songId: number): Promise<boolean> {
+  const db = await getDb();
   return new Promise((resolve, reject) => {
     const query = 'DELETE FROM playlist_songs WHERE playlist_id = ? AND song_id = ?';
     db.run(query, [playlistId, songId], function (err: Error | null) {

@@ -12,6 +12,7 @@ import { Toaster } from './components/ui/sonner';
 import { PlayerProvider } from './contexts/PlayerProvider';
 import { PlayerManagerProvider } from './contexts/PlayerManagerContext';
 import { VersionProvider } from './contexts/VersionContext';
+import { MusicPathProvider } from './contexts/MusicPathProvider';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
@@ -20,8 +21,10 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
         <PlayerProvider>
           <DataProvider>
             <VersionProvider>
-              <RouterProvider router={router} />
-              <Toaster />
+              <MusicPathProvider>
+                <RouterProvider router={router} />
+                <Toaster />
+              </MusicPathProvider>
             </VersionProvider>
           </DataProvider>
         </PlayerProvider>

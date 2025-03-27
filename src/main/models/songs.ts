@@ -1,6 +1,5 @@
 import path from 'node:path'
 import fs from 'node:fs'
-import { fileURLToPath } from 'node:url'
 import { getDb } from '../config/database';
 import { exec } from 'node:child_process'
 import { getTimestamp } from '../config/helpers';
@@ -13,27 +12,19 @@ import { autoUpdater } from 'electron-updater';
 import log from "electron-log";
 import ProgressBar from "electron-progressbar";
 import { platform } from 'node:os';
-import { is } from '@electron-toolkit/utils';
+import { basePath, getMusicPath } from '../config/storage';
 
 const execPromise = promisify(exec)
 const repoOwner = "BradMoyetones"; // 🔹 Cambia esto por tu usuario o equipo de GitHub
 const repoName = "BradTunes"; // 🔹 Cambia esto por el nombre de tu repo
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
 // Detectar el sistema operativo
 const isWindows = process.platform === 'win32';
 const isMac = process.platform === 'darwin';
 
-// Definir rutas dinámicamente
-const basePath = is.dev
-  ? path.join(__dirname, '../../src/renderer/public')
-  : path.join(process.resourcesPath, 'app.asar.unpacked', 'out', 'renderer');
 
 const ytDlpPath = isWindows ? path.join(basePath, 'yt-dlp.exe') : isMac ? path.join(basePath, 'yt-dlp_macos') : '';
 const ffmpegPath = isWindows ? path.join(basePath, 'ffmpeg.exe') : isMac ? path.join(basePath, 'ffmpeg') : '';
-const outputDir = isWindows || isMac ? path.join(basePath, 'music') : '';
-const imgDir = isWindows || isMac ? path.join(outputDir, 'img') : '';
 
 // console.log('YT-DLP Path:', ytDlpPath);
 // console.log('FFmpeg Path:', ffmpegPath);
@@ -305,8 +296,12 @@ export async function installLatestVersion() {
   }
 }
 
-export function downloadSong(videoUrl: string) {
-  const db = getDb();
+export async function downloadSong(videoUrl: string) {
+  const db = await getDb();
+  const musicPath = await getMusicPath(); // 🔹 Espera la ruta correcta
+  const outputDir = musicPath;
+  const imgDir = path.join(outputDir, 'img');
+
   console.log('ytDlpPath:', ytDlpPath);
   if (!fs.existsSync(ytDlpPath)) {
     throw new Error('yt-dlp.exe not found');
@@ -402,9 +397,9 @@ export function downloadSong(videoUrl: string) {
               stmt.run(
                 title,
                 artist,
-                `music/${mp3Filename}`,
-                `music/${mp4Filename}`,
-                `music/img/${thumbnailFilename}`,
+                `${mp3Filename}`,
+                `${mp4Filename}`,
+                `${thumbnailFilename}`,
                 duration,
                 createdAt,
                 (err: Error | null) => {
@@ -453,8 +448,8 @@ export function downloadSong(videoUrl: string) {
   });
 }
 
-export function songs(currentPlaylist: Playlist | null, currentSong: SongFull | null): Promise<CurrentMusic> {
-  const db = getDb();
+export async function songs(currentPlaylist: Playlist | null, currentSong: SongFull | null): Promise<CurrentMusic> {
+  const db = await getDb();
 
   return new Promise((resolve, reject) => {
     let query = `
@@ -533,8 +528,8 @@ export function songs(currentPlaylist: Playlist | null, currentSong: SongFull | 
   });
 }
 
-export function songsXplaylist(playlistId: number): Promise<SongFull[]> {
-  const db = getDb();
+export async function songsXplaylist(playlistId: number): Promise<SongFull[]> {
+  const db = await getDb();
 
   return new Promise((resolve, reject) => {
     let query = `
@@ -601,8 +596,8 @@ export function songsXplaylist(playlistId: number): Promise<SongFull[]> {
   });
 }
 
-export function getSongById(id: number): Promise<SongFull | null> {
-  const db = getDb();
+export async function getSongById(id: number): Promise<SongFull | null> {
+  const db = await getDb();
 
   return new Promise((resolve, reject) => {
     const selectQuery = `SELECT * FROM songs WHERE id = ?`;
@@ -675,13 +670,16 @@ export function getSongById(id: number): Promise<SongFull | null> {
 }
 
 
-export function updateSong(
+export async function updateSong(
   id: number,
   title: string,
   artist: string,
   image: string | undefined  // Aceptamos la imagen en formato base64
 ): Promise<SongFull> {
-  const db = getDb();
+  const db = await getDb();
+  const musicPath = await getMusicPath(); // 🔹 Espera la ruta correcta
+  const outputDir = musicPath;
+  const imgDir = path.join(outputDir, 'img');
 
   return new Promise((resolve, reject) => {
     const sanitizeFilename = (name: string) => {
@@ -746,7 +744,7 @@ export function updateSong(
           // Guardar la imagen como archivo
           fs.writeFileSync(imageDestination, buffer);
 
-          imagePath = `music/img/${imageFilename}`;
+          imagePath = `${imageFilename}`;
         } catch (err) {
           reject(`Error saving image: ${(err as Error).message}`);
           return;
@@ -834,47 +832,54 @@ export function updateSong(
   });
 }
 
-// Eliminar una canción por ID
-export function deleteSong(id: number): Promise<boolean> {
-  const db = getDb();
+const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+const deleteFile = async (filePath: string, retries = 5) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      if (fs.existsSync(filePath)) {
+        fs.rmSync(filePath, { force: true });
+        console.log(`✅ Archivo eliminado: ${filePath}`);
+      }
+      return;
+    } catch (error: any) {
+      if (error.code === 'EBUSY' || error.code === 'EPERM') {
+        console.warn(`⚠️ Archivo ocupado, reintentando... (${i + 1}/${retries})`);
+        await wait(500); // Espera 500ms antes de reintentar
+      } else {
+        throw error;
+      }
+    }
+  }
+  throw new Error(`❌ No se pudo eliminar el archivo: ${filePath}`);
+};
+
+export async function deleteSong(id: number): Promise<boolean> {
+  const db = await getDb();
+  const musicPath = await getMusicPath();
+  const outputDir = musicPath;
+
   return new Promise((resolve, reject) => {
-    db.get('SELECT song, video, image FROM songs WHERE id = ?', [id], (err: Error | null, row: any) => {
-      if (err) {
-        reject(`Error fetching record: ${err.message}`);
-        return;
-      }
+    db.get('SELECT song, video, image FROM songs WHERE id = ?', [id], async (err: Error | null, row: any) => {
+      if (err) return reject(`Error fetching record: ${err.message}`);
+      if (!row) return reject('Record not found');
 
-      if (!row) {
-        reject('Record not found');
-        return;
-      }
-
-      const mp3Path = path.join(outputDir, row.song.replace(/^music\//, ''));
-      const imagePath = path.join(outputDir, row.image.replace(/^music\//, ''));
-      const videoPath = path.join(outputDir, row.video.replace(/^music\//, ''));
+      const mp3Path = path.join(outputDir, row.song);
+      const imagePath = path.join(outputDir, 'img', row.image);
+      const videoPath = row.video ? path.join(outputDir, row.video) : null;
 
       try {
-        if (fs.existsSync(mp3Path)) {
-          fs.unlinkSync(mp3Path);
-        }
-        if (fs.existsSync(imagePath)) {
-          fs.unlinkSync(imagePath);
-        }
-        if (fs.existsSync(videoPath)) {
-          fs.unlinkSync(videoPath);
-        }
+        if (videoPath) await deleteFile(videoPath);
+        await deleteFile(imagePath);
+        await deleteFile(mp3Path);
       } catch (fileError) {
-        if (fileError instanceof Error) {
-          reject(`Error deleting files: ${fileError.message}`);
-        } else {
-          reject('Unknown error occurred while deleting files.');
-        }
+        return reject(`Error deleting files: ${fileError instanceof Error ? fileError.message : 'Unknown error'}`);
       }
 
       const stmt = db.prepare("DELETE FROM songs WHERE id = ?");
       stmt.run(id, function (err: Error | null) {
         if (err) {
-          reject(false);
+          reject(`Error deleting from database: ${err.message}`);
         } else {
           resolve(true);
         }

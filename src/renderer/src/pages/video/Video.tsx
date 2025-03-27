@@ -3,18 +3,20 @@ import { usePlayerStore } from "@/store/usePlayerStore";
 import { usePlayerManager } from "@/contexts/PlayerManagerContext";
 import { usePlayer } from "@/contexts/PlayerProvider";
 import { useVideoFullScreen } from "@/contexts/VideoFullScreenContext";
+import { useMusicPath } from "@/contexts/MusicPathProvider";
 
 export default function Video() {
     const { currentSong, currentTime } = usePlayerStore();
     const player = usePlayer();
     const playerManager = usePlayerManager();
     const { isFullScreen, isCursorHidden, enterFullScreen, exitFullScreen } = useVideoFullScreen();
+    const { musicPath } = useMusicPath()
     const videoRef = useRef<HTMLVideoElement | null>(null);
 
     useEffect(() => {
         if (videoRef.current && playerManager.videoRef && player.currentMusic.song) {
             playerManager.setVideoElement(videoRef.current);
-            playerManager.videoRef.src = player.currentMusic.song.video;
+            playerManager.videoRef.src = `safe-file://${musicPath}/${player.currentMusic.song.video}`;
             playerManager.videoRef.currentTime = currentTime;
             if (!playerManager.audioRef.paused) playerManager.videoRef.play();
         }
@@ -48,7 +50,7 @@ export default function Video() {
             <div className="w-full h-full flex relative items-center justify-center overflow-hidden">
                 {!isFullScreen && (
                     <video 
-                        src={currentSong?.video} 
+                        src={`safe-file://${musicPath}/${currentSong?.video}`}
                         autoPlay 
                         loop 
                         muted 

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { usePlayerStore } from "@/store/usePlayerStore"; // Importa el store
 import { usePlayerManager } from "./PlayerManagerContext";
 import { PlayerState } from "@/utils/PlayerManager";
+import { useMusicPathStore } from "@/store/useMusicPathStore";
 
 // Creamos el contexto
 const PlayerContext = createContext<PlayerState | undefined>(undefined);
@@ -10,6 +11,7 @@ const PlayerContext = createContext<PlayerState | undefined>(undefined);
 export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const playerStore = usePlayerStore(); // Accede al estado desde Zustand
     const player = usePlayerManager();
+    const pathStore = useMusicPathStore();
 
     const [state, setState] = useState<PlayerState>({
         currentMusic: {
@@ -81,9 +83,14 @@ export const PlayerProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         playerStore.loopMode,
         playerStore.isShuffling,
         playerStore.selectedDeviceId,
+        pathStore.musicPath
     ]);
 
     // 📌 Conectar el `PlayerManager` con el estado global
+    useEffect(() => {
+        player.audioRef.src = `safe-file://${pathStore.musicPath}/${playerStore.currentSong?.song}`;
+    }, [pathStore.musicPath]); // 🔥 Agregado `player` como dependencia para evitar referencias obsoletas
+
     useEffect(() => {
         player.updateState = setState;
     }, [player]); // 🔥 Agregado `player` como dependencia para evitar referencias obsoletas

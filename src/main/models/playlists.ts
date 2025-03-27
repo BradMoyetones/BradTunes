@@ -3,31 +3,17 @@ import { PlaylistsFull } from '../../types/data';
 import { getDb } from '../config/database';
 import fs from 'node:fs'
 import { getTimestamp } from '../config/helpers';
-import { fileURLToPath } from 'node:url'
-import { is } from '@electron-toolkit/utils';
+import { getMusicPath } from '../config/storage';
 
 interface RunResult {
   lastID: number;
   changes: number;
 }
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Definir rutas dinámicamente con is.dev
-const outputDir = is.dev
-  ? path.join(__dirname, '../../src/renderer/public/music')
-  : path.join(process.resourcesPath, 'app.asar.unpacked', 'out', 'renderer', 'music');
-
-const imgDir = path.join(outputDir, 'img/playlists');
-
-[outputDir, imgDir].forEach((dir) => {
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-});
-
-export function playlists(limit: number = 1000, offset: number = 0): Promise<PlaylistsFull[]> {
-  const db = getDb();
+export async function playlists(limit: number = 1000, offset: number = 0): Promise<PlaylistsFull[]> {
+  const db = await getDb();
 
   return new Promise((resolve, reject) => {
     const query = `
@@ -119,12 +105,21 @@ export function playlists(limit: number = 1000, offset: number = 0): Promise<Pla
   });
 }
 
-export function createPlaylist(
+export async function createPlaylist(
   title: string,
   color: { accent: string; dark: string },
   cover: string | undefined | null
 ): Promise<PlaylistsFull> {
-  const db = getDb();
+  const db = await getDb();
+  const musicPath = await getMusicPath(); // 🔹 Espera la ruta correcta
+  const outputDir = musicPath;
+  const imgDir = path.join(outputDir, 'img', 'playlists');
+
+  [outputDir, imgDir].forEach((dir) => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+  });
 
   return new Promise((resolve, reject) => {
     const sanitizeFilename = (name: string) => {
@@ -158,7 +153,7 @@ export function createPlaylist(
         }
 
         fs.writeFileSync(coverDestination, buffer);
-        coverPath = `music/img/playlists/${coverFilename}`;
+        coverPath = `${coverFilename}`;
       } catch (err) {
         reject(`Error saving cover image: ${(err as Error).message}`);
         return;
@@ -179,7 +174,7 @@ export function createPlaylist(
       }
 
       fs.writeFileSync(coverDestination, buffer);
-      coverPath = `music/img/playlists/${coverFilename}`;
+      coverPath = `${coverFilename}`;
     }
 
     // Serializar el color como JSON
@@ -225,9 +220,18 @@ export function createPlaylist(
   });
 }
 
-export function updatePlaylist(id: number | undefined, title: string, color: { accent: string; dark: string }, cover: string | undefined): Promise<PlaylistsFull> {
-  const db = getDb();
-  
+export async function updatePlaylist(id: number | undefined, title: string, color: { accent: string; dark: string }, cover: string | undefined): Promise<PlaylistsFull> {
+  const db = await getDb();
+  const musicPath = await getMusicPath(); // 🔹 Espera la ruta correcta
+  const outputDir = musicPath;
+  const imgDir = path.join(outputDir, 'img', 'playlists');
+
+  [outputDir, imgDir].forEach((dir) => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+  });
+
   return new Promise((resolve, reject) => {
     const sanitizeFilename = (name: string) => {
       return name
@@ -297,7 +301,7 @@ export function updatePlaylist(id: number | undefined, title: string, color: { a
           // Guardar la imagen como archivo
           fs.writeFileSync(imageDestination, buffer);
 
-          coverPath = `music/img/playlists/${imageFilename}`;
+          coverPath = `${imageFilename}`;
         } catch (err) {
           reject(`Error saving image: ${(err as Error).message}`);
           return;
@@ -387,8 +391,17 @@ export function updatePlaylist(id: number | undefined, title: string, color: { a
   });
 }
 
-export function deletePlaylist(id: number): Promise<boolean> {
-  const db = getDb();
+export async function deletePlaylist(id: number): Promise<boolean> {
+  const db = await getDb();
+  const musicPath = await getMusicPath(); // 🔹 Espera la ruta correcta
+  const outputDir = musicPath;
+  const imgDir = path.join(outputDir, 'img');
+
+  [outputDir, imgDir].forEach((dir) => {
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+  });
   return new Promise((resolve, reject) => {
     const selectQuery = `SELECT * FROM playlists WHERE id = ?`;
     db.get(selectQuery, [id], (err, row) => {
@@ -404,7 +417,7 @@ export function deletePlaylist(id: number): Promise<boolean> {
 
       // Eliminar la imagen de la portada si existe
       if (row.cover) {
-        const imagePath = path.join(outputDir, row.cover.replace(/^music\//, ''));
+        const imagePath = path.join(outputDir, 'img', 'playlists', row.cover.replace(/^music\//, ''));
         if (fs.existsSync(imagePath)) {
           try {
             fs.unlinkSync(imagePath);  // Eliminar el archivo de la imagen
