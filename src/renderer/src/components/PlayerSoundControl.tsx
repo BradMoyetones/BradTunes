@@ -3,9 +3,11 @@ import { Slider } from "./ui/slider";
 import { usePlayerStore } from "@/store/usePlayerStore";
 import { usePlayerManager } from "@/contexts/PlayerManagerContext";
 import { useVideoFullScreen } from "@/contexts/VideoFullScreenContext";
+import { usePlayer } from "@/contexts/PlayerProvider";
 
 export const PlayerSoundControl = () => {
-  const player = usePlayerManager();
+  const playerM = usePlayerManager();
+  const player = usePlayer();
   const { currentTime, currentSong } = usePlayerStore((state) => state);
   const [duration, setDuration] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -22,9 +24,9 @@ export const PlayerSoundControl = () => {
   };
 
   useEffect(() => {
-    if (!player || !player.audioRef) return;
+    if (!playerM || !playerM.audioRef) return;
 
-    const audio = player.audioRef;
+    const audio = playerM.audioRef;
 
     if (currentSong?.duration) {
       setDuration(parseDuration(currentSong.duration));
@@ -55,8 +57,10 @@ export const PlayerSoundControl = () => {
       audio.removeEventListener("loadedmetadata", updateDuration);
       audio.removeEventListener("timeupdate", handleTimeUpdate);
     };
-  }, [player, isDragging, currentSong?.duration]);
+  }, [playerM, isDragging, currentSong?.duration, player.isPlaying]);
 
+  console.log(player.isPlaying);
+  
   const formatTime = (time: number) => {
     if (!isFinite(time)) return "0:00";
     const minutes = Math.floor(time / 60);
@@ -118,10 +122,10 @@ export const PlayerSoundControl = () => {
             const [newTime] = value;
             setIsDragging(false);
             setHoverTime(null);
-            if (player.audioRef) {
-              player.audioRef.currentTime = newTime;
+            if (playerM.audioRef) {
+              playerM.audioRef.currentTime = newTime;
             }
-            player.stopSeeking(newTime);
+            playerM.stopSeeking(newTime);
           }}
         />
       </div>
