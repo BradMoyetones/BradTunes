@@ -1,6 +1,6 @@
 {
   "name": "bradtunes",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Hi! I’m Brad, and this is BradTunes, an app that combines a full-featured music player with the power of yt-dlp downloads.",
   "main": "./out/main/index.js",
   "author": "Brad Moyetones",
