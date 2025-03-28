@@ -316,7 +316,7 @@ export async function downloadSong(videoUrl: string) {
   }
 
   return new Promise((resolve, reject) => {
-    const metadataCommand = `"${ytDlpPath}" -j "${videoUrl}"`;
+    const metadataCommand = `"${ytDlpPath}" --ffmpeg-location ${ffmpegPath} -j "${videoUrl}"`;
     exec(metadataCommand, (metadataError, metadataStdout, metadataStderr) => {
       if (metadataError) {
         reject(`Metadata Error: ${metadataError.message}`);
@@ -355,7 +355,7 @@ export async function downloadSong(videoUrl: string) {
       // const command = `"${ytDlpPath}" -x --audio-format mp3 --write-thumbnail -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}"`;
       // const command = `"${ytDlpPath}" -x --audio-format mp3 --write-thumbnail -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}" && "${ytDlpPath}" -f mp4 -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}"`;
       // const command = `"${ytDlpPath}" -x --audio-format mp3 --write-thumbnail -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}" && "${ytDlpPath}" -f "bv*[ext=mp4][height<=720]+ba[ext=m4a]/b[ext=mp4]" --merge-output-format mp4 -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}"`;
-      const command = `"${ytDlpPath}" --ffmpeg-location "${ffmpegPath}" -x --audio-format mp3 --write-thumbnail -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}" && "${ytDlpPath}" --ffmpeg-location "${ffmpegPath}" -f "bv*[ext=mp4][height<=720]+ba[ext=m4a]/b[ext=mp4]" --merge-output-format mp4 -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}"`;
+      const command = `"${ytDlpPath}" --ffmpeg-location ${ffmpegPath} -x --audio-format mp3 --write-thumbnail -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}" && "${ytDlpPath}" --ffmpeg-location ${ffmpegPath} -f "bv*[ext=mp4][height<=720]+ba[ext=m4a]/b[ext=mp4]" --merge-output-format mp4 -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}"`;
 
       exec(command, (error, _stdout, stderr) => {
         if (error) {
