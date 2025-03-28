@@ -29,23 +29,23 @@ export default function AsideMenu() {
         <nav className="flex flex-col flex-1 gap-2">
             <div className="bg-slate-200 dark:bg-zinc-900 rounded-lg p-2">
                 <ul className="relative">
-                    <SideMenuItem to="/">
+                    <SideMenuItem to="/" id="homeButton">
                         <HomeIcon />
                         Home
                     </SideMenuItem>
                     
 
-                    <SideMenuItem onClick={() => setIsDownloadDialogOpen(true)}>
+                    <SideMenuItem onClick={() => setIsDownloadDialogOpen(true)} id="downloadButton">
                         <SearchIcon />
                         Download
                     </SideMenuItem>
 
-                    <SideMenuItem onClick={() => openYoutube()}>
+                    <SideMenuItem onClick={() => openYoutube()} id="youtubeButton">
                         <Youtube />
                         YouTube
                     </SideMenuItem>
 
-                    <SideMenuItem onClick={navigateToLastPath}>
+                    <SideMenuItem onClick={navigateToLastPath} id="settingsButton">
                         <div className="relative">
                             {(versionInfo?.newVersion || appVersion?.newVersion || defaultPath) && (
                                 <span className="absolute w-3 h-3 bg-yellow-400 rounded-full -top-1 -right-1 animate-pulse"></span>

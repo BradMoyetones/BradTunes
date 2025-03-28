@@ -840,3 +840,91 @@ body {
 .player-shadow {
   background: linear-gradient(180deg, hsla(0, 0%, 0%, 0) 0%, hsl(0, 0%, 0%) 100%);
 }
+
+
+
+
+
+/* DRIVER.JS */
+
+.driver-popover.driverjs-theme {
+  background-color: hsl(var(--card-foreground));
+}
+
+.driver-popover.driverjs-theme .driver-popover-title {
+  font-size: 20px;
+}
+
+.driver-popover.driverjs-theme .driver-popover-description {
+  font-size: 15px;
+}
+
+.driver-popover.driverjs-theme .driver-popover-title,
+.driver-popover.driverjs-theme .driver-popover-progress-text {
+  color: hsl(var(--primary));
+}
+
+.driver-popover.driverjs-theme .driver-popover-description {
+  color: hsl(var(--secondary));
+}
+
+
+.driver-popover.driverjs-theme button {
+  flex: 1;
+  text-align: center;
+  background-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  border: hsl(var(--border));
+  text-shadow: none;
+  font-size: 14px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  transition: 0.3s;
+}
+
+.driver-popover.driverjs-theme button:disabled {
+  opacity: 0.5 !important;
+  pointer-events: none !important;
+  transition: 0.3s;
+}
+
+.driver-popover.driverjs-theme button:hover {
+  background-color: hsl(var(--primary) / 0.9) !important;
+  transition: 0.3s;
+}
+
+.driver-popover.driverjs-theme .driver-popover-navigation-btns {
+  justify-content: space-between;
+  gap: 3px;
+}
+
+.driver-popover.driverjs-theme .driver-popover-close-btn {
+  color: #9b9b9b;
+}
+
+.driver-popover.driverjs-theme .driver-popover-close-btn:hover {
+  color: #000;
+}
+
+.driver-popover.driverjs-theme .driver-popover-arrow-side-left.driver-popover-arrow {
+  border-left-color: hsl(var(--card-foreground));
+}
+
+.driver-popover.driverjs-theme .driver-popover-arrow-side-right.driver-popover-arrow {
+  border-right-color: hsl(var(--card-foreground));
+}
+
+.driver-popover.driverjs-theme .driver-popover-arrow-side-top.driver-popover-arrow {
+  border-top-color: hsl(var(--card-foreground));
+}
+
+.driver-popover.driverjs-theme .driver-popover-arrow-side-bottom.driver-popover-arrow {
+  border-bottom-color: hsl(var(--card-foreground));
+}
+
+/* Quitar desenfoque a textos */
+.lists {
+  -webkit-font-smoothing: subpixel-antialiased !important; /* Mejora el suavizado de las fuentes */
+  backface-visibility: hidden !important; /* Evita que las caras traseras de los elementos sean visibles */
+  transform: translateZ(0) !important; /* Asegura que se utilice el renderizado en 3D */
+}
