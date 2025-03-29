@@ -16,7 +16,7 @@ export default function StorageSettings() {
 
             <div className="mt-4">
                 <h2 className="text-base font-extrabold text-muted-foreground mb-4">Storage Directory</h2>
-                <Card className="w-full bg-zinc-900 border-zinc-700">
+                <Card className="w-full bg-slate-100 dark:bg-zinc-900 border-border">
                     <CardContent className="p-6">
                         {defaultPath &&
                             <>
@@ -34,7 +34,7 @@ export default function StorageSettings() {
                         <div className="space-y-2">
                             <div>
                                 <Label>Path</Label>
-                                <Input type="text" value={musicPath} disabled />
+                                <Input type="text" value={musicPath} disabled className="bg-slate-300 dark:bg-zinc-800" />
                             </div>
                             <div className="flex gap-2">
                                 <Button onClick={changePath} disabled={isLoading}>

@@ -29,6 +29,7 @@ import { useEffect, useState } from "react";
 import { PlaylistsFull } from "@/types/data";
 import { colors } from "@/lib/colors";
 import { useData } from "@/contexts/DataProvider";
+import { useMusicPath } from "@/contexts/MusicPathProvider";
 
 interface PlaylistDialogProps {
     isOpen: boolean;
@@ -54,6 +55,7 @@ const FormSchema = z.object({
 export default function PlaylistDialog({ isOpen, setIsOpen, data }: PlaylistDialogProps) {
     const [loading, setLoading] = useState(false);
     const { playlists, setPlaylists } = useData();
+    const { musicPath } = useMusicPath();
 
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
@@ -214,7 +216,7 @@ export default function PlaylistDialog({ isOpen, setIsOpen, data }: PlaylistDial
                                         >
                                             <div className="flex flex-col focus:bg-black gap-2 p-4 min-h-20 border-2 border-dashed rounded-lg text-center items-center justify-center">
                                                 <div className="w-24 h-24 rounded-lg">
-                                                    <img src={field.value ? field.value : data ? data?.cover : "img/IMG_4101.jpg"} alt="Default playlist image" className="rounded-lg object-cover object-center w-full h-full" />
+                                                    <img src={field.value ? "safe-file://"+musicPath+"/img/playlists/"+field.value : data ? "safe-file:"+musicPath+"/img/playlists/"+data?.cover : "img/IMG_4101.jpg"} alt="Default playlist image" className="rounded-lg object-cover object-center w-full h-full" />
                                                 </div>
                                                 <span className="text-muted-foreground">Drop file of type (PNG, JPEG and WEBP)</span>
                                             </div>

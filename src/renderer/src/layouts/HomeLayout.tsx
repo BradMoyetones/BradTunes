@@ -8,28 +8,24 @@ import { Outlet } from "react-router-dom";
 import "driver.js/dist/driver.css";
 
 export default function HomeLayout() {
-
-    localStorage.setItem('tourCompletedLunches', ""); // Guardar timestamp actual
     
     useEffect(() => {
         const jsConfetti = new JSConfetti();
     
-        // Verificar si el tour ya fue completado y la fecha
-        const tourTimestamp = localStorage.getItem('tourCompletedLunches');
-        const now = Date.now(); // Marca de tiempo actual en milisegundos
-        const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000; // 7 días en milisegundos
-    
-        if (tourTimestamp && now - parseInt(tourTimestamp, 10) < sevenDaysInMs) {
-            // Si han pasado menos de 7 días, no iniciar el tour
-            return;
+        const tourCompleted = localStorage.getItem('tourOneCompleted') === 'true';
+
+        if(tourCompleted){
+            return
         }
     
         const driverObj = driver({
             popoverClass: 'driverjs-theme',
-            allowClose: false,
+            allowClose: true,
+            allowKeyboardControl: true,
+            overlayOpacity: 0.7,
             disableActiveInteraction: true,
             prevBtnText: 'Prev',
-            showButtons: ['next', 'previous'],
+            showButtons: ['next', 'previous', 'close'],
             nextBtnText: 'Next',
             doneBtnText: 'Finish',
             showProgress: true,
@@ -41,16 +37,23 @@ export default function HomeLayout() {
                 { element: '#downloadButton', popover: { title: 'Download', description: 'Enter a public URL, press the download button, and wait for your content to be saved.', side: "bottom", align: 'center' }},
                 { element: '#youtubeButton', popover: { title: 'YouTube', description: 'Opens YouTube in a new browser window, allowing you to browse and track music.', side: "bottom", align: 'center' }},
                 { element: '#settingsButton', popover: { title: 'Settings', description: 'Update the application, upgrade the yt-dlp binary, and customize the theme and colors.', side: "bottom", align: 'center' }},
+                { element: '#buttonPlaylist', popover: { title: 'Create Playlist', description: 'Create a new playlist by adding a name, selecting a color, and choosing a cover image.', side: "bottom", align: 'center' }},
+                { 
+                    element: '#contextMenu', 
+                    popover: { 
+                        title: 'Context Menu', 
+                        description: 'Right-click on playlists or songs to access extra options like edit, delete, or add to a playlist.', 
+                        side: "bottom", 
+                        align: 'center' 
+                    }
+                },
             ],
             
             // onDestroyStarted es llamado cuando el usuario finaliza el tour
             onDestroyStarted: () => {
-                if (!driverObj.hasNextStep() || confirm("¿Estás seguro?")) {
-                    localStorage.setItem('tourCompletedLunches', now.toString()); // Guardar timestamp actual
+                if (!driverObj.hasNextStep() || confirm("Are you sure you want to skip the tutorial?")) {
+                    localStorage.setItem('tourOneCompleted', "true"); // Guardar timestamp actual
                     jsConfetti.addConfetti();
-                    // jsConfetti.addConfetti({
-                    //     emojis: ['🏳️‍🌈'],
-                    // });
                     driverObj.destroy();
                 }
             },
@@ -58,6 +61,7 @@ export default function HomeLayout() {
     
         driverObj.drive();
     }, []);
+
     return (
         <VideoFullScreenProvider>
             <div>

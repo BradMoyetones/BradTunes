@@ -862,10 +862,12 @@ body {
 .driver-popover.driverjs-theme .driver-popover-title,
 .driver-popover.driverjs-theme .driver-popover-progress-text {
   color: hsl(var(--primary));
+  font-family: 'Onest Variable', sans-serif !important;
 }
 
 .driver-popover.driverjs-theme .driver-popover-description {
   color: hsl(var(--secondary));
+  font-family: 'Onest Variable', sans-serif !important;
 }
 
 
@@ -880,6 +882,7 @@ body {
   padding: 5px 8px;
   border-radius: 6px;
   transition: 0.3s;
+  font-family: 'Onest Variable', sans-serif !important;
 }
 
 .driver-popover.driverjs-theme button:disabled {
@@ -899,7 +902,13 @@ body {
 }
 
 .driver-popover.driverjs-theme .driver-popover-close-btn {
+  width: 20px !important;
+  height: 20px !important;
+  border-radius: 100% !important;
+  padding: 4px !important;
   color: #9b9b9b;
+  top: 16px;
+  right: 15px;
 }
 
 .driver-popover.driverjs-theme .driver-popover-close-btn:hover {
@@ -920,6 +929,10 @@ body {
 
 .driver-popover.driverjs-theme .driver-popover-arrow-side-bottom.driver-popover-arrow {
   border-bottom-color: hsl(var(--card-foreground));
+}
+
+.driver-popover.driverjs-theme .driver-popover-footer{
+  gap: 20px;
 }
 
 /* Quitar desenfoque a textos */

@@ -68,6 +68,7 @@ export default function AsideMenu() {
                     variant={"ghost"}
                     size={"icon"}
                     onClick={() => setIsOpen(!isOpen)} 
+                    id="buttonPlaylist"
                 >
                     <Plus />
                     <span className="sr-only">Create Playlist</span>

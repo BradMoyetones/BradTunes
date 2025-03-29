@@ -14,7 +14,7 @@ export default function Advanced() {
             <div className="mt-4">
                 <h2 className="text-base font-extrabold text-muted-foreground mb-4">Application version</h2>
                 <div className="flex gap-4">
-                    <Card className="w-full bg-zinc-900 border-zinc-700">
+                    <Card className="w-full bg-slate-100 dark:bg-zinc-900 border-border">
                         <CardContent className="p-6">
                             <h3 className="flex items-center gap-2 mb-4">
                                 <div className={`aspect-square h-4 w-4 rounded-full ${appVersion?.newVersion ? "bg-yellow-500" : "bg-green-500"} animate-pulse`} />
@@ -43,7 +43,7 @@ export default function Advanced() {
             <div className="mt-8">
                 <h2 className="text-base font-extrabold text-muted-foreground mb-4">YT-DLP version</h2>
                 <div className="flex gap-4">
-                    <Card className="w-full bg-zinc-900 border-zinc-700">
+                    <Card className="w-full bg-slate-100 dark:bg-zinc-900 border-border">
                         <CardContent className="p-6">
                             <h3 className="flex items-center gap-2 mb-4">
                                 <div className={`aspect-square h-4 w-4 rounded-full ${versionInfo?.newVersion ? "bg-yellow-500" : "bg-green-500"} animate-pulse`} />

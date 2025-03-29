@@ -58,8 +58,6 @@ export const PlayerSoundControl = () => {
       audio.removeEventListener("timeupdate", handleTimeUpdate);
     };
   }, [playerM, isDragging, currentSong?.duration, player.isPlaying]);
-
-  console.log(player.isPlaying);
   
   const formatTime = (time: number) => {
     if (!isFinite(time)) return "0:00";
