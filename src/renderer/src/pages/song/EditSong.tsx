@@ -197,7 +197,7 @@ export default function EditSong() {
                                 render={({  }) => (
                                     <label className="cursor-pointer">
                                         <img
-                                            src={`safe-file://${musicPath}/img/${previewImage || song?.image}`}
+                                            src={`${previewImage ? previewImage : `safe-file://${musicPath}/img/${previewImage || song?.image}`}`}
                                             alt={`Cover of ${song?.title}`}
                                             className="object-cover w-full h-full shadow-lg rounded-lg"
                                             style={{

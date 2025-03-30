@@ -27,7 +27,7 @@ export interface SongFull extends Song {
 export interface PlaylistSongs {
     id: number;
     playlist_id: number;
-    song_id: string;
+    song_id: number;
     date: string;
 }
 

@@ -45,6 +45,12 @@ declare global {
       ytDlpPath: () => Promise<string>
       ffmpegPath: () => Promise<string>
 
+      getPlatform: () => Promise<string>;
+
+      minimize: () => void;
+      maximize: () => Promise<boolean>;
+      isMaximized: () => Promise<boolean>;
+      close: () => void;
 
       playlists: () => Promise<PlaylistsFull[]>
       createPlaylist: (title: string, color: { accent: string, dark: string }, cover: string | undefined | null) => Promise<PlaylistsFull>

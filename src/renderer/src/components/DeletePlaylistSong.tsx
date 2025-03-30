@@ -9,7 +9,8 @@ const deletePlaylistSong = async (
     playlists: PlaylistsFull[],
     songs: SongFull[],
     setSongs: (songs: SongFull[]) => void,
-    setPlaylists: (playlists: PlaylistsFull[]) => void
+    setPlaylists: (playlists: PlaylistsFull[]) => void,
+    deleteSong: (songId: number) => void
 ) => {
     if(song && playlist){
         // Mostrar notificación de confirmación
@@ -68,6 +69,7 @@ const deletePlaylistSong = async (
 
                         // Actualizar el estado de `songs`
                         setSongs(updatedSongs);
+                        deleteSong(song.id);
 
                     } else {
                         ToastNotification({

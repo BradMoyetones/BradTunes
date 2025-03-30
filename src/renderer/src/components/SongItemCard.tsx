@@ -20,7 +20,7 @@ import { Input } from "./ui/input";
 import { useState } from "react";
 import { filterData } from "@/lib/helpers";
 import deleteSong from "./DeleteSong";
-import { Link } from "react-router";
+import { Link, useViewTransitionState } from "react-router";
 import { useData } from "@/contexts/DataProvider";
 import { usePlayer } from "@/contexts/PlayerProvider";
 import { useMusicPathStore } from "@/store/useMusicPathStore";
@@ -31,6 +31,8 @@ interface PlayListItemCardProps {
 
 export default function SongItemCard({ song }: PlayListItemCardProps) {
   const { id, title, image, artist } = song
+  const href = `/song/${id}`;
+  const isTransitioning = useViewTransitionState(href);
   const { musicPath } = useMusicPathStore();
 
   const { playlists, setPlaylists, setSongs } = useData()
@@ -82,7 +84,7 @@ export default function SongItemCard({ song }: PlayListItemCardProps) {
         <article
           onMouseMove={handleMouseMove} onMouseOut={handleMouseOut}
           className="group relative bg-white/40 hover:bg-white dark:hover:bg-zinc-800 shadow-lg hover:shadow-xl dark:bg-zinc-500/30 rounded-md ransi transition-all duration-300 overflow-hidden reflex"
-          style={{ transition: "box-shadow .1s, transform .1s, background-color .1s", viewTransitionName: `song ${id} box` }}
+          style={{ transition: "box-shadow .1s, transform .1s, background-color .1s", viewTransitionName: isTransitioning ? `box-song-${id}` : "none", }}
         >
           <div
             className="absolute right-4 bottom-20 translate-y-4
@@ -102,7 +104,9 @@ export default function SongItemCard({ song }: PlayListItemCardProps) {
                   alt={`Cover of ${title} by ${artist}`}
                   className="object-cover w-full h-full rounded-md object-center" 
                   style={{
-                    viewTransitionName: `song-image-${id}`
+                    viewTransitionName: isTransitioning
+                      ? `song-image-${id}`
+                      : "none",
                   }}
                 />
               </picture>
@@ -111,7 +115,9 @@ export default function SongItemCard({ song }: PlayListItemCardProps) {
                 <h4 
                   className="text-zinc-900 dark:text-white text-sm truncate font-semibold" 
                   style={{
-                    viewTransitionName: `song-title-${id}`
+                    viewTransitionName: isTransitioning
+                      ? `song-title-${id}`
+                      : "none",
                   }}
                 >
                   {title}
@@ -120,7 +126,9 @@ export default function SongItemCard({ song }: PlayListItemCardProps) {
                 <span
                   className="text-xs text-zinc-600 dark:text-gray-400 truncate"
                   style={{
-                    viewTransitionName: `song-artist-${id}`
+                    viewTransitionName: isTransitioning
+                      ? `song-artist-${id}`
+                      : "none",
                   }}
                 >
                   {artist}
@@ -161,7 +169,7 @@ export default function SongItemCard({ song }: PlayListItemCardProps) {
         <ContextMenuSeparator />
         <ContextMenuItem asChild>
           <Link 
-            to={`/song/${id}`}
+            to={href}
             viewTransition
           >
             <Pen className="mr-2 h-4 w-4" />

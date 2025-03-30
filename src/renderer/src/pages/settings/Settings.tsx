@@ -9,7 +9,7 @@ import Search from "@/icons/Search";
 import { FacebookIcon, InstagramIcon, TikTokIcon, YouTubeIcon } from "@/icons/Social";
 import { Github, X } from "lucide-react";
 import { Suspense, useState } from "react";
-import { Link, Outlet, useLocation } from "react-router";
+import { Outlet, useLocation, useNavigate } from "react-router";
 import {
     Tooltip,
     TooltipContent,
@@ -31,7 +31,8 @@ interface LinkProps {
 export default function Settings() {
     const [search, setSearch] = useState("");
     const { appVersion, versionInfo } = useVersion()
-    const { defaultPath } = useMusicPath();
+    const { defaultPath } = useMusicPath();    
+    const navigate = useNavigate()
 
     const LINKS: LinkProps[] = [
         {
@@ -186,13 +187,12 @@ export default function Settings() {
                 </div>
 
                 <div className="h-screen w-full !pt-16 p-2 sticky top-0 flex-1">
-                    <Link
-                        to={"/"}
+                    <button
+                        onClick={() => navigate("/", { viewTransition: true, replace: true })}
                         className={buttonVariants({variant: "outline", size: "icon"})+" !rounded-full"}
-                        viewTransition
                     >
                         <X />
-                    </Link>
+                    </button>
                 </div>
                 
             </div>
@@ -204,13 +204,14 @@ export default function Settings() {
 
 const LinkSidebarSettings = ({link}: {link: LinkSidebarSettingsProps}) => {
     const location = useLocation()
+    const navigate = useNavigate()
 
     return (
-        <Link to={link.href} className={`relative py-1.5 px-2.5 hover:bg-slate-200 dark:hover:bg-zinc-700 w-full rounded-lg transition-all text-sm font-bold text-zinc-600 dark:text-muted-foreground dark:hover:text-white ${link.href === location.pathname && "bg-slate-200 dark:bg-zinc-700 dark:text-white text-zinc-900"}`} viewTransition>
+        <button onClick={() => navigate(link.href, {viewTransition: true, replace: true})} className={`relative py-1.5 px-2.5 text-left hover:bg-slate-200 dark:hover:bg-zinc-700 w-full rounded-lg transition-all text-sm font-bold text-zinc-600 dark:text-muted-foreground dark:hover:text-white ${link.href === location.pathname && "bg-slate-200 dark:bg-zinc-700 dark:text-white text-zinc-900"}`}>
             {link.title}
             {link.alert && (
                 <div className="absolute w-3 h-3 bg-yellow-400 rounded-full top-2.5 right-2 animate-pulse"></div>
             )}
-        </Link>
+        </button>
     )
 }

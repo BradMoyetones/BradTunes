@@ -532,6 +532,7 @@ export async function songsXplaylist(playlistId: number): Promise<SongFull[]> {
   const db = await getDb();
 
   return new Promise((resolve, reject) => {
+    // 1. Consulta para obtener las canciones asociadas a la playlist (con filtro de playlistId)
     let query = `
       SELECT
         m.id AS song_id,
@@ -548,14 +549,10 @@ export async function songsXplaylist(playlistId: number): Promise<SongFull[]> {
         ps.date AS playlist_song_date
       FROM songs m
       LEFT JOIN playlist_songs ps ON m.id = ps.song_id
+      WHERE ps.playlist_id = ?
     `;
 
-    let queryParams: any[] = [];
-
-    if (playlistId) {
-      query += ` WHERE ps.playlist_id = ?`;
-      queryParams.push(playlistId);
-    }
+    let queryParams: any[] = [playlistId];  // Filtro por playlist_id
 
     db.all(query, queryParams, (err: Error | null, rows: any[]) => {
       if (err) {
@@ -563,6 +560,7 @@ export async function songsXplaylist(playlistId: number): Promise<SongFull[]> {
         return;
       }
 
+      // Crear un mapa de canciones con sus datos
       const songsMap = new Map<number, SongFull>();
 
       rows.forEach(row => {
@@ -581,6 +579,7 @@ export async function songsXplaylist(playlistId: number): Promise<SongFull[]> {
           });
         }
 
+        // Si hay una relación de playlist_songs, añadirla
         if (row.playlist_song_id) {
           songsMap.get(row.song_id)?.playlist_songs.push({
             id: row.playlist_song_id,
@@ -591,7 +590,40 @@ export async function songsXplaylist(playlistId: number): Promise<SongFull[]> {
         }
       });
 
-      resolve(Array.from(songsMap.values()));
+      // 2. Consulta para obtener todas las relaciones de playlist_songs para las canciones
+      // Esto se hace para asegurarnos de obtener todas las relaciones de canciones a playlists
+      const playlistSongsQuery = `
+        SELECT
+          ps.id AS playlist_song_id,
+          ps.playlist_id,
+          ps.song_id,
+          ps.date AS playlist_song_date
+        FROM playlist_songs ps
+        WHERE ps.song_id IN (${Array.from(songsMap.keys()).join(', ')})
+      `;
+
+      db.all(playlistSongsQuery, [], (err: Error | null, playlistSongsRows: any[]) => {
+        if (err) {
+          reject(`Error fetching playlist songs: ${err.message}`);
+          return;
+        }
+
+        // Añadir las relaciones de playlist_songs a las canciones correspondientes
+        playlistSongsRows.forEach(row => {
+          const song = songsMap.get(row.song_id);
+          if (song) {
+            song.playlist_songs.push({
+              id: row.playlist_song_id,
+              playlist_id: row.playlist_id,
+              song_id: row.song_id,
+              date: row.playlist_song_date,
+            });
+          }
+        });
+
+        // Devolver las canciones con sus relaciones
+        resolve(Array.from(songsMap.values()));
+      });
     });
   });
 }
@@ -710,7 +742,7 @@ export async function updateSong(
 
       // Eliminar la imagen anterior si existe
       if (row.image && image !== undefined) {
-        const oldImagePath = path.join(outputDir, row.image.replace(/^music\//, ''));
+        const oldImagePath = path.join(imgDir, row.image);
         if (fs.existsSync(oldImagePath)) {
           try {
             fs.unlinkSync(oldImagePath);  // Eliminar el archivo de la imagen anterior

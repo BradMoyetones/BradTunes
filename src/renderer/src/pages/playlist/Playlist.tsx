@@ -3,7 +3,7 @@ import { MusicsTable } from "@/components/MusicsTable";
 import { useTheme } from "@/components/theme-provider";
 import { useData } from "@/contexts/DataProvider";
 import { useMusicPathStore } from "@/store/useMusicPathStore";
-import { PlaylistsFull, SongFull } from "@/types/data";
+import { PlaylistsFull, PlaylistSongsFull, SongFull } from "@/types/data";
 import { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 
@@ -64,14 +64,27 @@ export default function Playlist() {
         return '';
     }, [songs]);
 
-    // Verificación si la playlist existe
-    
+    // Función para eliminar una canción por ID
+    const deleteSong = (songId: number) => {
+        // Filtra la canción con el ID proporcionado
+        const updatedSongs = songs.filter((song) => song.id !== songId);
+        setSongs(updatedSongs); // Actualiza el estado con la lista de canciones actualizada
+    };
 
+    const addSongToPlaylist = (songId: number, createPlaylistSong: PlaylistSongsFull) => {
+        setSongs(prevSongs =>
+            prevSongs.map(s =>
+                s.id === songId // Suponiendo que `createPlaylistSong.songId` tiene el ID de la canción
+                    ? { ...s, playlist_songs: [...s.playlist_songs, createPlaylistSong] }
+                    : s
+            )
+        );
+    };
     
     return (
         <div
             id="playlist-container"
-            className="relative flex flex-col h-full bg-slate-200 dark:bg-zinc-900 bg-gradient-to-t from-50% from-slate-200 via-slate-200/80 dark:from-zinc-900 dark:via-zinc-900/80 rounded-lg"
+            className="relative flex flex-col h-full bg-slate-200 dark:bg-zinc-900 bg-gradient-to-t from-50% from-slate-200 via-slate-200/80 dark:from-zinc-900 dark:via-zinc-900/80 rounded-lg overflow-auto"
             style={{ backgroundColor: theme === "dark" ? playlist?.color.dark : playlist?.color.accent, viewTransitionName: `playlist-box-${id}` }}
         >
             <header className="flex flex-row gap-8 px-6 mt-12">
@@ -117,7 +130,7 @@ export default function Playlist() {
             <div className="relative z-10 px-6 pt-10"></div>
 
             <section className="p-6">
-                <MusicsTable songs={songs} playlist={playlist} />
+                <MusicsTable songs={songs} playlist={playlist} deleteSong={deleteSong} addSongToPlaylist={addSongToPlaylist} />
             </section>
         </div>
     );

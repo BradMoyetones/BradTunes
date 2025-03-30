@@ -1,5 +1,5 @@
 import { getTimestamp } from "@/lib/helpers";
-import { PlaylistsFull, SongFull } from "@/types/data";
+import { PlaylistsFull, PlaylistSongsFull, SongFull } from "@/types/data";
 import ToastNotification from "./ToastNotification";
 import { Bug, Check, X } from "lucide-react";
 import { CurrentMusic } from "@/utils/PlayerManager";
@@ -13,7 +13,9 @@ const addMusicToPlaylist = async (
     currentMusic: CurrentMusic, 
     setCurrentMusic: (currentMusic: CurrentMusic) => void, 
     setPlaylists: SetState<PlaylistsFull[]>,
-    setSongs: SetState<SongFull[]>
+    setSongs: SetState<SongFull[]>,
+    addSongToPlaylist?: (songId: number, data: PlaylistSongsFull) => void
+    
 ) => {
     const date = getTimestamp();
 
@@ -38,6 +40,10 @@ const addMusicToPlaylist = async (
                             ? { ...s, playlist_songs: [...s.playlist_songs, createPlaylistSong] }
                             : s
                     );
+                    
+                    if (addSongToPlaylist) {
+                        addSongToPlaylist(song.id, createPlaylistSong);
+                    }
 
                     // 🔄 Actualizar `currentMusic`
                     setCurrentMusic({
@@ -54,7 +60,7 @@ const addMusicToPlaylist = async (
                                 ? { ...s, playlist_songs: [...s.playlist_songs, createPlaylistSong] }
                                 : s
                         )
-                    );                    
+                    );
                     
                     setPlaylists(prevPlaylists =>
                         prevPlaylists.map(p => 

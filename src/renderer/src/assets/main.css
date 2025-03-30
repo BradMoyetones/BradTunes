@@ -782,11 +782,31 @@ body {
 #app {
   display: grid;
   grid-template-areas:
+    "title title"
     "aside main"
     "player player";
   grid-template-columns: 350px 1fr;
-  grid-template-rows: 1fr auto;
+  grid-template-rows: auto 1fr auto;
 }
+
+#titleBarApp {
+  -webkit-app-region: drag;
+}
+
+#titleBarApp .no-drag {
+  -webkit-app-region: no-drag;
+}
+
+/* #titleBarApp::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  -webkit-app-region: drag;
+  padding: 10px;
+} */
 
 
 /* Simulacion de ecualizador */

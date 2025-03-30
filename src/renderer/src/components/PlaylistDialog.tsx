@@ -153,7 +153,7 @@ export default function PlaylistDialog({ isOpen, setIsOpen, data }: PlaylistDial
         if (file) {
             // Verificar si el archivo es una imagen válida
             const validImageTypes = ["image/jpeg", "image/png", "image/webp"];
-            const maxFileSize = 500 * 1024; // 500 KB en bytes
+            // const maxFileSize = 500 * 1024; // 500 KB en bytes
     
             if (!validImageTypes.includes(file.type)) {
                 ToastNotification({
@@ -164,14 +164,14 @@ export default function PlaylistDialog({ isOpen, setIsOpen, data }: PlaylistDial
                 return;
             }
     
-            if (file.size > maxFileSize) {
-                ToastNotification({
-                    title: "File too large",
-                    description: "The image size must not exceed 500 KB.",
-                    Icon: Bug,
-                });
-                return;
-            }
+            // if (file.size > maxFileSize) {
+            //     ToastNotification({
+            //         title: "File too large",
+            //         description: "The image size must not exceed 500 KB.",
+            //         Icon: Bug,
+            //     });
+            //     return;
+            // }
     
             // Convertir la imagen a base64
             const reader = new FileReader();

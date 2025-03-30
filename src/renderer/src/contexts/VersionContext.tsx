@@ -53,9 +53,17 @@ export function VersionProvider({ children }: { children: React.ReactNode }) {
     };
 
     useEffect(() => {
-        checkVersion(); // Verifica la versión de YT-DLP
-        checkVersionApp()
+        checkVersion();
+        checkVersionApp();
+        // Función para verificar la versión
+        const intervalId = setInterval(() => {
+            checkVersion();
+            checkVersionApp();
+        }, 300000);
+    
+        return () => clearInterval(intervalId);
     }, []);
+    
 
     return (
         <VersionContext.Provider value={{ versionInfo, appVersion, loading, checkVersion, updateYtDlp, checkVersionApp, updateApp }}>

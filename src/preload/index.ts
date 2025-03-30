@@ -26,6 +26,13 @@ const api = {
   ytDlpPath: () => ipcRenderer.invoke("ytDlpPath"),
   ffmpegPath: () => ipcRenderer.invoke("ffmpegPath"),
 
+  getPlatform: () => ipcRenderer.invoke("get-platform"),
+
+  minimize: () => ipcRenderer.send("minimize"),
+  maximize: () => ipcRenderer.invoke("maximize"),
+  isMaximized: () => ipcRenderer.invoke("isMaximized"),
+  close: () => ipcRenderer.send("close"),
+
   // PLAYLISTS
   playlists: () => ipcRenderer.invoke('playlists'),
   createPlaylist: (title: string, color: string, cover: string | undefined) => ipcRenderer.invoke('createPlaylist', title, color, cover),

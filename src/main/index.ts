@@ -23,6 +23,7 @@ function createWindow(): void {
     minHeight: 700,
     minWidth: 1080,
     show: false,
+    frame: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {icon}),
     webPreferences: {
@@ -223,6 +224,41 @@ ipcMain.handle('ytDlpPath', (_event) => {
 });
 ipcMain.handle('ffmpegPath', (_event) => {
   return ffmpegPath;
+});
+
+ipcMain.handle('get-platform', () => process.platform);
+
+ipcMain.on('minimize', () => {
+  const focusedWindow = BrowserWindow.getFocusedWindow();
+  if (focusedWindow) {
+    focusedWindow.minimize();
+  }
+});
+
+let isMaximized: boolean = false;
+ipcMain.handle('maximize', () => {
+  const focusedWindow = BrowserWindow.getFocusedWindow();
+  if (focusedWindow) {
+    if (focusedWindow.isMaximized()) {
+      focusedWindow.unmaximize();
+      isMaximized = false;
+    } else {
+      focusedWindow.maximize();
+      isMaximized = true;
+    }
+  }
+  return isMaximized;
+});
+ipcMain.handle('isMaximized', () => {
+  const focusedWindow = BrowserWindow.getFocusedWindow();
+  if (focusedWindow) {
+    return focusedWindow.isMaximized();
+  }
+  return false;
+});
+
+ipcMain.on('close', () => {
+  app.quit();
 });
 
 // PLAYLISTS

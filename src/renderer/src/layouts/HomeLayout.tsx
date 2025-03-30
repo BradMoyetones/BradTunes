@@ -6,6 +6,7 @@ import JSConfetti from "js-confetti";
 import { Suspense, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import "driver.js/dist/driver.css";
+import TitleBar from "@/components/TitleBar";
 
 export default function HomeLayout() {
     
@@ -65,13 +66,16 @@ export default function HomeLayout() {
     return (
         <VideoFullScreenProvider>
             <div>
+
                 <div id="app" className="relative h-screen gap-2 pr-2">
-                    <aside className="[grid-area:aside] flex-col flex overflow-y-auto ml-2 mt-2" id="sidebarMain">
+                    <TitleBar />
+
+                    <aside className="[grid-area:aside] flex-col flex overflow-y-auto ml-2" id="sidebarMain">
                         <AsideMenu />
                     </aside>
 
                     <main
-                        className="[grid-area:main] rounded-lg bg-slate-200 dark:bg-zinc-900 overflow-y-auto w-full mt-2"
+                        className="[grid-area:main] rounded-lg bg-slate-200 dark:bg-zinc-900 overflow-auto w-full h-full"
                         id="main"
                     >
                         <Suspense fallback={<div>Loading...</div>}>

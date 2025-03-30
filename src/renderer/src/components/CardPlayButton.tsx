@@ -39,7 +39,14 @@ export function CardPlayButton({ id, song, playlist = null, size = 'small'}: { i
   return (
     <button
       type="button"
-      onClick={() => playerM.changePlaylistAndSong(sanitizedPlaylist, song)}
+      onClick={() => {
+        if(currentPlaylist !== null && currentPlaylist.id === playlist?.id) {
+          playerM.togglePlay();
+          return;
+        }
+        playerM.changePlaylistAndSong(sanitizedPlaylist, song);
+        
+      }}
       className="card-play-button rounded-full text-primary-foreground bg-primary p-4 hover:scale-105 transition hover:bg-primary/90"
     >
       {shouldShowPause ? <Pause className={iconClassName} /> : <Play className={iconClassName} />}
