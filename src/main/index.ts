@@ -23,8 +23,8 @@ function createWindow(): void {
     minHeight: 700,
     minWidth: 1080,
     show: false,
-    frame: process.platform !== 'darwin', // Solo false en Windows/Linux, true en macOS
-    titleBarStyle: process.platform === 'darwin' ? 'hidden' : 'default',
+    frame: process.platform === 'darwin' ? undefined : false, // Solo false en Windows/Linux, true en macOS
+    titleBarStyle: process.platform === 'darwin' ? 'hidden' : undefined,
     titleBarOverlay: process.platform === 'darwin' ? { height: 64 } : undefined,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {icon}),
