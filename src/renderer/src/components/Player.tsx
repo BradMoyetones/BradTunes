@@ -47,7 +47,7 @@ export default function Player() {
     }, [playerStore.selectedDeviceId]); // Se ejecuta cuando cambia el `deviceId`
 
     return (
-        <div className={`flex flex-row items-center justify-between w-full h-full px-2 z-50 transition-all duration-300 ${isFullScreen ? isButtonVisible ? "opacity-100 [background:radial-gradient(115%_115%_at_50%_10%,#ffffff00_40%,#000_100%)] player-shadow" : "opacity-0" : ""}`}>
+        <div className={`flex flex-row items-center justify-between w-full h-full z-50 transition-all duration-300 ${isFullScreen ? isButtonVisible ? "opacity-100 [background:radial-gradient(115%_115%_at_50%_10%,#ffffff00_40%,#000_100%)] player-shadow" : "opacity-0" : ""}`}>
             <div className="max-w-[300px] w-full">
                 <PlayerCurrentSong {...player.currentMusic.song} />
             </div>

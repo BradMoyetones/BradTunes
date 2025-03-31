@@ -8,11 +8,19 @@ import { Notificaciones } from "./Notifications";
 export default function TitleBar() {
     const [platform, setPlatform] = useState('');
     const [maximize, setMaximize] = useState(false);
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate()
 
     useEffect(() => {
         // Obtén la plataforma desde el proceso principal
-        window.api.getPlatform().then(setPlatform);
+        const plat = async () => {
+            setLoading(true)
+            const value = await window.api.getPlatform()
+            setPlatform(value)
+            setLoading(false)
+        }
+        plat();
+
         // Verifica si la ventana está maximizada
         window.api.isMaximized().then(setMaximize);
     }, []);
@@ -38,7 +46,7 @@ export default function TitleBar() {
             <div
                 className="no-drag flex items-center gap-2 pl-4"
             >
-                <div>
+                <div className={`${!loading && platform === 'darwin' && "ml-14"}`}>
                     <button
                         className="w-11 px-3 py-2 h-full dark:hover:text-white dark:text-white/50 text-black/50 hover:text-black disabled:text-black/50 dark:disabled:hover:text-white/50 transition duration-300"
                         title="Back"
@@ -73,7 +81,7 @@ export default function TitleBar() {
                 </div>
 
 
-                {platform !== 'mac' && (
+                {!loading && platform !== 'darwin' && (
                     <div className="flex items-center no-drag h-full">
                         <button
                             className="w-11 px-3 py-2 h-full hover:bg-black/5 dark:hover:bg-white/5 transition duration-300"
