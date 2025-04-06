@@ -134,7 +134,7 @@ export default function Settings() {
                             </Tooltip>
                             <Tooltip>
                                 <TooltipTrigger asChild>
-                                    <a href="https://www.instagram.com/bradnavas_/" target="_blank">
+                                    <a href="https://www.instagram.com/its.bradn/" target="_blank">
                                         <InstagramIcon className="size-4" />
                                     </a>
                                 </TooltipTrigger>
