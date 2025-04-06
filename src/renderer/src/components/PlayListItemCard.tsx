@@ -1,6 +1,6 @@
 import { useMusicPathStore } from '@/store/useMusicPathStore';
 import { PlaylistsFull } from '@/types/data';
-import { Link } from 'react-router';
+import { Link, useViewTransitionState } from 'react-router';
 
 interface PlayListItemCardProps {
   playlist: PlaylistsFull;
@@ -10,11 +10,13 @@ export default function PlayListItemCard2({ playlist }: PlayListItemCardProps) {
     const { id, cover, title, playlist_songs } = playlist
     const artistsString = playlist_songs.length > 0 ? playlist_songs.map(e => e.song.artist).join(", ") : "No artists found"
     const { musicPath } = useMusicPathStore();
+    const href = `/playlist/${id}`;
+    const isTransitioning = useViewTransitionState(href);
 
     return (
         <Link 
             key={playlist.id+"cardmix"}
-            to={`/playlist/${id}`}
+            to={href}
             className="col-span-1 flex items-center rounded-sm overflow-hidden h-16 gap-4 bg-secondary hover:bg-secondary/80 cursor-pointer transition-colors"
             viewTransition
             style={{ viewTransitionName: `playlist-box-${id}` }}
@@ -26,7 +28,9 @@ export default function PlayListItemCard2({ playlist }: PlayListItemCardProps) {
                             alt={`Cover of ${title} by ${artistsString}`}
                             className="w-full h-full object-cover object-center" 
                             style={{
-                                viewTransitionName: `playlist-image-${id}`
+                                viewTransitionName: isTransitioning
+                                    ? `playlist-image-${id}`
+                                    : "none",
                             }}
                         />
                     </div>
@@ -35,17 +39,21 @@ export default function PlayListItemCard2({ playlist }: PlayListItemCardProps) {
                         <h1 
                             className="font-bold truncate"
                             style={{
-                                viewTransitionName: `playlist-title-${id}`
+                                viewTransitionName: isTransitioning
+                                    ? `playlist-title-${id}`
+                                    : "none",
                             }}
                         >{playlist.title}</h1>
-                        <span
-                            className="text-xs text-zinc-600 dark:text-gray-400 truncate"
+                        <p
+                            className="text-xs text-zinc-600 dark:text-gray-400 truncate max-w-32"
                             style={{
-                                viewTransitionName: `playlist-subtitle-${id}`
+                                viewTransitionName: isTransitioning
+                                    ? `playlist-subtitle-${id}`
+                                    : "none",
                             }}
                         >
                             {artistsString}
-                        </span>
+                        </p>
                     </div>
                 </>
         </Link>

@@ -62,8 +62,11 @@ export default function Player() {
                             if (player.loopMode === "song") {
                                 // console.log("🔁 Loop mode: Canción. Reiniciando...");
                                 playerManager.audioRef.currentTime = 0;
+                                if(playerManager.videoRef){
+                                    playerManager.videoRef.currentTime = 0;
+                                    playerManager.videoRef.play();
+                                }
                                 playerManager.audioRef.play();
-                                playerManager.videoRef?.play();
                             } else {
                                 playerManager.nextSong();
                             }
