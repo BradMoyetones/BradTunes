@@ -58,6 +58,7 @@ declare global {
       deletePlaylist: (id: number) => Promise<boolean>
       
       downloadSong: (url: string) => Promise<SongFull>
+      downloadMedia: (filePath: string) => Promise<{ success: boolean; buffer?: Buffer; filename?: string; error?: string }>;
       songs: (currentPlaylist: Playlist | null, currentSong: Song | null) => Promise<CurrentMusic>
       songsXplaylist: (playlistId: number) => Promise<SongFull[]>
       getSongById: (id: number) => Promise<SongFull | null> 

@@ -41,6 +41,7 @@ const api = {
   
   // SONGS
   downloadSong: (url: string) => ipcRenderer.invoke('download-song', url),
+  downloadMedia: (url: string) => ipcRenderer.invoke('download-media', url),
   songs: (currentPlaylist: Playlist | null, currentSong: SongFull | null) => ipcRenderer.invoke('songs', currentPlaylist, currentSong),
   songsXplaylist: (playlistId: number) => ipcRenderer.invoke('songsXplaylist', playlistId),
   getSongById: (id: number) => ipcRenderer.invoke('getSongById', id),

@@ -9,6 +9,7 @@ import { deleteSong, downloadSong, songs, updateSong, songsXplaylist, verifyVers
 import { createPlaylist, deletePlaylist, playlists, updatePlaylist } from './models/playlists'
 import { addMusicToPlaylist, deletePlaylistSong, playlistSong } from './models/playlist_songs'
 import { getMusicPath, isDefaultMusicPath, resetMusicPath, setMusicPath } from './config/storage'
+import fs from 'node:fs'
 
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -283,6 +284,24 @@ ipcMain.handle('download-song', (_event, videoUrl) => {
   
   return downloadSong(videoUrl);
 });
+
+ipcMain.handle("download-media", async (_event, filePath) => {
+  try {
+    const fileBuffer = fs.readFileSync(filePath);
+    return {
+      success: true,
+      buffer: fileBuffer,
+      filename: path.basename(filePath),
+    };
+  } catch (err) {
+    console.error("Error al leer el archivo:", err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : String(err),
+    };
+  }
+});
+
 ipcMain.handle('songs', (_event, playlist, song) => {
   return songs(playlist, song);
 });

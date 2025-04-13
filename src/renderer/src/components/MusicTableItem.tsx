@@ -173,11 +173,11 @@ const MusicTableItem = ({
                             Format
                         </ContextMenuLabel>
                         <ContextMenuSeparator />
-                        <ContextMenuItem onClick={() => handleDownloadMedia(song, "mp3")}>
+                        <ContextMenuItem onClick={() => handleDownloadMedia(song, "mp3", musicPath)}>
                             <Music2 className="mr-2 h-4 w-4" />
                             MP3
                         </ContextMenuItem>
-                        <ContextMenuItem onClick={() => handleDownloadMedia(song, "mp4")}>
+                        <ContextMenuItem onClick={() => handleDownloadMedia(song, "mp4", musicPath)}>
                             <Video className="mr-2 h-4 w-4" />
                             MP4
                         </ContextMenuItem>

@@ -193,13 +193,13 @@ export default function SongItemCard({ song }: PlayListItemCardProps) {
             </ContextMenuLabel>
             <ContextMenuSeparator />
               <ContextMenuItem 
-                onClick={() => handleDownloadMedia(song, "mp3")}
+                onClick={() => handleDownloadMedia(song, "mp3", musicPath)}
               >
                 <Music2 className="mr-2 h-4 w-4" />
                 MP3
               </ContextMenuItem>
               <ContextMenuItem 
-                onClick={() => handleDownloadMedia(song, "mp4")}
+                onClick={() => handleDownloadMedia(song, "mp4", musicPath)}
               >
                 <Video className="mr-2 h-4 w-4" />
                 MP4
