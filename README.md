@@ -8,7 +8,7 @@
 [![Discord](https://img.shields.io/discord/1354491438724808926?color=blue&labelColor=555555&label=&logo=discord&style=for-the-badge)](https://discord.gg/5CC6AfrK "Discord")
 [![Portfolio](https://img.shields.io/badge/my_portfolio-000?style=for-the-badge&logo=ko-fi&logoColor=white)](https://portfolio-brad.vercel.app)
 [![linkedin](https://img.shields.io/badge/linkedin-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://co.linkedin.com/in/brad-salom%C3%B3n-moyetones-navas-726b9a1a8)
-[![Instagram](https://img.shields.io/badge/instagram-E1306C?style=for-the-badge&logo=instagram&logoColor=white)](https://www.instagram.com/bradnavas_/)
+[![Instagram](https://img.shields.io/badge/instagram-E1306C?style=for-the-badge&logo=instagram&logoColor=white)](https://www.instagram.com/its.bradn/)
 [![License: MIT](https://img.shields.io/badge/-MIT-blue.svg?style=for-the-badge)](LICENSE "License")
 [![Commits](https://img.shields.io/github/commit-activity/m/BradMoyetones/BradTunes?label=commits&style=for-the-badge)](https://github.com/BradMoyetones/BradTunes/commits "Commit History")
 [![Last Commit](https://img.shields.io/github/last-commit/BradMoyetones/BradTunes/main?label=&style=for-the-badge&display_timestamp=committer)](https://github.com/BradMoyetones/BradTunes/pulse/monthly "Last activity")
