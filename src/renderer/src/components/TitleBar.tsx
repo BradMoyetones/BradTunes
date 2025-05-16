@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import HomeIcon from "@/icons/Home"
 import { useNavigate } from "react-router";
 import { Notificaciones } from "./Notifications";
+import GlobalSearch from "./GlobalSearch";
 
 export default function TitleBar() {
     const [platform, setPlatform] = useState('');
@@ -46,7 +47,7 @@ export default function TitleBar() {
             <div
                 className="no-drag flex items-center gap-2 pl-4"
             >
-                <div className={`${!loading && platform === 'darwin' && "ml-14"}`}>
+                <div className={`${!loading && platform === 'darwin' && "ml-14"} flex-shrink-0`}>
                     <button
                         className="w-11 px-3 py-2 h-full dark:hover:text-white dark:text-white/50 text-black/50 hover:text-black disabled:text-black/50 dark:disabled:hover:text-white/50 transition duration-300"
                         title="Back"
@@ -70,9 +71,14 @@ export default function TitleBar() {
                     variant={"secondary"} 
                     size={"icon"} 
                     onClick={() => navigate("/", { viewTransition: true, replace: true })}
+                    className="flex-shrink-0"
                 >
                     <HomeIcon />
                 </Button>
+            </div>
+
+            <div className="max-w-md w-full">
+                <GlobalSearch />
             </div>
             
             <div className="flex items-center gap-2 h-full">
