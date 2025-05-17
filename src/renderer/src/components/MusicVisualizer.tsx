@@ -11,7 +11,7 @@ const MusicVisualizer: React.FC<MusicVisualizer> = ({ numBars, width, height }) 
     const bars = Array.from({ length: numBars }, (_, i) => i);
 
     return (
-        <div className="flex gap-[1px] overflow-hidden justify-center items-end group-hover:hidden" style={{ width: width, height: height }}>
+        <div className="flex gap-[1px] overflow-hidden justify-center items-end" style={{ width: width, height: height }}>
             {bars.map((_, index) => (
                 <div 
                     key={index+_} 

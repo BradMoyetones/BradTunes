@@ -24,6 +24,9 @@ import { Link, useViewTransitionState } from "react-router";
 import { useData } from "@/contexts/DataProvider";
 import { usePlayer } from "@/contexts/PlayerProvider";
 import { useMusicPathStore } from "@/store/useMusicPathStore";
+import { usePlayerManager } from "@/contexts/PlayerManagerContext";
+import MusicVisualizer from "./MusicVisualizer";
+import { usePlayerStore } from "@/store/usePlayerStore";
 
 interface PlayListItemCardProps {
   song: SongFull;
@@ -34,6 +37,8 @@ export default function SongItemCard({ song }: PlayListItemCardProps) {
   const href = `/song/${id}`;
   const isTransitioning = useViewTransitionState(href);
   const { musicPath } = useMusicPathStore();
+  const playerM = usePlayerManager();
+  const { currentPlaylist } = usePlayerStore(state => state);
 
   const { playlists, setPlaylists, setSongs } = useData()
   const [searchQuery, setSearchQuery] = useState("");
@@ -78,12 +83,18 @@ export default function SongItemCard({ song }: PlayListItemCardProps) {
     100
   );
 
+
+  const isCurrentSong = (songId: number) => {
+    return currentMusic.song?.id === songId && !playerM.audioRef.paused && currentPlaylist === null
+  }
+  const isPlaying = (id && isCurrentSong(id));
+
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>
         <article
           onMouseMove={handleMouseMove} onMouseOut={handleMouseOut}
-          className="group relative bg-white/40 hover:bg-white dark:hover:bg-zinc-800 shadow-lg hover:shadow-xl dark:bg-zinc-500/30 rounded-md ransi transition-all duration-300 overflow-hidden reflex"
+          className={`${isPlaying ? "bg-white dark:bg-zinc-800" : "bg-white/40 hover:bg-white dark:bg-zinc-500/30 dark:hover:bg-zinc-800"} group relative  shadow-lg hover:shadow-xl  rounded-md ransi transition-all duration-300 overflow-hidden reflex`}
           style={{ transition: "box-shadow .1s, transform .1s, background-color .1s", viewTransitionName: isTransitioning ? `box-song-${id}` : "none", }}
         >
           <div
@@ -112,16 +123,23 @@ export default function SongItemCard({ song }: PlayListItemCardProps) {
               </picture>
 
               <div className="flex flex-auto flex-col px-2">
-                <h4 
-                  className="text-zinc-900 dark:text-white text-sm truncate font-semibold" 
-                  style={{
-                    viewTransitionName: isTransitioning
-                      ? `song-title-${id}`
-                      : "none",
-                  }}
-                >
-                  {title}
-                </h4>
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    {isPlaying && (
+                      <MusicVisualizer numBars={5} width={20} height={18} />
+                    )}
+                  </div>
+                  <h4 
+                    className={`${isPlaying ? "text-primary" : "text-zinc-900 dark:text-white"} text-sm truncate font-semibold`}
+                    style={{
+                      viewTransitionName: isTransitioning
+                        ? `song-title-${id}`
+                        : "none",
+                    }}
+                  >
+                    {title}
+                  </h4>
+                </div>
 
                 <span
                   className="text-xs text-zinc-600 dark:text-gray-400 truncate"

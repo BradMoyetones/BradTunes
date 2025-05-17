@@ -1,10 +1,13 @@
 import { CardPlayButton } from "@/components/CardPlayButton";
 import { MusicsTable } from "@/components/MusicsTable";
 import { useTheme } from "@/components/theme-provider";
+import { Button } from "@/components/ui/button";
 import { useData } from "@/contexts/DataProvider";
+import Search from "@/icons/Search";
 import { useMusicPathStore } from "@/store/useMusicPathStore";
 import { PlaylistsFull, PlaylistSongsFull, SongFull } from "@/types/data";
-import { useEffect, useState, useMemo } from "react";
+import { FilterX } from "lucide-react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useParams } from "react-router-dom";
 
 export default function Playlist() {
@@ -13,6 +16,10 @@ export default function Playlist() {
     const { id } = useParams<{ id: string }>();
     const [songs, setSongs] = useState<SongFull[]>([]);
     const { musicPath } = useMusicPathStore();
+
+    const [open, setOpen] = useState(false);
+    const [query, setQuery] = useState("");
+    const inputRef = useRef<HTMLInputElement>(null);
 
     // Inicializar estado local
     const [artistsString, setArtistsString] = useState<string>("");
@@ -80,6 +87,34 @@ export default function Playlist() {
             )
         );
     };
+
+    const handleToggle = () => {
+        // Si hay texto, no cerrar
+        setOpen(prev => !prev);
+        if(!open){
+            inputRef.current?.focus()
+        }
+    };
+
+    const handleFocus = () => {
+        setOpen(true);
+    };
+
+    const handleBlur = () => {
+        // Si no hay texto, cerrar
+        setTimeout(() => {
+            setOpen(false);
+        }, 100)
+    };
+
+    const q = query.toLowerCase().trim();
+
+    const filteredSongs = useMemo(() => {
+        return songs.filter(s =>
+            s.title.toLowerCase().includes(q) ||
+            s.artist.toLowerCase().includes(q)
+        );
+    }, [songs, q]);
     
     return (
         <div
@@ -123,14 +158,50 @@ export default function Playlist() {
                 </div>
             </header>
 
-            <div className="pl-6 pt-6">
+            <div className="px-6 pt-6 flex items-center justify-between">
                 <CardPlayButton playlist={playlist} song={songs[0]} />
+                <div className="flex items-center gap-2">
+                    
+                    <Button
+                        className={`${q ? "opacity-100" : "opacity-0"} transition-all`}
+                        variant={"ghost"}
+                        size={"icon"}
+                        onClick={() => setQuery("")}
+                    >
+                        <FilterX />
+                        <span className="sr-only">Drop filter</span>
+                    </Button>
+                    <div className={`flex shadow-sm rounded-full hover:opacity-100 transition-all`}>
+                        <button 
+                            onClick={handleToggle}
+                            className={`${open ? "border-r rounded-l-full" : "rounded-full"} flex items-center justify-center bg-muted p-3 rounded-l-full border-border dark:border-zinc-100/10`}
+                        >
+                            <Search />
+                        </button>
+                        <input
+                            ref={inputRef}
+                            onFocus={handleFocus}
+                            onBlur={handleBlur}
+                            value={query}
+                            onChange={e => setQuery(e.target.value)}
+                            className={`${open ? "opacity-100" : "opacity-0"} rounded-r-full bg-muted text-base transition-[width,padding,opacity] duration-300 ease-in-out file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm`}
+                            style={{
+                                width: open ? '200px' : '0px',
+                                paddingLeft: open ? '0.75rem' : '0',
+                                paddingRight: open ? '0.75rem' : '0',
+                                paddingTop: open ? '0.25rem' : '0',
+                                paddingBottom: open ? '0.25rem' : '0',
+                            }}
+                            placeholder="Buscar..."
+                        />
+                    </div>
+                </div>
             </div>
 
             <div className="relative z-10 px-6 pt-10"></div>
 
             <section className="p-6">
-                <MusicsTable songs={songs} playlist={playlist} deleteSong={deleteSong} addSongToPlaylist={addSongToPlaylist} />
+                <MusicsTable songs={filteredSongs} playlist={playlist} deleteSong={deleteSong} addSongToPlaylist={addSongToPlaylist} />
             </section>
         </div>
     );

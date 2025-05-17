@@ -77,7 +77,7 @@ export default function TitleBar() {
                 </Button>
             </div>
 
-            <div className="max-w-md w-full">
+            <div className="max-w-md w-full flex justify-center transition-all duration-300">
                 <GlobalSearch />
             </div>
             

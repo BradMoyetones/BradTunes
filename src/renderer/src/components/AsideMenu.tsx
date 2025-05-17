@@ -1,11 +1,10 @@
 import SideMenuItem from "./SideMenuItem";
 import HomeIcon from "@/icons/Home"
-import SearchIcon from "@/icons/Search"
 import LibraryIcon from "@/icons/Library"
 import SideMenuCard from "./SideMenuCard";
 import DownloadDialog from "./DownloadDialog";
 import { useState } from "react";
-import { AlertCircle, Cog, Plus, Youtube } from "lucide-react";
+import { AlertCircle, Cog, Download, Plus, Youtube } from "lucide-react";
 import PlaylistDialog from "./PlaylistDialog";
 import { Button } from "./ui/button";
 import { useData } from "@/contexts/DataProvider";
@@ -36,7 +35,7 @@ export default function AsideMenu() {
                     
 
                     <SideMenuItem onClick={() => setIsDownloadDialogOpen(true)} id="downloadButton">
-                        <SearchIcon />
+                        <Download />
                         Download
                     </SideMenuItem>
 

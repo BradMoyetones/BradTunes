@@ -21,8 +21,10 @@ export default function GlobalSearch() {
 
     const handleToggle = () => {
         // Si hay texto, no cerrar
-        if (query.trim() !== "") return;
         setOpen(prev => !prev);
+        if(!open){
+            inputRef.current?.focus()
+        }
     };
 
     const handleFocus = () => {
@@ -31,7 +33,10 @@ export default function GlobalSearch() {
 
     const handleBlur = () => {
         // Si no hay texto, cerrar
-        if (query.trim() === "") setOpen(false);
+        setTimeout(() => {
+            setQuery("")
+            setOpen(false);
+        }, 100)
     };
 
     const q = query.toLowerCase().trim();
@@ -67,7 +72,14 @@ export default function GlobalSearch() {
     console.log(playlists);
     
     return (
-        <div className={`no-drag h-full flex justify-center flex-col relative ${open ? "w-full" : "w-fit mx-auto"} transition-all duration-300`}>
+        <div
+            className="no-drag h-full flex justify-center flex-col relative transition-[max-width] duration-300 ease-in-out"
+            style={{
+                maxWidth: open ? '100%' : '98px', // ajustá según tu diseño
+                width: '100%', // siempre ocupa todo el contenedor padre
+            }}
+        >
+
             <div className={`${open ? "opacity-100" : "opacity-60"} flex shadow-sm rounded-full border border-border hover:opacity-100 transition-all`}>
                 <button 
                     onClick={handleToggle}
@@ -81,7 +93,14 @@ export default function GlobalSearch() {
                     onBlur={handleBlur}
                     value={query}
                     onChange={e => setQuery(e.target.value)}
-                    className={`bg-muted ${open ? "w-full px-3 py-1" : "w-0"} text-base transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm`}
+                    className={`bg-muted text-base transition-[width,padding] duration-300 ease-in-out file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm`}
+                    style={{
+                        width: open ? '100%' : '0px',
+                        paddingLeft: open ? '0.75rem' : '0',
+                        paddingRight: open ? '0.75rem' : '0',
+                        paddingTop: open ? '0.25rem' : '0',
+                        paddingBottom: open ? '0.25rem' : '0',
+                    }}
                     placeholder="Buscar..."
                 />
                 <button
@@ -158,7 +177,7 @@ const CardSearch = ({callBack, paragraph, title, image, url, id}: CardSearchProp
     const isCurrentSong = (songId: number) => {
         return currentMusic.song?.id === songId && !playerM.audioRef.paused
     }
-    const shouldShowPause = (id && isCurrentSong(id));
+    const isPlaying = (id && isCurrentSong(id));
 
     return (
         <>
@@ -183,11 +202,11 @@ const CardSearch = ({callBack, paragraph, title, image, url, id}: CardSearchProp
                     <div>
                         <div className="flex">
                             <div className="flex-shrink-0">
-                                {shouldShowPause && (
+                                {isPlaying && (
                                     <MusicVisualizer numBars={5} width={20} height={18} />
                                 )}
                             </div>
-                            <h3 className={`text-md font-bold line-clamp-1 ${shouldShowPause && "text-primary"}`}>
+                            <h3 className={`text-md font-bold line-clamp-1 ${isPlaying && "text-primary"}`}>
                                 {title}
                             </h3>
                         </div>

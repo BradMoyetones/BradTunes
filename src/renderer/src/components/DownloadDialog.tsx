@@ -55,6 +55,7 @@ export default function DownloadDialog({ isOpen, setIsOpen }: DownloadDialogProp
                 }
 
                 setSongs((prev) => [...prev, newSong])
+                setUrl("")
             } catch (error) {
                 if (error instanceof Error) {
                     setStatus("Error: " + error.message);
