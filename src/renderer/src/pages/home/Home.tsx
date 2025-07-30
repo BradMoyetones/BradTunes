@@ -10,7 +10,7 @@ export default function Home() {
     return (
         <div
             id="playlist-container"
-            className="relative transition-all duration-1000 bg-primary rounded-lg"
+            className="relative transition-all duration-1000  rounded-lg"
         >
             <div className="relative z-10 px-6 pt-10 pb-6">
                 <Greeting />
@@ -22,7 +22,7 @@ export default function Home() {
                     {songs.length > 0 ? songs.map((song) => (
                         <SongItemCard key={`Sound-card-${song.id}`} song={song} />
                     )): (
-                        <div className="flex flex-col text-muted-foreground py-10 items-center justify-center w-full">
+                        <div className="flex flex-col gap-2 text-muted-foreground py-10 items-center justify-center w-full">
                             <AlertCircle />
                             <p>
                                 No songs found
@@ -31,7 +31,7 @@ export default function Home() {
                     )}
                 </div>
                 <div
-                    className="absolute inset-0 bg-gradient-to-t from-slate-200 via-slate-200/80 dark:from-zinc-900 dark:via-zinc-900/80 -z-[1]"
+                    className="absolute top-0 left-0 right-0 h-[80vh] bg-gradient-to-b from-primary via-primary/50  -z-[1]"
                 >
                 </div>
             </div>

@@ -47,7 +47,7 @@ export function CardPlayButton({ id, song, playlist = null, size = 'small'}: { i
         playerM.changePlaylistAndSong(sanitizedPlaylist, song);
         
       }}
-      className="card-play-button rounded-full text-primary-foreground bg-primary p-4 hover:scale-105 transition hover:bg-primary/90"
+      className="card-play-button rounded-full bg-primary text-primary-foreground p-4 hover:scale-105 transition hover:bg-primary/90"
     >
       {shouldShowPause ? <Pause className={iconClassName} /> : <Play className={iconClassName} />}
     </button>

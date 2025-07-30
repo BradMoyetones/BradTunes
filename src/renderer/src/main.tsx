@@ -6,7 +6,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider } from 'react-router-dom'
 import router from './router'
-import { ThemeProvider } from './components/theme-provider'
+import { ThemeProvider } from './contexts/theme-provider'
 import { DataProvider } from './contexts/DataProvider';
 import { Toaster } from './components/ui/sonner';
 import { PlayerProvider } from './contexts/PlayerProvider';
@@ -16,7 +16,7 @@ import { MusicPathProvider } from './contexts/MusicPathProvider';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <ThemeProvider defaultTheme="dark" defaultColor='Green' storageKey="vite-ui-theme">
+    <ThemeProvider defaultTheme="dark">
       <PlayerManagerProvider>
         <PlayerProvider>
           <DataProvider>

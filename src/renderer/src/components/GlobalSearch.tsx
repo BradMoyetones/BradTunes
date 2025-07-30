@@ -67,10 +67,10 @@ export default function GlobalSearch() {
         );
     }, [songs, q]);
 
-    const noResults = q && filteredPlaylists.length === 0 && filteredSongs.length === 0;
+    const noResults = useMemo(() => {
+        return q && filteredPlaylists.length === 0 && filteredSongs.length === 0;
+    }, [q, filteredPlaylists.length, filteredSongs.length])
 
-    console.log(playlists);
-    
     return (
         <div
             className="no-drag h-full flex justify-center flex-col relative transition-[max-width] duration-300 ease-in-out"

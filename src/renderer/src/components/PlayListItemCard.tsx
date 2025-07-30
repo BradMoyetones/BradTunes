@@ -17,7 +17,7 @@ export default function PlayListItemCard2({ playlist }: PlayListItemCardProps) {
         <Link 
             key={playlist.id+"cardmix"}
             to={href}
-            className="col-span-1 flex items-center rounded-sm overflow-hidden h-16 gap-4 bg-secondary hover:bg-secondary/80 cursor-pointer transition-colors"
+            className="col-span-1 flex items-center rounded-sm overflow-hidden h-16 gap-4 bg-card hover:bg-card/80 border cursor-pointer transition-colors"
             viewTransition
             style={{ viewTransitionName: `playlist-box-${id}` }}
         >

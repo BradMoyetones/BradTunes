@@ -119,7 +119,7 @@ export default function Playlist() {
     return (
         <div
             id="playlist-container"
-            className="relative flex flex-col h-full bg-slate-200 dark:bg-zinc-900 bg-gradient-to-t from-50% from-slate-200 via-slate-200/80 dark:from-zinc-900 dark:via-zinc-900/80 rounded-lg overflow-auto"
+            className="relative flex flex-col h-full bg-gradient-to-t from-background via-background/80 rounded-lg overflow-auto"
             style={{ backgroundColor: theme === "dark" ? playlist?.color.dark : playlist?.color.accent, viewTransitionName: `playlist-box-${id}` }}
         >
             <header className="flex flex-row gap-8 px-6 mt-12">
@@ -143,14 +143,14 @@ export default function Playlist() {
                     </div>
 
                     <div className="flex-1 flex items-end">
-                        <div className="text-sm text-zinc-600 dark:text-gray-300 font-normal">
+                        <div className="text-sm text-muted-foreground font-normal">
                             <div className="truncate max-w-96">
                                 <span style={{ viewTransitionName: `playlist-subtitle-${id}` }}>
                                     {artistsString}
                                 </span>
                             </div>
                             <p className="mt-1">
-                                <span className="text-zinc-900 dark:text-white">{songs.length} {songs.length === 1 ? "song" : songs.length === 0 ? "Playlist empty" : "songs"}</span>,
+                                <span className="text-secondary-foreground">{songs.length} {songs.length === 1 ? "song" : songs.length === 0 ? "Playlist empty" : "songs"}</span>,
                                 {" "+horasTotales} aproximadamente
                             </p>
                         </div>

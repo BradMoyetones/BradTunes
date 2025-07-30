@@ -17,7 +17,7 @@ import { Disc3, Download, List, Music2, Pen, Search, Trash2, Video } from "lucid
 import addMusicToPlaylist from "./AddMusicToPlaylist";
 import { handleDownloadMedia } from "./handleDownloadMP3";
 import { Input } from "./ui/input";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { filterData } from "@/lib/helpers";
 import deleteSong from "./DeleteSong";
 import { Link, useViewTransitionState } from "react-router";
@@ -27,6 +27,7 @@ import { useMusicPathStore } from "@/store/useMusicPathStore";
 import { usePlayerManager } from "@/contexts/PlayerManagerContext";
 import MusicVisualizer from "./MusicVisualizer";
 import { usePlayerStore } from "@/store/usePlayerStore";
+import { Card } from "./ui/card";
 
 interface PlayListItemCardProps {
   song: SongFull;
@@ -87,14 +88,16 @@ export default function SongItemCard({ song }: PlayListItemCardProps) {
   const isCurrentSong = (songId: number) => {
     return currentMusic.song?.id === songId && !playerM.audioRef.paused && currentPlaylist === null
   }
-  const isPlaying = (id && isCurrentSong(id));
+  const isPlaying = useMemo(() => {
+    return (id && isCurrentSong(id))
+  }, [id, isCurrentSong])
 
   return (
     <ContextMenu>
       <ContextMenuTrigger asChild>
-        <article
+        <Card
           onMouseMove={handleMouseMove} onMouseOut={handleMouseOut}
-          className={`${isPlaying ? "bg-white dark:bg-zinc-800" : "bg-white/40 hover:bg-white dark:bg-zinc-500/30 dark:hover:bg-zinc-800"} group relative  shadow-lg hover:shadow-xl  rounded-md ransi transition-all duration-300 overflow-hidden reflex`}
+          className={`group relative shadow-lg hover:shadow-xl  rounded-md ransi transition-all duration-300 overflow-hidden reflex py-0`}
           style={{ transition: "box-shadow .1s, transform .1s, background-color .1s", viewTransitionName: isTransitioning ? `box-song-${id}` : "none", }}
         >
           <div
@@ -130,7 +133,7 @@ export default function SongItemCard({ song }: PlayListItemCardProps) {
                     )}
                   </div>
                   <h4 
-                    className={`${isPlaying ? "text-primary" : "text-zinc-900 dark:text-white"} text-sm truncate font-semibold`}
+                    className={`${isPlaying ? "text-primary" : ""} text-sm truncate font-semibold`}
                     style={{
                       viewTransitionName: isTransitioning
                         ? `song-title-${id}`
@@ -142,7 +145,7 @@ export default function SongItemCard({ song }: PlayListItemCardProps) {
                 </div>
 
                 <span
-                  className="text-xs text-zinc-600 dark:text-gray-400 truncate"
+                  className="text-xs text-muted-foreground truncate"
                   style={{
                     viewTransitionName: isTransitioning
                       ? `song-artist-${id}`
@@ -153,7 +156,7 @@ export default function SongItemCard({ song }: PlayListItemCardProps) {
                 </span>
               </div>
           </div>
-        </article>
+        </Card>
       </ContextMenuTrigger>
       <ContextMenuContent className="w-64">
         <ContextMenuSub>

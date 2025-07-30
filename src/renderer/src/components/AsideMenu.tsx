@@ -11,6 +11,7 @@ import { useData } from "@/contexts/DataProvider";
 import { useLastVisitedPath } from "@/hooks/useLastVisitedPath";
 import { useVersion } from "@/contexts/VersionContext";
 import { useMusicPath } from "@/contexts/MusicPathProvider";
+import { Card } from "./ui/card";
 
 export default function AsideMenu() {
     const [isDownloadDialogOpen, setIsDownloadDialogOpen] = useState(false);
@@ -26,7 +27,7 @@ export default function AsideMenu() {
 
     return (
         <nav className="flex flex-col flex-1 gap-2">
-            <div className="bg-slate-200 dark:bg-zinc-900 rounded-lg p-2">
+            <Card className="rounded-lg p-2 bg-background">
                 <ul className="relative">
                     <SideMenuItem to="/" id="homeButton">
                         <HomeIcon />
@@ -59,9 +60,9 @@ export default function AsideMenu() {
                         setIsOpen={setIsDownloadDialogOpen} 
                     />
                 </ul>
-            </div>
+            </Card>
 
-            <div className="bg-slate-200 dark:bg-zinc-900 rounded-lg p-2 flex-1 relative">
+            <Card className="rounded-lg p-2 flex-1 relative bg-background">
                 <Button
                     className="absolute top-3.5 right-4 rounded-full" 
                     variant={"ghost"}
@@ -87,7 +88,7 @@ export default function AsideMenu() {
                         </div>
                     )}
                 </ul>
-            </div>
+            </Card>
             <PlaylistDialog setIsOpen={setIsOpen} isOpen={isOpen} />
         </nav>
     )

@@ -177,7 +177,7 @@ export default function EditSong() {
                 backgroundColor: randomColor?.accent,
                 viewTransitionName: `box-song-${id}`
             }}
-            className="relative flex flex-col h-full bg-slate-200 dark:bg-zinc-900 bg-gradient-to-t from-50% from-slate-200 via-zinc-200/80 dark:from-zinc-900 dark:via-zinc-900/80 rounded-lg"
+            className="relative flex flex-col h-full bg-background bg-gradient-to-t from-background via-background/80 rounded-lg"
         >
             <Button
                 size={"icon"}

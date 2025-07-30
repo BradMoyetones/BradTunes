@@ -5,6 +5,7 @@ import HomeIcon from "@/icons/Home"
 import { useNavigate } from "react-router";
 import { Notificaciones } from "./Notifications";
 import GlobalSearch from "./GlobalSearch";
+import ThemePresetSelect from "./theme-preset-select";
 
 export default function TitleBar() {
     const [platform, setPlatform] = useState('');
@@ -82,8 +83,9 @@ export default function TitleBar() {
             </div>
             
             <div className="flex items-center gap-2 h-full">
-                <div className="flex items-center no-drag pr-4">
+                <div className="flex items-center no-drag pr-4 gap-2">
                     <Notificaciones />
+                    <ThemePresetSelect className="h-14 w-fit rounded-none z-50" disabled={false} />
                 </div>
 
 

@@ -75,7 +75,7 @@ export default function HomeLayout() {
                     </aside>
 
                     <main
-                        className="[grid-area:main] rounded-lg bg-slate-200 dark:bg-zinc-900 overflow-auto h-full"
+                        className="[grid-area:main] rounded-lg bg-background border overflow-auto h-full"
                         id="main"
                     >
                         <Suspense fallback={<div>Loading...</div>}>
@@ -83,13 +83,12 @@ export default function HomeLayout() {
                         </Suspense>
                     </main>
 
-                    <footer className="[grid-area:player] h-[80px] flex items-center justify-center mt-2 pr-2" id="player">
+                    <footer className="[grid-area:player] h-[80px] flex items-center justify-center mt-2" id="player">
                         <Player />
                     </footer>
                 </div>
                 
             </div>
         </VideoFullScreenProvider>
-
     )
 }

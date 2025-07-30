@@ -1,4 +1,4 @@
-export type ThemeColors = "Zinc" | "Slate" | "Stone" | "Gray" | "Neutral" | "Red" | "Rose" | "Orange" | "Green" | "Blue" | "Yellow" | "Violet"
+export type ThemeColors = "Default" | "Red" | "Rose" | "Orange" | "Green" | "Blue" | "Yellow" | "Violet"
 
 export interface ThemeColorStateParams {
     themeColor: ThemeColors;
