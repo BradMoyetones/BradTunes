@@ -43,7 +43,7 @@ export default function TitleBar() {
     return (
         <div
             id="titleBarApp"
-            className="[grid-area:title] h-16 justify-between flex -mx-2"
+            className="[grid-area:title] h-16 justify-between flex"
         >
             <div
                 className="no-drag flex items-center gap-2 pl-4"
@@ -83,7 +83,7 @@ export default function TitleBar() {
             </div>
             
             <div className="flex items-center gap-2 h-full">
-                <div className="flex items-center no-drag pr-4 gap-2">
+                <div className="flex items-center no-drag gap-2">
                     <Notificaciones />
                     <ThemePresetSelect className="h-14 w-fit rounded-none z-50" disabled={false} />
                 </div>

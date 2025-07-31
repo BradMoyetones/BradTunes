@@ -67,7 +67,7 @@ export default function HomeLayout() {
         <VideoFullScreenProvider>
             <div>
 
-                <div id="app" className="relative h-screen space-x-2 pr-2">
+                <div id="app" className="relative h-screen space-x-2">
                     <TitleBar />
 
                     <aside className="[grid-area:aside] flex-col flex overflow-y-auto ml-2" id="sidebarMain">
