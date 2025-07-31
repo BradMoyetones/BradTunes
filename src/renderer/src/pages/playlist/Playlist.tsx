@@ -3,6 +3,7 @@ import { MusicsTable } from "@/components/MusicsTable";
 import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import { useData } from "@/contexts/DataProvider";
+import { useImageExists } from "@/hooks/use-image-exists";
 import Search from "@/icons/Search";
 import { useMusicPathStore } from "@/store/useMusicPathStore";
 import { PlaylistsFull, PlaylistSongsFull, SongFull } from "@/types/data";
@@ -116,6 +117,8 @@ export default function Playlist() {
         );
     }, [songs, q]);
     
+    const validUrl = useImageExists(`safe-file://${musicPath}/img/playlists/${playlist?.cover}`)
+    
     return (
         <div
             id="playlist-container"
@@ -125,7 +128,7 @@ export default function Playlist() {
             <header className="flex flex-row gap-8 px-6 mt-12">
                 <picture className="aspect-square w-52 h-52 flex-none">
                     <img
-                        src={`safe-file://${musicPath}/img/playlists/${playlist?.cover}`}
+                        src={validUrl}
                         alt={`Cover of ${playlist?.title}`}
                         className="object-cover w-full h-full shadow-lg rounded-lg"
                         style={{ viewTransitionName: `playlist-image-${id}` }}

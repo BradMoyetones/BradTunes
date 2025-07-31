@@ -174,7 +174,7 @@ body {
 /* DRIVER.JS */
 
 .driver-popover.driverjs-theme {
-  background-color: hsl(var(--card-foreground));
+  background-color: var(--card-foreground);
 }
 
 .driver-popover.driverjs-theme .driver-popover-title {
@@ -187,21 +187,21 @@ body {
 
 .driver-popover.driverjs-theme .driver-popover-title,
 .driver-popover.driverjs-theme .driver-popover-progress-text {
-  color: hsl(var(--primary));
+  color: var(--card);
   font-family: 'Onest Variable', sans-serif !important;
 }
 
 .driver-popover.driverjs-theme .driver-popover-description {
-  color: hsl(var(--secondary));
+  color: var(--muted);
   font-family: 'Onest Variable', sans-serif !important;
 }
 
 .driver-popover.driverjs-theme button {
   flex: 1;
   text-align: center;
-  background-color: hsl(var(--primary)) !important;
-  color: hsl(var(--primary-foreground)) !important;
-  border: hsl(var(--border));
+  background-color: var(--primary) !important;
+  color: var(--primary-foreground) !important;
+  border: var(--border);
   text-shadow: none;
   font-size: 14px;
   padding: 5px 8px;
@@ -217,7 +217,7 @@ body {
 }
 
 .driver-popover.driverjs-theme button:hover {
-  background-color: hsl(var(--primary) / 0.9) !important;
+  background-color: var(--primary) / 0.9 !important;
   transition: 0.3s;
 }
 
@@ -241,19 +241,19 @@ body {
 }
 
 .driver-popover.driverjs-theme .driver-popover-arrow-side-left.driver-popover-arrow {
-  border-left-color: hsl(var(--card-foreground));
+  border-left-color: var(--card-foreground);
 }
 
 .driver-popover.driverjs-theme .driver-popover-arrow-side-right.driver-popover-arrow {
-  border-right-color: hsl(var(--card-foreground));
+  border-right-color: var(--card-foreground);
 }
 
 .driver-popover.driverjs-theme .driver-popover-arrow-side-top.driver-popover-arrow {
-  border-top-color: hsl(var(--card-foreground));
+  border-top-color: var(--card-foreground);
 }
 
 .driver-popover.driverjs-theme .driver-popover-arrow-side-bottom.driver-popover-arrow {
-  border-bottom-color: hsl(var(--card-foreground));
+  border-bottom-color: var(--card-foreground);
 }
 
 .driver-popover.driverjs-theme .driver-popover-footer{

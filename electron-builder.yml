@@ -16,6 +16,7 @@ asarUnpack:
   - out/renderer/index.html
   - out/renderer/yt-dlp*
   - out/renderer/ffmpeg*
+  - drizzle/migrations/**
 win:
   icon: resources/icon.png
   executableName: bradtunes

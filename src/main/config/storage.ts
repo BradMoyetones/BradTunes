@@ -9,6 +9,20 @@ export const basePath = is.dev
   ? path.join(__dirname, '../../src/renderer/public')
   : path.join(process.resourcesPath, 'app.asar.unpacked', 'out', 'renderer');
 
+export const getMigrationsPath = () => {
+  if (is.dev) {
+    return path.join(__dirname, '../../drizzle/migrations');
+  }
+
+  return path.join(
+    process.resourcesPath,
+    'app.asar.unpacked',
+    'out',
+    'drizzle',
+    'migrations'
+  );
+};
+
 let store: any;
 
 // Archivos y carpetas que deben conservarse al cambiar de directorio

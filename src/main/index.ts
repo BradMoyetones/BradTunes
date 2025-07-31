@@ -14,7 +14,6 @@ import fs from 'node:fs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-initializeDatabase();
 
 function createWindow(): void {
   // Create the browser window.

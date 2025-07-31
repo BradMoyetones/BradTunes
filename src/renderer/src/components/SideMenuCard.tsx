@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import PlaylistDialog from "./PlaylistDialog";
 import { useData } from "@/contexts/DataProvider";
 import { useMusicPathStore } from "@/store/useMusicPathStore";
+import { useImageExists } from "@/hooks/use-image-exists";
 
 interface Props {
   playlist: PlaylistsFull,
@@ -23,7 +24,7 @@ interface Props {
 export default function SideMenuCard({ playlist, onClick }: Props) {
 
   const { id, cover, title, playlist_songs } = playlist;
-  const artistsString = playlist_songs.length > 0 ? playlist_songs.map(e => e.song.artist).join(", ") : "No artists found"
+  const artistsString = playlist_songs.length > 0 ? playlist_songs.map(e => e.song?.artist).join(", ") : "No artists found"
   const { playlists, setPlaylists } = useData();
   const [ isOpen, setIsOpen ] = useState(false);
   const { musicPath } = useMusicPathStore();
@@ -34,6 +35,8 @@ export default function SideMenuCard({ playlist, onClick }: Props) {
     setTimestamp(new Date().getTime())
   }, [isOpen, setIsOpen])
 
+  const validUrl = useImageExists(`safe-file://${musicPath}/img/playlists/${cover}`)
+  
   return (
     <>
     <ContextMenu>
@@ -45,7 +48,7 @@ export default function SideMenuCard({ playlist, onClick }: Props) {
         >
           <picture className="h-12 w-12 flex-none">
             <img
-              src={`safe-file://${musicPath}/img/playlists/${cover}`}
+              src={validUrl}
               alt={`Cover of ${title}`}
               className="object-cover w-full h-full rounded-md"
             />

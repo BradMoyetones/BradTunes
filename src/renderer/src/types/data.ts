@@ -32,7 +32,7 @@ export interface PlaylistSongs {
 }
 
 export interface PlaylistSongsFull extends PlaylistSongs {
-    song: Song;
+    song: Song | null;
     playlist: Playlist;
 }
 

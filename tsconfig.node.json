@@ -5,10 +5,15 @@
     "src/main/**/*",
     "src/preload/**/*",
     "src/types/**/*",   // Asegúrate de incluir la carpeta 'types'
-    "src/lib/**/*"   // Asegúrate de incluir la carpeta 'lib'
+    "src/lib/**/*",   // Asegúrate de incluir la carpeta 'lib'
+    "src/drizzle/**/*"   // Asegúrate de incluir la carpeta 'lib'
   ],
   "compilerOptions": {
     "composite": true,
-    "types": ["electron-vite/node"]
+    "types": ["electron-vite/node"],
+    "baseUrl": ".",
+    "paths": {
+      "@core/*": ["./src/*"]
+    }
   }
 }
