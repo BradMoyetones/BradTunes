@@ -1,7 +1,7 @@
 import Greeting from "@/components/Greeting";
 import PlayListItemCard2 from "@/components/PlayListItemCard";
-import SongItemCard from "@/components/SongItemCard";
-import { useData } from "@/contexts/DataProvider";
+import { SongItemCard } from "@/components/shared";
+import { useData } from "@/contexts";
 import { AlertCircle } from "lucide-react";
 
 export default function Home() {

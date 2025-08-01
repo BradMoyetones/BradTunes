@@ -3,7 +3,7 @@ import { usePlayerStore } from "@/store/usePlayerStore";
 import { usePlayerManager } from "@/contexts/PlayerManagerContext";
 import { usePlayer } from "@/contexts/PlayerProvider";
 import { useVideoFullScreen } from "@/contexts/VideoFullScreenContext";
-import { useMusicPath } from "@/contexts/MusicPathProvider";
+import { useMusicPath } from "@/contexts/MusicPathProvider/MusicPathProvider";
 
 export default function Video() {
     const { currentSong, currentTime } = usePlayerStore();

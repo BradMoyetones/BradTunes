@@ -6,10 +6,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Notification } from "@/store/useNotifications"
-import { useNotifications } from "@/store/useNotifications"
+import { Notification } from "@/store/useNotifications/useNotifications"
+import { useNotifications } from "@/store/useNotifications/useNotifications"
 import { useEffect } from 'react'
-import { useVersion } from '@/contexts/VersionContext'
+import { useVersion } from '@/contexts/VersionContext/VersionContext'
 import semver from 'semver'
 
 export function Notificaciones() {

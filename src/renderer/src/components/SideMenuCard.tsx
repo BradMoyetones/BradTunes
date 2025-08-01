@@ -1,4 +1,3 @@
-import { PlaylistsFull } from "@/types/data"
 import { NavLink } from "react-router"
 import {
   ContextMenu,
@@ -9,23 +8,21 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu"
 import { Pen, Trash2 } from "lucide-react";
-import deletePlaylist from "./DeletePlaylist";
 import { useEffect, useState } from "react";
-import PlaylistDialog from "./PlaylistDialog";
-import { useData } from "@/contexts/DataProvider";
-import { useMusicPathStore } from "@/store/useMusicPathStore";
+import { useMusicPathStore } from "@/store/useMusicPathStore/useMusicPathStore";
 import { useImageExists } from "@/hooks/use-image-exists";
+import { PlaylistColor } from "@core/types/data";
+import { PlaylistDialog } from "./shared";
 
 interface Props {
-  playlist: PlaylistsFull,
-  onClick?: (data: PlaylistsFull) => void,
+  playlist: PlaylistColor,
+  onClick?: (data: PlaylistColor) => void,
 }
 
 export default function SideMenuCard({ playlist, onClick }: Props) {
 
-  const { id, cover, title, playlist_songs } = playlist;
-  const artistsString = playlist_songs.length > 0 ? playlist_songs.map(e => e.song?.artist).join(", ") : "No artists found"
-  const { playlists, setPlaylists } = useData();
+  const { id, cover, title } = playlist;
+  const artistsString = "No artists found"
   const [ isOpen, setIsOpen ] = useState(false);
   const { musicPath } = useMusicPathStore();
 
@@ -84,7 +81,7 @@ export default function SideMenuCard({ playlist, onClick }: Props) {
           <Pen className="mr-2 h-4 w-4" />
           Edit
         </ContextMenuItem>
-        <ContextMenuItem className="text-destructive hover:!text-destructive" onClick={() => deletePlaylist(playlist, playlists, setPlaylists)}>
+        <ContextMenuItem className="text-destructive hover:!text-destructive">
           <Trash2 className="mr-2 h-4 w-4" />
           Delete
         </ContextMenuItem>

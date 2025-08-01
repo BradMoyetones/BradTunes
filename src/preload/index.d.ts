@@ -1,5 +1,4 @@
-import { Song } from '@/data'
-import { Playlist, PlaylistsFull, PlaylistSongs, PlaylistSongsFull, SongFull, CurrentMusic } from '@/types/data'
+import { Song, Playlist, PlaylistWithSongs, PlaylistSong, PlaylistSongFull, SongFull, CurrentMusic } from '@core/types/data'
 import { ElectronAPI } from '@electron-toolkit/preload'
 
 declare global {
@@ -7,8 +6,6 @@ declare global {
     electron: ElectronAPI
     api: {
       // UPDATES
-
-      // - APP
       verifyVersionApp: () => Promise<{
         currentVersion: string;
         newVersion: string | null;
@@ -32,6 +29,7 @@ declare global {
         message: string;
       }>
 
+      // - APP
       getMusicPath: () => Promise<string>;
       setMusicPath: (newPath: string) => void;
       resetMusicPath: () => void;
@@ -52,21 +50,24 @@ declare global {
       isMaximized: () => Promise<boolean>;
       close: () => void;
 
-      playlists: () => Promise<PlaylistsFull[]>
+      // Basic SQL Querys
+      playlists: () => Promise<PlaylistWithSongs[]>
+      songs: () => Promise<SongFull[]>
+      playlistSongs: () => Promise<PlaylistSong[]>
+      
       createPlaylist: (title: string, color: { accent: string, dark: string }, cover: string | undefined | null) => Promise<PlaylistsFull>
       updatePlaylist: (id: number | undefined, title: string, color: { accent: string, dark: string }, cover: string | undefined | null) => Promise<PlaylistsFull>
       deletePlaylist: (id: number) => Promise<boolean>
       
       downloadSong: (url: string) => Promise<SongFull>
       downloadMedia: (filePath: string) => Promise<{ success: boolean; buffer?: Buffer; filename?: string; error?: string }>;
-      songs: (currentPlaylist: Playlist | null, currentSong: Song | null) => Promise<CurrentMusic>
       songsXplaylist: (playlistId: number) => Promise<SongFull[]>
       getSongById: (id: number) => Promise<SongFull | null> 
       deleteSong: (id: number) => Promise<boolean>
       updateSong: (id: number, title: string, artist: string, image: string | undefined) => Promise<SongFull>
 
       playlistSong: (playlistId: number, songId: number) => Promise<PlaylistSongs | false>
-      addMusicToPlaylist: (playlistId: number, songId: number, date: string) => Promise<PlaylistSongsFull>
+      addMusicToPlaylist: (playlistId: number, songId: number, date: string) => Promise<PlaylistSongFull>
       deletePlaylistSong: (playlistId: number, songId: number) => Promise<boolean>
 
       createNewWindow: (url: string) => Promise<void>

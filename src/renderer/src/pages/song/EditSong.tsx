@@ -11,8 +11,8 @@ import { ArrowLeft, Bug, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePlayer } from "@/contexts/PlayerProvider";
 import { SongFull } from "@/types/data";
-import { useData } from "@/contexts/DataProvider";
-import { useMusicPathStore } from "@/store/useMusicPathStore";
+import { useData } from "@/contexts/DataProvider/DataProvider";
+import { useMusicPathStore } from "@/store/useMusicPathStore/useMusicPathStore";
 
 // Actualización del schema para aceptar un archivo de imagen
 const FormSchema = z.object({

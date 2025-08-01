@@ -33,7 +33,8 @@
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "electron-vite build && electron-builder --mac",
     "build:linux": "electron-vite build && electron-builder --linux",
-    "rebuild": "electron-rebuild -f -w better-sqlite3"
+    "rebuild": "electron-rebuild -f -w better-sqlite3",
+    "db:generate": "npx drizzle-kit generate"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",

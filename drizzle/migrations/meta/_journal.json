@@ -15,6 +15,20 @@
       "when": 1753996625114,
       "tag": "0001_premium_young_avengers",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1754058392912,
+      "tag": "0002_minor_night_thrasher",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1754080729306,
+      "tag": "0003_absurd_stone_men",
+      "breakpoints": true
     }
   ]
 }

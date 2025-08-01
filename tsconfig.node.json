@@ -4,9 +4,10 @@
     "electron.vite.config.*",
     "src/main/**/*",
     "src/preload/**/*",
-    "src/types/**/*",   // Asegúrate de incluir la carpeta 'types'
-    "src/lib/**/*",   // Asegúrate de incluir la carpeta 'lib'
-    "src/drizzle/**/*"   // Asegúrate de incluir la carpeta 'lib'
+    "src/types/**/*",
+    "src/lib/**/*",
+    "src/drizzle/**/*",
+    "src/utils/**/*"
   ],
   "compilerOptions": {
     "composite": true,

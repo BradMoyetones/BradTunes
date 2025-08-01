@@ -1,11 +1,7 @@
 import path from 'node:path'
 import fs from 'node:fs'
-import { getDb } from '../config/database';
 import { exec } from 'node:child_process'
 import { getTimestamp } from '../config/helpers';
-import { Playlist, SongFull } from '../../types/data';
-import { CurrentMusic } from '../../types/data';
-import { colors } from '../../lib/colors';
 import { promisify } from 'node:util';
 import { app, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
@@ -13,6 +9,11 @@ import log from "electron-log";
 import ProgressBar from "electron-progressbar";
 import { platform } from 'node:os';
 import { basePath, getMusicPath } from '../config/storage';
+import { getDb } from '@core/drizzle/client';
+import { playlists, playlistSongs, songs } from '@core/drizzle/schema';
+import { CurrentMusic, Playlist, PlaylistWithSongs, Song, SongFull } from '@core/types/data';
+import { eq, inArray } from 'drizzle-orm';
+import { deleteFile } from '@core/utils/deleteFile';
 
 const execPromise = promisify(exec)
 const repoOwner = "BradMoyetones"; // 🔹 Cambia esto por tu usuario o equipo de GitHub
@@ -296,627 +297,294 @@ export async function installLatestVersion() {
   }
 }
 
-export async function downloadSong(videoUrl: string) {
+const sanitizeFilename = (name: string) =>
+  name.replace(/[\\/:*?"<>|]/g, '_').replace(/\s+/g, ' ').trim();
+
+export async function downloadAndSaveSong(videoUrl: string) {
   const db = await getDb();
-  const musicPath = await getMusicPath(); // 🔹 Espera la ruta correcta
-  const outputDir = musicPath;
-  const imgDir = path.join(outputDir, 'img');
+  const musicPath = await getMusicPath();
+  const imgDir = path.join(musicPath, 'img');
+  fs.mkdirSync(imgDir, { recursive: true });
 
-  console.log('ytDlpPath:', ytDlpPath);
-  if (!fs.existsSync(ytDlpPath)) {
-    throw new Error('yt-dlp.exe not found');
-  }
-
-  if (!fs.existsSync(ffmpegPath)) {
-    throw new Error('ffmpeg.exe not found');
-  }
-
-  if (!fs.existsSync(imgDir)) {
-    fs.mkdirSync(imgDir, { recursive: true });
-  }
-
-  return new Promise((resolve, reject) => {
-    const metadataCommand = `"${ytDlpPath}" --ffmpeg-location ${ffmpegPath} -j "${videoUrl}"`;
-    exec(metadataCommand, (metadataError, metadataStdout, metadataStderr) => {
-      if (metadataError) {
-        reject(`Metadata Error: ${metadataError.message}`);
-        return;
-      } else if (metadataStderr) {
-        reject(`Metadata Stderr: ${metadataStderr}`);
-        return;
-      }
-
-      let metadata;
+  // 1. Obtener metadata
+  const metadata = await new Promise<any>((resolve, reject) => {
+    const cmd = `"${ytDlpPath}" --ffmpeg-location ${ffmpegPath} -j "${videoUrl}"`;
+    exec(cmd, (err, stdout, stderr) => {
+      if (err || stderr) return reject(err || stderr);
       try {
-        metadata = JSON.parse(metadataStdout);
-        console.log('Metadata:', metadata);
-      } catch (parseError) {
-        reject(`Metadata Parse Error: ${(parseError as Error).message}`);
-        return;
+        resolve(JSON.parse(stdout));
+      } catch (e) {
+        reject(`Error parseando metadata: ${e}`);
       }
-
-      const sanitizeFilename = (name: string) => {
-        return name
-          .replace(/[\\/:*?"<>|]/g, '_') // Evitar caracteres no válidos en nombres de archivos
-          .replace(/\s+/g, ' ') // Normalizar espacios
-          .trim(); // Eliminar espacios innecesarios
-      };
-
-      const timestamp = Date.now();
-      const title = sanitizeFilename(metadata.title || 'Unknown Title');
-      const artist = sanitizeFilename(metadata.channel || 'Unknown Artist');
-      const duration = metadata.duration_string || 'Unknown Time';
-
-      // Establecer nombres explícitos para MP3 e imagen
-      const mp3Filename = `${timestamp}.mp3`;
-      const mp4Filename = `${timestamp}.mp4`;
-      const thumbnailFilename = `${timestamp}.jpg`;
-
-      // const command = `"${ytDlpPath}" -x --audio-format mp3 --write-thumbnail -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}"`;
-      // const command = `"${ytDlpPath}" -x --audio-format mp3 --write-thumbnail -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}" && "${ytDlpPath}" -f mp4 -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}"`;
-      // const command = `"${ytDlpPath}" -x --audio-format mp3 --write-thumbnail -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}" && "${ytDlpPath}" -f "bv*[ext=mp4][height<=720]+ba[ext=m4a]/b[ext=mp4]" --merge-output-format mp4 -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}"`;
-      const command = `"${ytDlpPath}" --ffmpeg-location ${ffmpegPath} -x --audio-format mp3 --write-thumbnail -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}" && "${ytDlpPath}" --ffmpeg-location ${ffmpegPath} -f "bv*[ext=mp4][height<=720]+ba[ext=m4a]/b[ext=mp4]" --merge-output-format mp4 -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}"`;
-
-      exec(command, (error, _stdout, stderr) => {
-        if (error) {
-          reject(`Error: ${error.message}`);
-        } else if (stderr) {
-          reject(`Stderr: ${stderr}`);
-        } else {
-          fs.readdir(outputDir, (err, files) => {
-            if (err) {
-              reject(`Error reading directory: ${err.message}`);
-              return;
-            }
-
-            const mp3Files = files.filter((file) => file.endsWith('.mp3'));
-            const thumbnailFiles = files.filter((file) =>
-              /\.(webp|jpeg|jpg|png|gif|svg)$/i.test(file)
-            );
-
-            if (mp3Files.length > 0) {
-              // Mover la miniatura a la carpeta img
-              const thumbnailFile = thumbnailFiles.find((thumb) =>
-                thumb.includes(`${timestamp}`)
-              );
-
-              if (thumbnailFile) {
-                const srcThumbnailPath = path.join(outputDir, thumbnailFile);
-                const destThumbnailPath = path.join(imgDir, thumbnailFilename);
-                fs.renameSync(srcThumbnailPath, destThumbnailPath);
-              }
-
-              const createdAt = getTimestamp();
-
-              const stmt = db.prepare(`
-                INSERT INTO songs (title, artist, song, video, image, duration, date)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-                RETURNING id
-              `);
-
-              stmt.run(
-                title,
-                artist,
-                `${mp3Filename}`,
-                `${mp4Filename}`,
-                `${thumbnailFilename}`,
-                duration,
-                createdAt,
-                (err: Error | null) => {
-                  if (err) {
-                    reject(`Error inserting into database: ${err.message}`);
-                  } else {
-                    const newId = stmt.lastID;
-
-                    // Recupera el objeto recién creado
-                    const selectStmt = db.prepare(`
-                      SELECT * FROM songs WHERE id = ?
-                    `);
-                    selectStmt.get(newId, (err: Error | null, row: any) => {
-                      if (err) {
-                        reject(
-                          `Error retrieving from database: ${err.message}`
-                        );
-                      } else {
-                        const newSong: SongFull = {
-                          id: row.id,
-                          title: row.title,
-                          artist: row.artist,
-                          song: row.song,
-                          video: row.video,
-                          image: row.image,
-                          reproductions: row.reproductions,
-                          duration: row.duration,
-                          date: row.date,
-                          playlist_songs: [],
-                        };
-                        resolve(newSong);
-                      }
-                    });
-                  }
-                }
-              );
-
-              stmt.finalize();
-            } else {
-              resolve('No MP3 or thumbnail files found.');
-            }
-          });
-        }
-      });
     });
   });
+
+  const timestamp = Date.now();
+  const title = sanitizeFilename(metadata.title || 'Unknown Title');
+  const artist = sanitizeFilename(metadata.channel || 'Unknown Artist');
+  const duration = metadata.duration || null;
+
+  const mp3Filename = `${timestamp}.mp3`;
+  const mp4Filename = `${timestamp}.mp4`;
+  const thumbnailFilename = `${timestamp}.jpg`;
+
+  // 2. Descargar audio e imagen
+  // const command = `"${ytDlpPath}" -x --audio-format mp3 --write-thumbnail -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}"`;
+  // const command = `"${ytDlpPath}" -x --audio-format mp3 --write-thumbnail -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}" && "${ytDlpPath}" -f mp4 -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}"`;
+  // const command = `"${ytDlpPath}" -x --audio-format mp3 --write-thumbnail -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}" && "${ytDlpPath}" -f "bv*[ext=mp4][height<=720]+ba[ext=m4a]/b[ext=mp4]" --merge-output-format mp4 -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}"`;
+  // const command = `"${ytDlpPath}" --ffmpeg-location ${ffmpegPath} -x --audio-format mp3 --write-thumbnail -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}" && "${ytDlpPath}" --ffmpeg-location ${ffmpegPath} -f "bv*[ext=mp4][height<=720]+ba[ext=m4a]/b[ext=mp4]" --merge-output-format mp4 -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}"`;
+  const command = `
+    "${ytDlpPath}" --ffmpeg-location ${ffmpegPath} -x --audio-format mp3 --write-thumbnail -o "${musicPath}/${timestamp}.%(ext)s" "${videoUrl}" &&
+    "${ytDlpPath}" --ffmpeg-location ${ffmpegPath} -f "bv*[ext=mp4][height<=720]+ba[ext=m4a]/b[ext=mp4]" --merge-output-format mp4 -o "${musicPath}/${timestamp}.%(ext)s" "${videoUrl}"
+  `;
+
+  await new Promise((resolve, reject) => {
+    exec(command, (err, _stdout, stderr) => {
+      if (err || stderr) return reject(err || stderr);
+      resolve(true);
+    });
+  });
+
+  // 3. Mover imagen
+  const files = fs.readdirSync(musicPath);
+  const thumbnail = files.find(f => f.includes(`${timestamp}`) && /\.(jpg|jpeg|png|webp)$/i.test(f));
+  if (thumbnail) {
+    fs.renameSync(path.join(musicPath, thumbnail), path.join(imgDir, thumbnailFilename));
+  }
+
+  // 4. Insertar en DB
+  const createdAt = getTimestamp();
+
+  const inserted = await db
+    .insert(songs)
+    .values({
+      title,
+      artist,
+      song: mp3Filename,
+      video: mp4Filename, // Opcional
+      image: thumbnailFilename,
+      duration,
+      date: createdAt,
+    })
+    .returning();
+
+  return inserted[0];
 }
 
-export async function songs(currentPlaylist: Playlist | null, currentSong: SongFull | null): Promise<CurrentMusic> {
+export async function songsAll(): Promise<SongFull[]> {
   const db = await getDb();
-
-  return new Promise((resolve, reject) => {
-    let query = `
-      SELECT
-        m.id AS song_id,
-        m.title,
-        m.artist,
-        m.song,
-        m.video,
-        m.image,
-        m.reproductions,
-        m.duration,
-        m.date AS song_date,
-        ps.id AS playlist_song_id,
-        ps.playlist_id,
-        ps.date AS playlist_song_date
-      FROM songs m
-      LEFT JOIN playlist_songs ps ON m.id = ps.song_id
-    `;
-
-    let queryParams: any[] = [];
-
-    if (currentPlaylist) {
-      query += ` WHERE ps.playlist_id = ?`;
-      queryParams.push(currentPlaylist.id);
-    }
-
-    db.all(query, queryParams, (err: Error | null, rows: any[]) => {
-      if (err) {
-        reject(`Error fetching songs: ${err.message}`);
-        return;
-      }
-
-      const songsMap = new Map<number, SongFull>();
-
-      rows.forEach(row => {
-        if (!songsMap.has(row.song_id)) {
-          songsMap.set(row.song_id, {
-            id: row.song_id,
-            title: row.title,
-            artist: row.artist,
-            song: row.song,
-            video: row.video,
-            image: row.image,
-            reproductions: row.reproductions,
-            duration: row.duration,
-            date: row.song_date,
-            playlist_songs: [],
-          });
-        }
-
-        if (row.playlist_song_id) {
-          songsMap.get(row.song_id)?.playlist_songs.push({
-            id: row.playlist_song_id,
-            playlist_id: row.playlist_id,
-            song_id: row.song_id,
-            date: row.playlist_song_date,
-          });
-        }
-      });
-
-      const songs = Array.from(songsMap.values());
-
-      let selectedSong: SongFull | null = currentSong;
-
-      if (!selectedSong && songs.length > 0) {
-        selectedSong = songs[0]; // Si no hay `currentSong`, seleccionamos la primera canción disponible
-      }
-
-      resolve({
-        playlist: currentPlaylist,
-        song: selectedSong,
-        songs
-      });
-    });
+  
+  // todas las canciones y sus relaciones
+  let rows = await db.query.songs.findMany({
+    with: {
+      playlist_songs: true,
+    },
   });
+
+  return rows
 }
 
 export async function songsXplaylist(playlistId: number): Promise<SongFull[]> {
   const db = await getDb();
+  
+  // 1. Obtener relaciones playlist_songs por playlistId
+  const playlistSongRows = await db
+    .select()
+    .from(playlistSongs)
+    .where(eq(playlistSongs.playlistId, playlistId));
 
-  return new Promise((resolve, reject) => {
-    // 1. Consulta para obtener las canciones asociadas a la playlist (con filtro de playlistId)
-    let query = `
-      SELECT
-        m.id AS song_id,
-        m.title,
-        m.artist,
-        m.song,
-        m.video,
-        m.image,
-        m.reproductions,
-        m.duration,
-        m.date AS song_date,
-        ps.id AS playlist_song_id,
-        ps.playlist_id,
-        ps.date AS playlist_song_date
-      FROM songs m
-      LEFT JOIN playlist_songs ps ON m.id = ps.song_id
-      WHERE ps.playlist_id = ?
-    `;
+  if (playlistSongRows.length === 0) return [];
 
-    let queryParams: any[] = [playlistId];  // Filtro por playlist_id
+  // 2. Obtener IDs de canciones asociadas
+  const songIds = playlistSongRows.map(row => row.songId);
 
-    db.all(query, queryParams, (err: Error | null, rows: any[]) => {
-      if (err) {
-        reject(`Error fetching songs: ${err.message}`);
-        return;
-      }
+  // 3. Obtener canciones por esos IDs
+  const songRows = await db
+    .select()
+    .from(songs)
+    .where(inArray(songs.id, songIds));
 
-      // Crear un mapa de canciones con sus datos
-      const songsMap = new Map<number, SongFull>();
+  // 4. Agrupar playlistSongs por canción
+  const map = new Map<number, SongFull>();
 
-      rows.forEach(row => {
-        if (!songsMap.has(row.song_id)) {
-          songsMap.set(row.song_id, {
-            id: row.song_id,
-            title: row.title,
-            artist: row.artist,
-            song: row.song,
-            video: row.video,
-            image: row.image,
-            reproductions: row.reproductions,
-            duration: row.duration,
-            date: row.song_date,
-            playlist_songs: [],
-          });
-        }
-
-        // Si hay una relación de playlist_songs, añadirla
-        if (row.playlist_song_id) {
-          songsMap.get(row.song_id)?.playlist_songs.push({
-            id: row.playlist_song_id,
-            playlist_id: row.playlist_id,
-            song_id: row.song_id,
-            date: row.playlist_song_date,
-          });
-        }
-      });
-
-      // 2. Consulta para obtener todas las relaciones de playlist_songs para las canciones
-      // Esto se hace para asegurarnos de obtener todas las relaciones de canciones a playlists
-      const playlistSongsQuery = `
-        SELECT
-          ps.id AS playlist_song_id,
-          ps.playlist_id,
-          ps.song_id,
-          ps.date AS playlist_song_date
-        FROM playlist_songs ps
-        WHERE ps.song_id IN (${Array.from(songsMap.keys()).join(', ')})
-      `;
-
-      db.all(playlistSongsQuery, [], (err: Error | null, playlistSongsRows: any[]) => {
-        if (err) {
-          reject(`Error fetching playlist songs: ${err.message}`);
-          return;
-        }
-
-        // Añadir las relaciones de playlist_songs a las canciones correspondientes
-        playlistSongsRows.forEach(row => {
-          const song = songsMap.get(row.song_id);
-          if (song) {
-            song.playlist_songs.push({
-              id: row.playlist_song_id,
-              playlist_id: row.playlist_id,
-              song_id: row.song_id,
-              date: row.playlist_song_date,
-            });
-          }
-        });
-
-        // Devolver las canciones con sus relaciones
-        resolve(Array.from(songsMap.values()));
-      });
+  for (const song of songRows) {
+    map.set(song.id, {
+      ...song,
+      playlist_songs: [],
     });
-  });
+  }
+
+  for (const ps of playlistSongRows) {
+    const entry = map.get(ps.songId);
+    if (entry) {
+      entry.playlist_songs.push(ps);
+    }
+  }
+
+  return Array.from(map.values());
 }
 
 export async function getSongById(id: number): Promise<SongFull | null> {
   const db = await getDb();
 
-  return new Promise((resolve, reject) => {
-    const selectQuery = `SELECT * FROM songs WHERE id = ?`;
-
-    db.get(selectQuery, [id], (err, row) => {
-      if (err) {
-        reject(`Error fetching song: ${err.message}`);
-        return;
-      }
-
-      if (!row) {
-        resolve(null); // Retorna null si no encuentra la canción
-        return;
-      }
-
-      const song: SongFull = {
-        id: row.id,
-        title: row.title,
-        artist: row.artist,
-        song: row.song,
-        video: row.video,
-        image: row.image,
-        reproductions: row.reproductions,
-        duration: row.duration,
-        date: row.date,
-        playlist_songs: [],
-      };
-
-      // Consultar las playlists asociadas
-      const playlistQuery = `
-        SELECT
-          ps.id AS playlist_song_id,
-          ps.playlist_id,
-          ps.song_id,
-          ps.date AS playlist_song_date,
-          p.id AS playlist_id,
-          p.title AS playlist_title,
-          p.color AS playlist_color,
-          p.cover AS playlist_cover,
-          p.date AS playlist_date
-        FROM playlist_songs ps
-        JOIN playlists p ON ps.playlist_id = p.id
-        WHERE ps.song_id = ?;
-      `;
-
-      db.all(playlistQuery, [id], (err2, playlistRows) => {
-        if (err2) {
-          reject(`Error fetching playlists: ${err2.message}`);
-          return;
-        }
-
-        song.playlist_songs = playlistRows.map((playlistRow) => ({
-          id: playlistRow.playlist_song_id,
-          playlist_id: playlistRow.playlist_id,
-          song_id: playlistRow.song_id,
-          date: playlistRow.playlist_song_date,
-          playlist: {
-            id: playlistRow.playlist_id,
-            title: playlistRow.playlist_title,
-            color: colors[playlistRow.playlist_color as keyof typeof colors] || colors.red,
-            cover: playlistRow.playlist_cover,
-            date: playlistRow.playlist_date,
-          },
-        }));
-
-        resolve(song);
-      });
-    });
+  const songRow = await db.query.songs.findFirst({
+    where: eq(songs.id, id),
   });
-}
 
+  if (!songRow) return null;
+
+  const playlistSongRows = await db
+    .select({
+      psId: playlistSongs.id,
+      psPlaylistId: playlistSongs.playlistId,
+      psSongId: playlistSongs.songId,
+      psDate: playlistSongs.date,
+    })
+    .from(playlistSongs)
+    .where(eq(playlistSongs.songId, id));
+
+  const song: SongFull = {
+    ...songRow,
+    playlist_songs: playlistSongRows.map((row) => ({
+      id: row.psId,
+      playlistId: row.psPlaylistId,
+      songId: row.psSongId,
+      date: row.psDate,
+    })),
+  };
+
+  return song;
+}
 
 export async function updateSong(
   id: number,
   title: string,
   artist: string,
-  image: string | undefined  // Aceptamos la imagen en formato base64
+  image: string | undefined
 ): Promise<SongFull> {
   const db = await getDb();
-  const musicPath = await getMusicPath(); // 🔹 Espera la ruta correcta
+  const musicPath = await getMusicPath();
   const outputDir = musicPath;
   const imgDir = path.join(outputDir, 'img');
 
-  return new Promise((resolve, reject) => {
-    const sanitizeFilename = (name: string) => {
-      return name
-        .replace(/[\\/:*?"<>|]/g, '_')  // Evitar caracteres no válidos en nombres de archivos
-        .replace(/\s+/g, ' ')           // Normalizar espacios
-        .trim();                        // Eliminar espacios innecesarios
-    };
+  const timestamp = Date.now();
+  const sanitizedTitle = sanitizeFilename(title);
+  const sanitizedArtist = sanitizeFilename(artist);
 
-    const timestamp = Date.now();
-    const sanitizedTitle = sanitizeFilename(title);
-    const sanitizedArtist = sanitizeFilename(artist);
-
-    let imagePath: string | null = null;
-
-    // Primero, obtenemos la canción actual para eliminar la imagen anterior si existe
-    const selectQuery = `SELECT * FROM songs WHERE id = ?`;
-    db.get(selectQuery, [id], (err2, row) => {
-      if (err2) {
-        reject(`Error fetching song for update: ${err2.message}`);
-        return;
-      }
-
-      if (!row) {
-        reject('Record not found');
-        return;
-      }
-
-      // Eliminar la imagen anterior si existe
-      if (row.image && image !== undefined) {
-        const oldImagePath = path.join(imgDir, row.image);
-        if (fs.existsSync(oldImagePath)) {
-          try {
-            fs.unlinkSync(oldImagePath);  // Eliminar el archivo de la imagen anterior
-          } catch (fileError) {
-            reject(`Error deleting old image: ${(fileError as Error).message}`);
-            return;
-          }
-        }
-      }
-
-      // Si hay una nueva imagen base64, procesarla
-      if (image) {
-        try {
-          // Convertimos la cadena base64 en un buffer para escribirla como archivo
-          const base64Data = image.replace(/^data:image\/\w+;base64,/, '');  // Eliminamos el prefijo 'data:image/...'
-          const buffer = Buffer.from(base64Data, 'base64');
-
-          // Determinar la extensión de la imagen
-          const extensionMatch = image.match(/^data:image\/(\w+);base64,/);
-          const extension = extensionMatch ? extensionMatch[1] : 'png'; // Usamos 'png' como predeterminado si no se encuentra
-
-          // Generamos el nombre y la ruta de la imagen
-          const imageFilename = `${timestamp}.${extension}`;
-          const imageDestination = path.join(imgDir, imageFilename);
-
-          // Crear directorio si no existe
-          if (!fs.existsSync(imgDir)) {
-            fs.mkdirSync(imgDir, { recursive: true });
-          }
-
-          // Guardar la imagen como archivo
-          fs.writeFileSync(imageDestination, buffer);
-
-          imagePath = `${imageFilename}`;
-        } catch (err) {
-          reject(`Error saving image: ${(err as Error).message}`);
-          return;
-        }
-      }
-
-      // Consulta SQL para actualizar la canción
-      const updateQuery = `
-        UPDATE songs
-        SET title = ?, artist = ? ${imagePath ? ', image = ? ' : ''}
-        WHERE id = ?;
-      `;
-
-      const params = [sanitizedTitle, sanitizedArtist, ...(imagePath ? [imagePath] : []), id];
-
-      db.run(updateQuery, params, function (err) {
-        if (err) {
-          reject(`Error updating song: ${err.message}`);
-          return;
-        }
-
-        // Obtener la canción actualizada después de la modificación
-        const updatedSelectQuery = `SELECT * FROM songs WHERE id = ?`;
-        db.get(updatedSelectQuery, [id], (err3, updatedRow) => {
-          if (err3) {
-            reject(`Error fetching updated song: ${err3.message}`);
-            return;
-          }
-
-          const updatedSongBase: SongFull = {
-            id: updatedRow.id,
-            title: updatedRow.title,
-            artist: updatedRow.artist,
-            song: updatedRow.song,
-            video: updatedRow.video,
-            image: updatedRow.image,
-            reproductions: updatedRow.reproductions,
-            duration: updatedRow.duration,
-            date: updatedRow.date,
-            playlist_songs: [],
-          };
-
-          // Consultar las playlists asociadas
-          const playlistQuery = `
-            SELECT
-              ps.id AS playlist_song_id,
-              ps.playlist_id,
-              ps.song_id,
-              ps.date AS playlist_song_date,
-              p.id AS playlist_id,
-              p.title AS playlist_title,
-              p.color AS playlist_color,
-              p.cover AS playlist_cover,
-              p.date AS playlist_date
-            FROM playlist_songs ps
-            JOIN playlists p ON ps.playlist_id = p.id
-            WHERE ps.song_id = ?;
-          `;
-
-          db.all(playlistQuery, [id], (err4, playlistRows) => {
-            if (err4) {
-              reject(`Error fetching playlists: ${err4.message}`);
-              return;
-            }
-
-            updatedSongBase.playlist_songs = playlistRows.map((playlistRow) => ({
-              id: playlistRow.playlist_song_id,
-              playlist_id: playlistRow.playlist_id,
-              song_id: playlistRow.song_id,
-              date: playlistRow.playlist_song_date,
-              playlist: {
-                id: playlistRow.playlist_id,
-                title: playlistRow.playlist_title,
-                color: colors[playlistRow.playlist_color as keyof typeof colors] || colors.red,
-                cover: playlistRow.playlist_cover,
-                date: playlistRow.playlist_date,
-              },
-            }));
-
-            resolve(updatedSongBase);  // Resolvemos con la canción actualizada
-          });
-        });
-      });
-    });
+  // 🔹 1. Buscar canción actual
+  const song = await db.query.songs.findFirst({
+    where: eq(songs.id, id),
   });
-}
 
-const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+  if (!song) {
+    throw new Error('Song not found');
+  }
 
-const deleteFile = async (filePath: string, retries = 5) => {
-  for (let i = 0; i < retries; i++) {
-    try {
-      if (fs.existsSync(filePath)) {
-        fs.rmSync(filePath, { force: true });
-        console.log(`✅ Archivo eliminado: ${filePath}`);
-      }
-      return;
-    } catch (error: any) {
-      if (error.code === 'EBUSY' || error.code === 'EPERM') {
-        console.warn(`⚠️ Archivo ocupado, reintentando... (${i + 1}/${retries})`);
-        await wait(500); // Espera 500ms antes de reintentar
-      } else {
-        throw error;
-      }
+  let imagePath: string | null = song.image;
+
+  // 🔹 2. Eliminar imagen anterior si hay nueva
+  if (song.image && image !== undefined) {
+    const oldImagePath = path.join(imgDir, song.image);
+    if (fs.existsSync(oldImagePath)) {
+      fs.unlinkSync(oldImagePath);
     }
   }
-  throw new Error(`❌ No se pudo eliminar el archivo: ${filePath}`);
-};
+
+  // 🔹 3. Procesar nueva imagen
+  if (image) {
+    const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
+    const buffer = Buffer.from(base64Data, 'base64');
+    const extensionMatch = image.match(/^data:image\/(\w+);base64,/);
+    const extension = extensionMatch ? extensionMatch[1] : 'png';
+    const imageFilename = `${timestamp}.${extension}`;
+    const imageDestination = path.join(imgDir, imageFilename);
+
+    if (!fs.existsSync(imgDir)) {
+      fs.mkdirSync(imgDir, { recursive: true });
+    }
+
+    fs.writeFileSync(imageDestination, buffer);
+    imagePath = imageFilename;
+  }
+
+  // 🔹 4. Actualizar canción
+  await db.update(songs)
+    .set({
+      title: sanitizedTitle,
+      artist: sanitizedArtist,
+      image: imagePath ?? null,
+    })
+    .where(eq(songs.id, id));
+
+  // 🔹 5. Volver a obtener la canción actualizada
+  const updated = await db.query.songs.findFirst({
+    where: eq(songs.id, id),
+  });
+
+  if (!updated) {
+    throw new Error('Updated song not found');
+  }
+
+  // 🔹 6. Obtener playlists asociadas
+  const relations = await db.select({
+    psId: playlistSongs.id,
+    psDate: playlistSongs.date,
+    playlist: {
+      id: playlists.id,
+      title: playlists.title,
+      color: playlists.color,
+      cover: playlists.cover,
+      date: playlists.date,
+    }
+  }).from(playlistSongs)
+    .innerJoin(playlists, eq(playlists.id, playlistSongs.playlistId))
+    .where(eq(playlistSongs.songId, id));
+
+  const result: SongFull = {
+    id: updated.id,
+    title: updated.title,
+    artist: updated.artist,
+    song: updated.song,
+    video: updated.video,
+    image: updated.image,
+    reproductions: updated.reproductions,
+    duration: updated.duration,
+    date: updated.date,
+    playlist_songs: relations.map((row) => ({
+      id: row.psId,
+      playlistId: row.playlist.id,
+      songId: id,
+      date: row.psDate,
+    })),
+  };
+
+  return result;
+}
 
 export async function deleteSong(id: number): Promise<boolean> {
   const db = await getDb();
   const musicPath = await getMusicPath();
   const outputDir = musicPath;
 
-  return new Promise((resolve, reject) => {
-    db.get('SELECT song, video, image FROM songs WHERE id = ?', [id], async (err: Error | null, row: any) => {
-      if (err) return reject(`Error fetching record: ${err.message}`);
-      if (!row) return reject('Record not found');
-
-      const mp3Path = path.join(outputDir, row.song);
-      const imagePath = path.join(outputDir, 'img', row.image);
-      const videoPath = row.video ? path.join(outputDir, row.video) : null;
-
-      try {
-        if (videoPath) await deleteFile(videoPath);
-        await deleteFile(imagePath);
-        await deleteFile(mp3Path);
-      } catch (fileError) {
-        return reject(`Error deleting files: ${fileError instanceof Error ? fileError.message : 'Unknown error'}`);
-      }
-
-      const stmt = db.prepare("DELETE FROM songs WHERE id = ?");
-      stmt.run(id, function (err: Error | null) {
-        if (err) {
-          reject(`Error deleting from database: ${err.message}`);
-        } else {
-          resolve(true);
-        }
-      });
-      stmt.finalize();
-    });
+  const song = await db.query.songs.findFirst({
+    where: eq(songs.id, id),
   });
+
+  if (!song) throw new Error('Record not found');
+
+  const mp3Path = path.join(outputDir, song.song);
+  const imagePath = path.join(outputDir, 'img', song.image ?? '');
+  const videoPath = song.video ? path.join(outputDir, song.video) : null;
+
+  try {
+    if (videoPath) await deleteFile(videoPath);
+    if (song.image) await deleteFile(imagePath);
+    await deleteFile(mp3Path);
+  } catch (err: any) {
+    throw new Error(`Error deleting files: ${err.message}`);
+  }
+
+  await db.delete(songs).where(eq(songs.id, id));
+
+  return true;
 }

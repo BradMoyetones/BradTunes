@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Moon, Sun } from "lucide-react";
 import { TooltipWrapper } from "./tooltip-wrapper";
-import { useTheme } from "@/contexts/theme-provider";
+import { useTheme } from "@/contexts";
 
 interface ThemeToggleProps extends React.ComponentProps<typeof Button> {}
 

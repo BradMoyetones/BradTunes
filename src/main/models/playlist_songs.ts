@@ -1,77 +1,77 @@
-import { Playlist, PlaylistSongs, PlaylistSongsFull, Song } from '../../types/data';
-import { getDb } from '../config/database';
+import { playlists, playlistSongs, songs } from '@core/drizzle/schema';
+import { PlaylistSong, PlaylistSongFull } from '@core/types/data';
+import { getDb } from '@core/drizzle/client';
+import { and, eq } from 'drizzle-orm';
 
-export async function playlistSong(playlistId: number, songId: number): Promise<PlaylistSongs | false> {
+export async function playlistSong(): Promise<PlaylistSong[]> {
   const db = await getDb();
-  return new Promise((resolve, reject) => {
-    const query = `
-      SELECT id, playlist_id, song_id, date 
-      FROM playlist_songs 
-      WHERE playlist_id = ? AND song_id = ?
-    `;
-    db.get(query, [playlistId, songId], (err: Error | null, row: PlaylistSongs | undefined) => {
-      if (err) {
-        reject(`Error fetching playlist songs: ${err.message}`);
-      } else {
-        resolve(row || false);
-      }
-    });
-  });
+
+  let rows = await db.query.playlistSongs.findMany();
+
+  return rows;
 }
 
-export async function addMusicToPlaylist(playlistId: number, songId: number, date: string): Promise<PlaylistSongsFull> {
+export async function addMusicToPlaylist(
+  playlistId: number,
+  songId: number,
+  date: string
+): Promise<PlaylistSongFull> {
   const db = await getDb();
-  return new Promise((resolve, reject) => {
-    // Paso 1: Insertar el nuevo registro en playlist_songs
-    const query = 'INSERT INTO playlist_songs (playlist_id, song_id, date) VALUES (?, ?, ?)';
-    db.run(query, [playlistId, songId, date], function (err: Error | null) {
-      if (err) {
-        reject(`Error creating playlist song: ${err.message}`);
-      } else {
-        // Paso 2: Obtener la canción y la lista de reproducción usando los IDs
-        const songQuery = 'SELECT * FROM songs WHERE id = ?';
-        const playlistQuery = 'SELECT * FROM playlists WHERE id = ?';
 
-        db.get(songQuery, [songId], (songErr: Error | null, songRow: Song | undefined) => {
-          if (songErr) {
-            reject(`Error fetching song: ${songErr.message}`);
-            return;
-          }
+  // 1. Insertar en la tabla playlist_songs
+  const [inserted] = await db
+    .insert(playlistSongs)
+    .values({ playlistId, songId, date })
+    .returning();
 
-          db.get(playlistQuery, [playlistId], (playlistErr: Error | null, playlistRow: Playlist | undefined) => {
-            if (playlistErr) {
-              reject(`Error fetching playlist: ${playlistErr.message}`);
-              return;
-            }
+  if (!inserted) throw new Error('Insert failed');
 
-            // Paso 3: Devolver el objeto completo con los detalles de la canción y la lista de reproducción
-            resolve({
-              id: db.lastID, // `this.lastID` contiene el ID del último registro insertado
-              playlist_id: playlistId,
-              song_id: songId,
-              date: date,
-              song: songRow || ({} as Song), // Si no se encuentra la canción, se asigna un objeto vacío
-              playlist: playlistRow || ({} as Playlist), // Si no se encuentra la lista, se asigna un objeto vacío
-            });
-          });
-        });
-      }
-    });
-  });
+  // 2. Obtener la canción
+  const [song] = await db
+    .select()
+    .from(songs)
+    .where(eq(songs.id, songId))
+    .limit(1);
+
+  if (!song) throw new Error('Song not found');
+
+  // 3. Obtener la playlist
+  const [playlist] = await db
+    .select()
+    .from(playlists)
+    .where(eq(playlists.id, playlistId))
+    .limit(1);
+
+  if (!playlist) throw new Error('Playlist not found');
+
+  // 4. Retornar el objeto compuesto
+  return {
+    ...inserted,
+    song,
+    playlist,
+  };
 }
 
-export async function deletePlaylistSong(playlistId: number, songId: number): Promise<boolean> {
+export async function deletePlaylistSong(
+  playlistId: number,
+  songId: number
+): Promise<boolean> {
   const db = await getDb();
-  return new Promise((resolve, reject) => {
-    const query = 'DELETE FROM playlist_songs WHERE playlist_id = ? AND song_id = ?';
-    db.run(query, [playlistId, songId], function (err: Error | null) {
-      if (err) {
-        reject(`Error deleting playlist song: ${err.message}`);
-      } else if (db.changes === 0) {
-        reject(`Playlist song not found`);
-      } else {
-        resolve(true);
-      }
-    });
-  });
+
+  const result = await db
+    .delete(playlistSongs)
+    .where(
+      and(
+        eq(playlistSongs.playlistId, playlistId),
+        eq(playlistSongs.songId, songId)
+      )
+    );
+
+  const { changes } = result;
+
+  if (changes === 0) {
+    throw new Error('Playlist song not found');
+  }
+
+  return true;
 }

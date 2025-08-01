@@ -4,16 +4,13 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { initializeDatabase } from './config/database'
-import { deleteSong, downloadSong, songs, updateSong, songsXplaylist, verifyVersion, installLatestVersion, getSongById, verifyVersionApp, installLatestVersionApp, ytDlpPath, ffmpegPath } from './models/songs'
-import { createPlaylist, deletePlaylist, playlists, updatePlaylist } from './models/playlists'
+import { deleteSong, downloadAndSaveSong, songsAll, updateSong, songsXplaylist, verifyVersion, installLatestVersion, getSongById, verifyVersionApp, installLatestVersionApp, ytDlpPath, ffmpegPath } from './models/songs'
+import { createPlaylist, deletePlaylist, playlistsAll, updatePlaylist } from './models/playlists'
 import { addMusicToPlaylist, deletePlaylistSong, playlistSong } from './models/playlist_songs'
 import { getMusicPath, isDefaultMusicPath, resetMusicPath, setMusicPath } from './config/storage'
 import fs from 'node:fs'
 
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-
 
 function createWindow(): void {
   // Create the browser window.
@@ -265,7 +262,7 @@ ipcMain.on('close', () => {
 
 // PLAYLISTS
 ipcMain.handle('playlists', (_event) => {
-  return playlists();
+  return playlistsAll();
 });
 ipcMain.handle('createPlaylist', (_event, title: string, color: { accent: string, dark: string }, cover: string | undefined) => {
   return createPlaylist(title, color, cover);
@@ -281,7 +278,7 @@ ipcMain.handle('deletePlaylist', (_event, id: number) => {
 ipcMain.handle('download-song', (_event, videoUrl) => {
   console.log('Downloading song:', videoUrl);
   
-  return downloadSong(videoUrl);
+  return downloadAndSaveSong(videoUrl);
 });
 
 ipcMain.handle("download-media", async (_event, filePath) => {
@@ -301,8 +298,8 @@ ipcMain.handle("download-media", async (_event, filePath) => {
   }
 });
 
-ipcMain.handle('songs', (_event, playlist, song) => {
-  return songs(playlist, song);
+ipcMain.handle('songs', (_event) => {
+  return songsAll();
 });
 ipcMain.handle('songsXplaylist', (_event, playlistId) => {
   return songsXplaylist(playlistId);
@@ -318,8 +315,8 @@ ipcMain.handle('updateSong', (_event, id: number, title: string, artist: string,
 });
 
 // PLAYLIST SONGS
-ipcMain.handle('playlistSong', (_event, playlistId: number, songId: number) => {
-  return playlistSong(playlistId, songId);
+ipcMain.handle('playlistSongs', (_event) => {
+  return playlistSong();
 });
 ipcMain.handle('addMusicToPlaylist', (_event, playlistId: number, songId: number, date: string) => {
   return addMusicToPlaylist(playlistId, songId, date);
@@ -332,9 +329,3 @@ ipcMain.handle('deletePlaylistSong', (_event, playlistId: number, songId: number
 ipcMain.handle('open-new-window', (_event, url: string) => {
   createNewWindow(url);
 });
-// ipcMain.handle('update-music', (_event, id: number) => {
-//   return updateMusic(id);
-// });
-// ipcMain.handle('delete-music-id', (_event, id: number) => {
-//   return deleteMusicById(id);
-// });

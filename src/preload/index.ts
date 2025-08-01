@@ -1,6 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
-import { Playlist, SongFull } from '../types/data'
 
 // Custom APIs for renderer
 const api = {
@@ -33,8 +32,11 @@ const api = {
   isMaximized: () => ipcRenderer.invoke("isMaximized"),
   close: () => ipcRenderer.send("close"),
 
-  // PLAYLISTS
   playlists: () => ipcRenderer.invoke('playlists'),
+  songs: () => ipcRenderer.invoke('songs'),
+  playlistSongs: () => ipcRenderer.invoke('playlistSongs'),
+
+  // PLAYLISTS
   createPlaylist: (title: string, color: string, cover: string | undefined) => ipcRenderer.invoke('createPlaylist', title, color, cover),
   updatePlaylist: (id: number | undefined, title: string, color: string, cover: string | undefined) => ipcRenderer.invoke('updatePlaylist', id, title, color, cover),
   deletePlaylist: (id: number) => ipcRenderer.invoke('deletePlaylist', id),
@@ -42,7 +44,6 @@ const api = {
   // SONGS
   downloadSong: (url: string) => ipcRenderer.invoke('download-song', url),
   downloadMedia: (url: string) => ipcRenderer.invoke('download-media', url),
-  songs: (currentPlaylist: Playlist | null, currentSong: SongFull | null) => ipcRenderer.invoke('songs', currentPlaylist, currentSong),
   songsXplaylist: (playlistId: number) => ipcRenderer.invoke('songsXplaylist', playlistId),
   getSongById: (id: number) => ipcRenderer.invoke('getSongById', id),
   deleteSong: (id: number) => ipcRenderer.invoke('deleteSong', id),

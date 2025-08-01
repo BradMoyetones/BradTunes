@@ -1,6 +1,6 @@
-import { SongFull } from "@/types/data";
+import { Song } from "@core/types/data";
 
-export async function handleDownloadMedia(song: SongFull, format: "mp3" | "mp4" = "mp3", musicPath: string) {
+export async function handleDownloadMedia(song: Song, format: "mp3" | "mp4" = "mp3", musicPath: string) {
     try {
         const filePath = `${musicPath}/${format === "mp3" ? song.song : song.video}`;
 

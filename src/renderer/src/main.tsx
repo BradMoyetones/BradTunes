@@ -6,29 +6,22 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { RouterProvider } from 'react-router-dom'
 import router from './router'
-import { ThemeProvider } from './contexts/theme-provider'
-import { DataProvider } from './contexts/DataProvider';
 import { Toaster } from './components/ui/sonner';
-import { PlayerProvider } from './contexts/PlayerProvider';
-import { PlayerManagerProvider } from './contexts/PlayerManagerContext';
-import { VersionProvider } from './contexts/VersionContext';
-import { MusicPathProvider } from './contexts/MusicPathProvider';
+import { DataProvider, MusicPathProvider, PlayerControllerProvider, ThemeProvider, VersionProvider } from './contexts';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <ThemeProvider defaultTheme="dark">
-      <PlayerManagerProvider>
-        <PlayerProvider>
-          <DataProvider>
-            <VersionProvider>
-              <MusicPathProvider>
+        <VersionProvider>
+          <MusicPathProvider>
+            <DataProvider>
+              <PlayerControllerProvider>
                 <RouterProvider router={router} />
                 <Toaster />
-              </MusicPathProvider>
-            </VersionProvider>
-          </DataProvider>
-        </PlayerProvider>
-      </PlayerManagerProvider>
+              </PlayerControllerProvider>
+            </DataProvider>
+          </MusicPathProvider>
+        </VersionProvider>
     </ThemeProvider>
   </React.StrictMode>
 )

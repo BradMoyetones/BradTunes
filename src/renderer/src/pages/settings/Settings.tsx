@@ -1,10 +1,8 @@
-import Spinner from "@/components/Spinner";
+import Spinner from "@/components/shared/Spinner/Spinner";
 import { buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { useMusicPath } from "@/contexts/MusicPathProvider";
-import { useVersion } from "@/contexts/VersionContext";
 import Search from "@/icons/Search";
 import { FacebookIcon, InstagramIcon, TikTokIcon, YouTubeIcon } from "@/icons/Social";
 import { Github, X } from "lucide-react";
@@ -15,6 +13,7 @@ import {
     TooltipContent,
     TooltipTrigger,
 } from "@/components/ui/tooltip"
+import { useMusicPath, useVersion } from "@/contexts";
 
 interface LinkSidebarSettingsProps {
     title: string;

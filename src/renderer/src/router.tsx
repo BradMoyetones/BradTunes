@@ -1,6 +1,6 @@
 import { createHashRouter } from "react-router-dom";
 import { lazy } from "react";
-import HomeLayout from "./layouts/HomeLayout";
+import HomeLayout from "./layouts/HomeLayout/HomeLayout";
 import Home from "./pages/home/Home";
 import Settings from "./pages/settings/Settings";
 import Profiles from "./pages/settings/routes/Profiles";

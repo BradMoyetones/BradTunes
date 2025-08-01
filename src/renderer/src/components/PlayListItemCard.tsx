@@ -1,15 +1,14 @@
 import { useImageExists } from '@/hooks/use-image-exists';
-import { useMusicPathStore } from '@/store/useMusicPathStore';
-import { PlaylistsFull } from '@/types/data';
+import { useMusicPathStore } from '@/store/useMusicPathStore/useMusicPathStore';
+import { Playlist } from '@core/types/data';
 import { Link, useViewTransitionState } from 'react-router';
 
 interface PlayListItemCardProps {
-  playlist: PlaylistsFull;
+  playlist: Playlist;
 }
 
 export default function PlayListItemCard2({ playlist }: PlayListItemCardProps) {
-    const { id, cover, title, playlist_songs } = playlist
-    const artistsString = playlist_songs.length > 0 ? playlist_songs.map(e => e.song?.artist).join(", ") : "No artists found"
+    const { id, cover, title } = playlist
     const { musicPath } = useMusicPathStore();
     const href = `/playlist/${id}`;
     const isTransitioning = useViewTransitionState(href);
@@ -28,7 +27,7 @@ export default function PlayListItemCard2({ playlist }: PlayListItemCardProps) {
                     <div className="rounded-sm h-full w-16 flex-none flex items-center justify-center bg-secondary">
                         <img
                             src={validUrl}
-                            alt={`Cover of ${title} by ${artistsString}`}
+                            alt={`Cover of ${title} by (COLOCAR ARTISTAS)`}
                             className="w-full h-full object-cover object-center" 
                             style={{
                                 viewTransitionName: isTransitioning
@@ -55,7 +54,7 @@ export default function PlayListItemCard2({ playlist }: PlayListItemCardProps) {
                                     : "none",
                             }}
                         >
-                            {artistsString}
+                            {/* {artistsString} */}
                         </p>
                     </div>
                 </>

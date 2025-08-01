@@ -12,3 +12,4 @@ export const colors = {
   rose: { accent: "#ed2377", dark: "#871b48" },
   gray: { accent: "#555555", dark: "#27272a" },
 };
+export type ColorType = (typeof colors)[keyof typeof colors];

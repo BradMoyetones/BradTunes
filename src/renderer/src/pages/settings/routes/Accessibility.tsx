@@ -1,10 +1,10 @@
-import Spinner from "@/components/Spinner";
+import Spinner from "@/components/shared/Spinner/Spinner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { useMusicPath } from "@/contexts/MusicPathProvider";
+import { useMusicPath } from "@/contexts";
 import { AlertCircle, RotateCcw, SquarePen } from "lucide-react";
 
 export default function StorageSettings() {

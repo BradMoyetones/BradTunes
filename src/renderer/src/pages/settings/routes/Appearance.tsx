@@ -1,4 +1,3 @@
-import { useTheme } from "@/contexts/theme-provider"
 import { Check } from "lucide-react"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Card } from "@/components/ui/card"
@@ -6,6 +5,7 @@ import { useCallback, useMemo, useState } from "react"
 import { useEditorStore } from "@/store/theme/store/editor-store"
 import { useThemePresetStore } from "@/store/theme/store/theme-preset-store"
 import { ThemeColors } from "@/components/theme-preset-select"
+import { useTheme } from "@/contexts"
   
 
 export default function Appearance() {

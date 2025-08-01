@@ -1,12 +1,6 @@
-import { useMusicPathStore } from "@/store/useMusicPathStore";
+import { useMusicPathStore } from "@/store/useMusicPathStore/useMusicPathStore";
 import { usePlayerStore } from "@/store/usePlayerStore";
-import { Playlist, SongFull } from "@/types/data";
-
-export interface CurrentMusic {
-    playlist: Playlist | null; // Playlist actual (si existe)
-    song: SongFull | null; // Canción en reproducción
-    songs: SongFull[]; // Canciones de la playlist
-}
+import { CurrentMusic, Playlist, SongFull } from "@core/types/data";
 
 // Definimos la estructura del estado del reproductor
 export interface PlayerState {
@@ -14,7 +8,7 @@ export interface PlayerState {
     isPlaying: boolean;
     volume: number;
     currentTime: number;
-    duration: string;
+    duration: string | null;
     loopMode: "none" | "song" | "playlist";
     isShuffling: boolean;
     selectedDeviceId: string;

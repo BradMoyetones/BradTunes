@@ -5,10 +5,10 @@ import { getMusicPath } from '../config/storage';
 import { getDb } from '@core/drizzle/client';
 import { playlists as schemaPlaylists, playlistSongs, songs } from '@core/drizzle/schema';
 import { eq, inArray } from 'drizzle-orm';
-import { PlaylistWithSongs } from '@core/types/data';
+import { PlaylistColor, PlaylistWithSongs } from '@core/types/data';
 
 // Definir rutas dinámicamente con is.dev
-export async function playlists(): Promise<PlaylistWithSongs[]> {
+export async function playlistsAll(): Promise<PlaylistWithSongs[]> {
   const db = await getDb();
 
   const allPlaylists = await db.select().from(schemaPlaylists).all();
@@ -99,6 +99,7 @@ export async function createPlaylist(
 
   return {
     ...newPlaylist,
+    color: JSON.parse(newPlaylist.color),
     playlist_songs: [],
   };
 }
@@ -188,7 +189,7 @@ export async function updatePlaylist(
     .all();
 
   return {
-    ...updatedPlaylist,
+    ...updatedPlaylist as PlaylistColor,
     playlist_songs: related.map(r => ({
       ...r.playlist_songs,
       song: r.songs

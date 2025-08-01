@@ -1,22 +1,12 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef } from "react";
 import Search from "@/icons/Search";
-import { AlertCircle, ChevronLeft } from "lucide-react";
-import { useData } from "@/contexts/DataProvider";
-import { Link } from "react-router-dom";
+import { ChevronLeft } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
-import { usePlayerManager } from "@/contexts/PlayerManagerContext";
-import { useMusicPathStore } from "@/store/useMusicPathStore";
-import { usePlayer } from "@/contexts/PlayerProvider";
-import MusicVisualizer from "./MusicVisualizer";
 
 export default function GlobalSearch() {
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
-
-    const { playlists, songs } = useData();
-    const playerM = usePlayerManager();
-    const { musicPath } = useMusicPathStore();
 
 
     const handleToggle = () => {
@@ -39,37 +29,37 @@ export default function GlobalSearch() {
         }, 100)
     };
 
-    const q = query.toLowerCase().trim();
+    // const q = query.toLowerCase().trim();
 
     // FILTRADO
-    const filteredPlaylists = useMemo(() => {
-        if (!q) return playlists.slice(0, 5); // muestra primeras 5 sin búsqueda
+    // const filteredPlaylists = useMemo(() => {
+    //     if (!q) return playlists.slice(0, 5); // muestra primeras 5 sin búsqueda
 
-        return playlists.filter(p => {
-            const matchesTitle = p.title.toLowerCase().includes(q);
-            const matchesSong = p.playlist_songs.some(ps =>
-                ps.song.title.toLowerCase().includes(q) ||
-                ps.song.artist.toLowerCase().includes(q)
-            );
-            return matchesTitle || matchesSong;
-        });
-    }, [playlists, q]);
+    //     return playlists.filter(p => {
+    //         const matchesTitle = p.title.toLowerCase().includes(q);
+    //         const matchesSong = p.playlist_songs.some(ps =>
+    //             ps.song.title.toLowerCase().includes(q) ||
+    //             ps.song.artist.toLowerCase().includes(q)
+    //         );
+    //         return matchesTitle || matchesSong;
+    //     });
+    // }, [playlists, q]);
 
-    const filteredSongs = useMemo(() => {
-        if (!q) {
-            // Top 10 por reproducciones si no hay búsqueda
-            return [...songs].sort((a, b) => b.reproductions - a.reproductions).slice(0, 10);
-        }
+    // const filteredSongs = useMemo(() => {
+    //     if (!q) {
+    //         // Top 10 por reproducciones si no hay búsqueda
+    //         return [...songs].sort((a, b) => (b.reproductions || 0) - (a.reproductions || 0)).slice(0, 10);
+    //     }
 
-        return songs.filter(s =>
-            s.title.toLowerCase().includes(q) ||
-            s.artist.toLowerCase().includes(q)
-        );
-    }, [songs, q]);
+    //     return songs.filter(s =>
+    //         s.title.toLowerCase().includes(q) ||
+    //         s.artist.toLowerCase().includes(q)
+    //     );
+    // }, [songs, q]);
 
-    const noResults = useMemo(() => {
-        return q && filteredPlaylists.length === 0 && filteredSongs.length === 0;
-    }, [q, filteredPlaylists.length, filteredSongs.length])
+    // const noResults = useMemo(() => {
+    //     return q && filteredPlaylists.length === 0 && filteredSongs.length === 0;
+    // }, [q, filteredPlaylists.length, filteredSongs.length])
 
     return (
         <div
@@ -113,7 +103,7 @@ export default function GlobalSearch() {
 
             <div className={`absolute top-16 rounded-sm z-50 p-2 bg-muted w-full transition-all duration-300 ease-in-out ${open ? "h-96 opacity-100" : "h-0 opacity-0"} overflow-hidden`}>
                 <ScrollArea className="h-full">
-                    {noResults ? (
+                    {/* {noResults ? (
                         <div className="flex items-center justify-center h-80">
                             <p className="text-sm flex flex-col items-center justify-center gap-2 text-center text-muted-foreground">
                                 <AlertCircle />
@@ -153,67 +143,67 @@ export default function GlobalSearch() {
                                 </>
                             )}
                         </>
-                    )}
+                    )} */}
                 </ScrollArea>
             </div>
         </div>
     );
 }
 
-interface CardSearchProps {
-    id?: number;
-    title: string;
-    paragraph: string;
-    image: string;
-    url?: string
-    callBack?: () => void;
-}
+// interface CardSearchProps {
+//     id?: number;
+//     title: string;
+//     paragraph: string;
+//     image: string;
+//     url?: string
+//     callBack?: () => void;
+// }
 
-const CardSearch = ({callBack, paragraph, title, image, url, id}: CardSearchProps) => {
-    const { currentMusic } = usePlayer()
+// const CardSearch = ({callBack, paragraph, title, image, url, id}: CardSearchProps) => {
+//     const { currentSong } = usePlayerStore()
     
-    const playerM = usePlayerManager();
+//     const playerM = usePlayerManager();
 
-    const isCurrentSong = (songId: number) => {
-        return currentMusic.song?.id === songId && !playerM.audioRef.paused
-    }
-    const isPlaying = (id && isCurrentSong(id));
+//     const isCurrentSong = (songId: number) => {
+//         return currentSong?.id === songId && !playerM.audioRef.paused
+//     }
+//     const isPlaying = (id && isCurrentSong(id));
 
-    return (
-        <>
-            {url ? (
-                <Link to={url} viewTransition className="border w-full text-left p-2 rounded-sm flex bg-white dark:bg-black hover:bg-slate-200 dark:hover:bg-zinc-900 transition-all gap-2 cursor-pointer">
-                    <div className="size-10 aspect-square rounded-sm overflow-hidden flex-shrink-0">
-                        <img src={image} alt="song" className="object-cover object-center w-full h-full" />
-                    </div>
-                    <div>
-                        <h3 className="text-md font-bold line-clamp-1">{title}</h3>
-                        <p className="text-xs line-clamp-1">{paragraph}</p>
-                    </div>
-                </Link>
-            ): (
-                <button 
-                    onClick={callBack}
-                    className="border w-full text-left p-2 rounded-sm flex bg-white dark:bg-black hover:bg-slate-200 dark:hover:bg-zinc-900 transition-all gap-2 cursor-pointer"
-                >
-                    <div className="size-10 aspect-square rounded-sm overflow-hidden flex-shrink-0">
-                        <img src={image} alt="song" className="object-cover object-center w-full h-full" />
-                    </div>
-                    <div>
-                        <div className="flex">
-                            <div className="flex-shrink-0">
-                                {isPlaying && (
-                                    <MusicVisualizer numBars={5} width={20} height={18} />
-                                )}
-                            </div>
-                            <h3 className={`text-md font-bold line-clamp-1 ${isPlaying && "text-primary"}`}>
-                                {title}
-                            </h3>
-                        </div>
-                        <p className="text-xs line-clamp-1">{paragraph}</p>
-                    </div>
-                </button>
-            )}
-        </>
-    )
-}
+//     return (
+//         <>
+//             {url ? (
+//                 <Link to={url} viewTransition className="border w-full text-left p-2 rounded-sm flex bg-white dark:bg-black hover:bg-slate-200 dark:hover:bg-zinc-900 transition-all gap-2 cursor-pointer">
+//                     <div className="size-10 aspect-square rounded-sm overflow-hidden flex-shrink-0">
+//                         <img src={image} alt="song" className="object-cover object-center w-full h-full" />
+//                     </div>
+//                     <div>
+//                         <h3 className="text-md font-bold line-clamp-1">{title}</h3>
+//                         <p className="text-xs line-clamp-1">{paragraph}</p>
+//                     </div>
+//                 </Link>
+//             ): (
+//                 <button 
+//                     onClick={callBack}
+//                     className="border w-full text-left p-2 rounded-sm flex bg-white dark:bg-black hover:bg-slate-200 dark:hover:bg-zinc-900 transition-all gap-2 cursor-pointer"
+//                 >
+//                     <div className="size-10 aspect-square rounded-sm overflow-hidden flex-shrink-0">
+//                         <img src={image} alt="song" className="object-cover object-center w-full h-full" />
+//                     </div>
+//                     <div>
+//                         <div className="flex">
+//                             <div className="flex-shrink-0">
+//                                 {isPlaying && (
+//                                     <MusicVisualizer numBars={5} width={20} height={18} />
+//                                 )}
+//                             </div>
+//                             <h3 className={`text-md font-bold line-clamp-1 ${isPlaying && "text-primary"}`}>
+//                                 {title}
+//                             </h3>
+//                         </div>
+//                         <p className="text-xs line-clamp-1">{paragraph}</p>
+//                     </div>
+//                 </button>
+//             )}
+//         </>
+//     )
+// }

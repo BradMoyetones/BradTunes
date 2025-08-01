@@ -54,11 +54,11 @@ export const getDb = async () => {
     const raw = await openDatabase();
     const client = drizzle(raw, { schema });
 
-    const tables = raw.prepare(
+    const tables: any = raw.prepare(
         `SELECT name FROM sqlite_master WHERE type='table' AND name='__drizzle_migrations';`
     ).get();
 
-    if (!tables) {
+    if (!tables || tables.name !== '__drizzle_migrations') {
         console.warn('[DB] 🧨 No existe tabla de migraciones. Dropeando todas las tablas existentes.');
 
         const allTables: any = raw.prepare(`SELECT name FROM sqlite_master WHERE type='table';`).all();
