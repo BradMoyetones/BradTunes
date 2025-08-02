@@ -28,7 +28,7 @@ export function SongItemCard({ song }: PlayListItemCardProps) {
   const href = `/song/${id}`;
   const isTransitioning = useViewTransitionState(href);
   const { musicPath } = useMusicPathStore();
-  const {playSong, isSameSong, isPlaying} = usePlayerController()
+  const {generatePlayQueue, isSameSong, isPlaying} = usePlayerController()
   
   const handleMouseMove = (evt: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     const { clientX, clientY, currentTarget } = evt;
@@ -79,7 +79,7 @@ export function SongItemCard({ song }: PlayListItemCardProps) {
               group-hover:translate-y-0 group-hover:opacity-100
               z-10"
           >
-            <Button onClick={() => playSong(song)} className="flex items-center justify-center rounded-full" size={"icon"}>
+            <Button onClick={() => generatePlayQueue(song)} className="flex items-center justify-center rounded-full" size={"icon"}>
               {isPlay ? <Pause className="fill-primary-foreground" /> : <Play className="fill-primary-foreground" />}
             </Button>
           </div>

@@ -10,7 +10,6 @@ export interface PlayerState {
     playbackMode: PlaybackMode;
     selectedDeviceId: string | null;
     currentTime: number;
-    duration: number;
 
     // Actions
     setVolume: (value: number) => void;
@@ -20,5 +19,4 @@ export interface PlayerState {
     setIsShuffle: (value: boolean) => void;
     setSelectedDeviceId: (deviceId: string | null) => void;
     setCurrentTime: (value: number) => void;
-    setDuration: (value: number) => void;
 }

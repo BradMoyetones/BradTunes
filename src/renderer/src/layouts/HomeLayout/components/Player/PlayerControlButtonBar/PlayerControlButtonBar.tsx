@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { Next, Pause, Play, Prev } from "@/icons/PlayerIcons";
 import { Repeat, Repeat1, Shuffle } from "lucide-react";
 import { useVideoFullScreen } from "@/contexts/VideoFullScreenContext";
@@ -6,7 +5,7 @@ import { usePlayerStore } from "@/store";
 import { usePlayerController } from "@/contexts";
 
 export function PlayerControlButtonBar() {
-  const {playbackMode, isShuffle, currentSong, currentPlaylist} = usePlayerStore();
+  const {playbackMode, isShuffle} = usePlayerStore();
   const { playNext, playPrevious, toggleLoopMode, togglePlay, toggleShuffle, isPlaying } = usePlayerController();
   const { isFullScreen } = useVideoFullScreen()
 
@@ -21,13 +20,13 @@ export function PlayerControlButtonBar() {
       <button className="hover:scale-110" title="Toggle Shuffle" onClick={toggleShuffle}>
         <Shuffle size={16} className={isShuffle ? "text-primary" : "opacity-50"} />
       </button>
-      <button className={`${isFullScreen && "text-white"} hover:scale-110`} title="Previous song" onClick={() => playPrevious()}>
+      <button className={`${isFullScreen && "text-white"} hover:scale-110`} title="Previous song" onClick={playPrevious}>
         <Prev />
       </button>
       <button className="bg-slate-200 dark:bg-white text-black rounded-full p-2 hover:scale-110" onClick={togglePlay}>
         {isPlaying ? <Pause /> : <Play />}
       </button>
-      <button className="hover:scale-110" title="Next song" onClick={() => playNext()}>
+      <button className="hover:scale-110" title="Next song" onClick={playNext}>
         <Next />
       </button>
       <button className="hover:scale-110" title="Toggle Loop Mode" onClick={toggleLoopMode}>

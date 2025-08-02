@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { Slider } from "@/components/ui/slider";
 import { usePlayerStore } from "@/store";
 import { formatTime } from "@/utils/time";
@@ -6,35 +6,39 @@ import { usePlayerController } from "@/contexts";
 import { useVideoFullScreen } from "@/contexts/VideoFullScreenContext";
 
 export const PlayerSoundControl = () => {
-  const { currentTime, duration } = usePlayerStore();
-const { audioRef } = usePlayerController();
+  const { currentTime, setCurrentTime, currentSong } = usePlayerStore();
+  const { howlInstance, setSeekAndSync } = usePlayerController();
+  const { isFullScreen } = useVideoFullScreen();
 
   const [isDragging, setIsDragging] = useState(false);
   const [hoverTime, setHoverTime] = useState<number | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState(0);
   const sliderRef = useRef<HTMLDivElement>(null);
-  const { isFullScreen } = useVideoFullScreen();
-
 
   const updateTooltip = (eventOrValue: React.MouseEvent<HTMLDivElement> | number) => {
-    if (!sliderRef.current || duration === 0) return;
+    if (!howlInstance || !sliderRef.current || howlInstance?.duration() === 0) return;
 
     let newTime: number;
     let offsetX: number;
 
     if (typeof eventOrValue === "number") {
       newTime = eventOrValue;
-      offsetX = (newTime / duration) * sliderRef.current.clientWidth;
+      offsetX = (newTime / howlInstance.duration()) * sliderRef.current.clientWidth;
     } else {
       const rect = sliderRef.current.getBoundingClientRect();
       offsetX = eventOrValue.clientX - rect.left;
       const percentage = Math.max(0, Math.min(1, offsetX / rect.width));
-      newTime = percentage * duration;
+      newTime = percentage * howlInstance.duration();
     }
 
     setHoverTime(newTime);
     setTooltipPosition(offsetX);
   };
+
+  const duration = useMemo(() => {
+    if(!currentSong) return 0
+    return Number(currentSong.duration)
+  }, [currentSong])
 
   return (
     <div className={`flex items-center gap-x-3 text-xs pt-2 relative ${isFullScreen && "text-white"}`}>
@@ -44,7 +48,11 @@ const { audioRef } = usePlayerController();
         ref={sliderRef}
         className="relative w-[400px]"
         onMouseMove={updateTooltip}
-        onMouseLeave={() => !isDragging && setHoverTime(null)}
+        onMouseLeave={() => {
+          if (!isDragging) {
+            setHoverTime(null);
+          }
+        }}
       >
         {hoverTime !== null && (
           <div
@@ -56,26 +64,20 @@ const { audioRef } = usePlayerController();
         )}
 
         <Slider
-          value={[currentTime]}
+          value={[isDragging ? (hoverTime ?? currentTime) : currentTime]}
           max={duration}
           min={0}
           className="w-full"
           onValueChange={(value) => {
             const [newTime] = value;
             setIsDragging(true);
-            updateTooltip(newTime); // actualiza tooltip mientras arrastra
+            updateTooltip(newTime);
           }}
           onValueCommit={(value) => {
-            const [newTime] = value;
             setIsDragging(false);
+            const [newTime] = value;
+            setSeekAndSync(newTime); // Forzamos sincronización visual
             setHoverTime(null);
-
-            if (audioRef.current) {
-              audioRef.current.currentTime = newTime;
-            }
-
-            // También actualiza el tiempo actual en el store
-            usePlayerStore.setState({ currentTime: newTime });
           }}
         />
       </div>

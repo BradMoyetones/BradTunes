@@ -1,9 +1,11 @@
-import { createContext, useEffect, useMemo, useRef, useState } from "react";
-import { usePlayerStore } from "@/store/usePlayerStore";
+import { createContext, useCallback, useEffect, useMemo, useState } from "react";
+import { PlaybackMode, usePlayerStore } from "@/store/usePlayerStore";
 import { Playlist, Song } from "@core/types/data";
 import { useMusicPathStore } from "@/store/useMusicPathStore/useMusicPathStore";
 import { PlayerControllerContextValue } from "./PlayerController.types";
 import { useData } from "../DataProvider";
+import {Howl} from 'howler';
+import { shuffleArray } from "@/utils/array";
 
 export const PlayerControllerContext = createContext<PlayerControllerContextValue | null>(null);
 
@@ -12,48 +14,78 @@ export const PlayerControllerProvider = ({ children }: { children: React.ReactNo
         currentSong, 
         currentPlaylist, 
         playbackMode, 
-        currentTime,
         isShuffle, 
         setCurrentSong, 
-        setCurrentPlaylist,
+        setIsShuffle,
         setCurrentTime,
-        setDuration
+        currentTime,
+        volume,
+        setPlaybackMode,
+        setVolume: setVolumeStore
     } = usePlayerStore();
 
+    const [playQueue, setPlayQueue] = useState<Song[]>([]);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [howlInstance, setHowlInstance] = useState<Howl | null>(null);
+
     const {musicPath} = useMusicPathStore();
-    const {songs} = useData();
-    const audioRef = useRef<HTMLAudioElement | null>(null);
+    const {songs, playlistSongs} = useData();
     const [isPlaying, setIsPlaying] = useState(false)
+
+    const setVolumeAndSync = (newVolume: number) => {
+        if (howlInstance) {
+            howlInstance.volume(newVolume);
+        }
+        setVolumeStore(newVolume); // actualiza zustand
+    };
+
+    const setSeekAndSync = (value: number) => {
+        if (howlInstance) {
+            howlInstance.seek(value);
+        }
+        setCurrentTime(value); // actualiza zustand
+    };
 
     // Cargar canciones de una playlist
     const playNext = () => {
-        if (!songs.length) return;
-
-        let nextIndex: number;
-
-        const currentIndex = songs.findIndex((s) => s.id === currentSong?.id);
         if (playbackMode === "repeat-one") {
-            nextIndex = currentIndex;
-        } else if (isShuffle) {
-            nextIndex = Math.floor(Math.random() * songs.length);
-        } else {
-            nextIndex = (currentIndex + 1) % songs.length;
+            howlInstance?.seek(0);
+            howlInstance?.play();
+            return;
         }
 
-        const nextSong = songs[nextIndex];
-        if (nextSong) {
-            setCurrentSong(nextSong);
+        const isLast = currentIndex === playQueue.length - 1;
+
+        if (isLast) {
+            if (playbackMode === "repeat-all") {
+                setCurrentIndex(0);
+            } else if (playbackMode === "none") {
+                howlInstance?.stop();
+                setIsPlaying(false);
+            }
+        } else {
+            setCurrentIndex(currentIndex + 1);
         }
     };
 
     const playPrevious = () => {
-        if (!songs.length) return;
+        if (playbackMode === "repeat-one") {
+            howlInstance?.seek(0);
+            howlInstance?.play();
+            return;
+        }
 
-        const currentIndex = songs.findIndex((s) => s.id === currentSong?.id);
-        const prevIndex = currentIndex === 0 ? songs.length - 1 : currentIndex - 1;
-        const prevSong = songs[prevIndex];
-        if (prevSong) {
-            setCurrentSong(prevSong);
+        const isFirst = currentIndex === 0;
+
+        if (isFirst) {
+            if (playbackMode === "repeat-all") {
+                setCurrentIndex(playQueue.length - 1);
+            } else if (playbackMode === "none") {
+                howlInstance?.stop();
+                setIsPlaying(false);
+            }
+        } else {
+            setCurrentIndex(currentIndex - 1);
         }
     };
 
@@ -69,81 +101,142 @@ export const PlayerControllerProvider = ({ children }: { children: React.ReactNo
         };
     }, [currentSong, currentPlaylist]);
 
-    const playSong = (song: Song, playlist?: Playlist | null) => {
-        if (isSameSong(song, playlist)) {
-            togglePlay(); // Solo pausamos o reanudamos
+    const generatePlayQueue = (selectedSong: Song, playlist?: Playlist | null) => {
+        const list = playlist
+            ? songs.filter((s) => playlistSongs.some((ps) => ps.playlistId === playlist.id && ps.songId === s.id))
+            : songs;
+
+        const shuffled = isShuffle
+            ? [selectedSong, ...shuffleArray(list.filter(s => s.id !== selectedSong.id))]
+            : list;
+
+        setPlayQueue(shuffled);
+        const index = shuffled.findIndex(s => s.id === selectedSong.id);
+        setCurrentIndex(index);
+    };
+
+    const togglePlay = useCallback(() => {
+        if (!howlInstance) return;
+
+        // Si ya está reproduciendo, pausamos
+        if (howlInstance.playing()) {
+            howlInstance.pause();
+            setIsPlaying(false);
             return;
         }
 
-        setCurrentSong(song);
-        setCurrentPlaylist(playlist || null);
-        setIsPlaying(true); // Esto hace que el useEffect dispare el .play() en la siguiente actualización
-    };
+        // Si está en el último índice y en modo "none", volver al inicio
+        const isAtEnd = currentIndex === playQueue.length - 1;
+        if (playbackMode === "none" && isAtEnd) {
+            const firstSong = playQueue[0];
+            setCurrentIndex(0);
+            setCurrentSong(firstSong);
 
-    const togglePlay = () => {
-        const audio = audioRef.current;
-        if (!audio) return;
+            // Destruye el howl actual si existe
+            howlInstance.unload();
 
-        if (isPlaying) {
-            audio.pause();
-            setIsPlaying(false);
-        } else {
-            audio.play().then(() => setIsPlaying(true)).catch(console.error);
+            const newHowl = new Howl({
+                src: [`safe-file://${musicPath}/${firstSong.song}`],
+                volume,
+                html5: true,
+                onend: playNext,
+            });
+
+            setHowlInstance(newHowl);
+            newHowl.play();
+            setIsPlaying(true);
+            return;
         }
-    };
+
+        // Si todo normal, solo damos play
+        howlInstance.play();
+        setIsPlaying(true);
+    }, [howlInstance, currentSong, playbackMode, currentPlaylist, musicPath, currentIndex]);
 
     const toggleShuffle = () => {
-        
-    }
+        const current = playQueue[currentIndex];
+        const rest = playQueue.filter((_, i) => i !== currentIndex);
+
+        const shuffled = isShuffle
+            ? [current, ...rest] // volver al orden original (opcional: ordenar)
+            : [current, ...shuffleArray(rest)];
+
+        setPlayQueue(shuffled);
+        setCurrentIndex(0);
+        setIsShuffle(!isShuffle);
+    };
 
     const toggleLoopMode = () => {
-
-    }
-
+        const modes: PlaybackMode[] = ["none", "repeat-all", "repeat-one"];
+        const currentIndex = modes.indexOf(playbackMode);
+        const nextMode = modes[(currentIndex + 1) % modes.length];
+        setPlaybackMode(nextMode);
+    };
     
-
-
-    // Setup del audio element
+    // Efecto que inicializa el howler con los datos del store
     useEffect(() => {
-        if (!currentSong || !musicPath) return;
+        const newHowl = new Howl({
+            src: [`safe-file://${musicPath}/${currentSong?.song}`],
+            volume,
+            html5: true,
+            onend: playNext,
+        });
 
-        const audio = new Audio(`safe-file://${musicPath}/${currentSong.song}`);
-        audioRef.current = audio;
+        newHowl.once('load', function(){
+            newHowl.seek(currentTime)
+        });
+        
+        setHowlInstance(newHowl)
+    }, [musicPath])
+    
+    // Efecto para actualizar el currentTime del store
+    useEffect(() => {
+        if (!howlInstance) return;
 
-        const onEnded = () => playNext();
+        let animationFrameId: number;
 
-        const onTimeUpdate = () => {
-            setCurrentTime(audio.currentTime);
-            setDuration(audio.duration);
+        const updateCurrentTime = () => {
+            const loop = () => {
+                if (!howlInstance || !howlInstance.playing()) {
+                    animationFrameId = requestAnimationFrame(loop); // Sigue esperando
+                    return;
+                }
+
+                const time = howlInstance.seek() as number;
+                setCurrentTime(time);
+                animationFrameId = requestAnimationFrame(loop);
+            };
+            loop();
         };
 
-        audio.addEventListener("ended", onEnded);
-        audio.addEventListener("timeupdate", onTimeUpdate);
+        // Solo empieza el loop una vez haya empezado a reproducirse
+        howlInstance.once('play', updateCurrentTime);
 
-        audio.load();
-        audio.currentTime = currentTime || 0;
-        setIsPlaying(false); // No reproducimos automáticamente
+        // También lo reiniciamos si hacen seek manual
+        howlInstance.on('seek', updateCurrentTime);
 
         return () => {
-            audio.pause();
-            audio.removeEventListener("ended", onEnded);
-            audio.removeEventListener("timeupdate", onTimeUpdate);
+            cancelAnimationFrame(animationFrameId);
+            howlInstance.off('seek', updateCurrentTime);
+            howlInstance.off('play', updateCurrentTime);
         };
-    }, [currentSong, musicPath]);
+    }, [howlInstance]);
 
     return (
         <PlayerControllerContext.Provider 
             value={{ 
-                audioRef, 
+                howlInstance, 
                 isSameSong,
                 playNext, 
                 playPrevious, 
-                playSong,
+                generatePlayQueue,
                 toggleLoopMode,
                 togglePlay,
                 toggleShuffle,
                 isPlaying,
-                setIsPlaying
+                setIsPlaying,
+                setVolumeAndSync,
+                setSeekAndSync
             }}
         >
             {children}

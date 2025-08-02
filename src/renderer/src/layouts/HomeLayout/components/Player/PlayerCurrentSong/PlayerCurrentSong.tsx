@@ -12,15 +12,16 @@ export const PlayerCurrentSong = ({image, title, artist, id}: PlayerCurrentSongP
       className={`
         flex items-center gap-5 relative
         overflow-hidden
+        h-fit
       `}>
       { image ?
         (
-          <picture className="!w-[70px] !h-[70px] mb-2 aspect-square bg-zinc-800 rounded-md shadow-lg overflow-hidden flex">
+          <picture className="h-16 w-16 aspect-square shrink-0 rounded-md shadow-lg overflow-hidden">
             <img src={`safe-file://${musicPath}/img/${image}`} alt={title} className="w-full h-full object-cover object-center"/>
           </picture>
         ): (
           <picture className="w-16 h-16 aspect-square bg-zinc-800 rounded-md shadow-lg overflow-hidden">
-            <img src={"img/liked-songs-64.png"} alt={"No song"} className="object-cover object-center"/>
+            <img src={"img/liked-songs-64.png"} alt={"No song"} className="w-full h-full object-cover object-center"/>
           </picture>
         )
       }
@@ -34,7 +35,6 @@ export const PlayerCurrentSong = ({image, title, artist, id}: PlayerCurrentSongP
           {artist ?? "No artist"}
         </span>
       </div>
-
     </div>
   )
 }

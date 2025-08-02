@@ -16,7 +16,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
                 const resultPlaylists = await window.api.playlists();
                 const resultPlaylistSongs = await window.api.playlistSongs();
 
-                console.log(resultSongs, resultPlaylists, resultPlaylistSongs);
+                // console.log(resultSongs, resultPlaylists, resultPlaylistSongs);
 
                 setSongs(resultSongs);
                 setPlaylists(resultPlaylists);

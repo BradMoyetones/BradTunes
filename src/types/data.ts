@@ -24,9 +24,3 @@ export type PlaylistSongFull = PlaylistSong & {
 export type SongFull = Song & {
     playlist_songs: PlaylistSong[];
 };
-
-export type CurrentMusic = {
-    playlist: PlaylistWithSongs | null;
-    song: SongFull | null;
-    songs: SongFull[];
-};

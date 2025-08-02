@@ -2,12 +2,14 @@ import { Playlist, Song } from "@core/types/data";
 import { SetStateAction } from "react";
 
 export interface PlayerControllerContextValue {
-    audioRef: React.RefObject<HTMLAudioElement | null>;
+    howlInstance: Howl | null;
 
+    setVolumeAndSync: (value: number) => void
+    setSeekAndSync: (value: number) => void
     isSameSong: (song?: Song | null, playlist?: Playlist | null) => boolean
     playNext: () => void;
     playPrevious: () => void;
-    playSong: (song: Song, playlist?: Playlist | null) => void;
+    generatePlayQueue: (song: Song, playlist?: Playlist | null) => void;
     toggleLoopMode: () => void;
     togglePlay: () => void;
     toggleShuffle: () => void;

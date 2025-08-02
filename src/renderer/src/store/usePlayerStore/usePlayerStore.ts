@@ -8,12 +8,10 @@ export const usePlayerStore = create<PlayerState>()(
             currentSong: null,
             volume: 0,
             currentPlaylist: null,
-            isPlaying: false,
             isShuffle: false,
             playbackMode: "none",
             selectedDeviceId: null,
             currentTime: 0,
-            duration: 0,
 
             setPlaybackMode: (mode) => set({ playbackMode: mode }),
 
@@ -23,7 +21,6 @@ export const usePlayerStore = create<PlayerState>()(
             setIsShuffle: (value) => set({isShuffle: value}),
             setSelectedDeviceId: (deviceId) => set({selectedDeviceId: deviceId}),
             setCurrentTime: (value) => set({currentTime: value}),
-            setDuration: (value) => set({duration: value}),
         }),
         {
             name: "player-storage",
