@@ -2,7 +2,7 @@ import { Playlist, Song } from "@core/types/data";
 import { SetStateAction } from "react";
 
 export interface PlayerControllerContextValue {
-    howlInstance: Howl | null;
+    howlRef: React.MutableRefObject<Howl | null>;
 
     setVolumeAndSync: (value: number) => void
     setSeekAndSync: (value: number) => void
@@ -19,4 +19,5 @@ export interface PlayerControllerContextValue {
     pause: () => void;
     resume: () => void;
     loadAndPlay: (song: Song) => void;
+    fadeToNewSong: (targetSong: Song) => void;
 }

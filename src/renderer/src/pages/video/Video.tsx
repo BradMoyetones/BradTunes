@@ -1,62 +1,99 @@
 import { useEffect, useRef } from "react";
-import { usePlayerStore } from "@/store/usePlayerStore";
-import { usePlayerManager } from "@/contexts/PlayerManagerContext";
-import { usePlayer } from "@/contexts/PlayerProvider";
 import { useVideoFullScreen } from "@/contexts/VideoFullScreenContext";
-import { useMusicPath } from "@/contexts/MusicPathProvider/MusicPathProvider";
+import { useMusicPath, usePlayerController } from "@/contexts";
+import { usePlayerStore } from "@/store";
 
 export default function Video() {
     const { currentSong, currentTime } = usePlayerStore();
-    const player = usePlayer();
-    const playerManager = usePlayerManager();
+    const {howlRef, togglePlay} = usePlayerController();
     const { isFullScreen, isCursorHidden, enterFullScreen, exitFullScreen } = useVideoFullScreen();
     const { musicPath } = useMusicPath()
-    const videoRef = useRef<HTMLVideoElement | null>(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const backgroundVideoRef = useRef<HTMLVideoElement>(null)
 
     useEffect(() => {
-        if (videoRef.current && playerManager.videoRef && player.currentMusic.song) {
-            playerManager.setVideoElement(videoRef.current);
-            playerManager.videoRef.src = `safe-file://${musicPath}/${player.currentMusic.song.video}`;
-            playerManager.videoRef.currentTime = currentTime;
-            if (!playerManager.audioRef.paused) playerManager.videoRef.play();
-        }
-    }, []);
+        const video = videoRef.current;
+        const backVideo = backgroundVideoRef.current
+        if (!video || !backVideo || !currentSong?.video) return;
 
+        video.src = `safe-file://${musicPath}/${currentSong.video}`;
+        backVideo.src = `safe-file://${musicPath}/${currentSong.video}`;
+        video.currentTime = currentTime;
+        backVideo.currentTime = currentTime;
+
+        const handleCanPlay = () => {
+            if (!howlRef.current?.playing()) return;
+            video.play().catch(err => console.error("Video play error:", err));
+            backVideo.play().catch(err => console.error("Video play error:", err));
+        };
+
+        video.addEventListener("canplay", handleCanPlay);
+        backVideo.addEventListener("canplay", handleCanPlay);
+        return () => {
+            video.removeEventListener("canplay", handleCanPlay);
+            backVideo.removeEventListener("canplay", handleCanPlay);
+        };
+    }, [currentSong]);
+    
     // 🔥 Verificar sincronización de audio y video
     useEffect(() => {
-        const syncVideoWithAudio = () => {
-            if (!videoRef.current || !playerManager.audioRef) return;
-            
+        const sync = () => {
             const video = videoRef.current;
-            const audio = playerManager.audioRef;
+            const backVideo = backgroundVideoRef.current
 
+            if (!video || !backVideo || !howlRef.current) return;
+
+            const audioTime = howlRef.current.seek() as number;
             const videoTime = video.currentTime;
-            const audioTime = audio.currentTime;
-            const timeDifference = Math.abs(videoTime - audioTime);
+            const backVideoTime = backVideo.currentTime;
+            const diff = videoTime - audioTime;
+            const backDiff = backVideoTime - audioTime;
 
-            if (timeDifference > 0.1) { // Si hay más de 0.3s de diferencia, sincroniza
-                // console.log(`⏳ Desfase detectado: ${timeDifference.toFixed(3)}s. Corrigiendo...`);
+            if (Math.abs(diff) > 0.5) {
                 video.currentTime = audioTime;
+            } else {
+                // Ajuste fino con playbackRate
+                video.playbackRate = 1 - diff * 0.1;
+            }
+
+            if (Math.abs(backDiff) > 0.5) {
+                backVideo.currentTime = audioTime;
+            } else {
+                // Ajuste fino con playbackRate
+                backVideo.playbackRate = 1 - diff * 0.1;
             }
         };
 
-        const interval = setInterval(syncVideoWithAudio, 500); // Verificar cada 500ms
+        const id = setInterval(sync, 500);
+        return () => clearInterval(id);
+    }, [howlRef.current]);
 
-        return () => clearInterval(interval);
-    }, []);
+    const togglePlayVideo = () => {
+        const video = videoRef.current;
+        const backVideo = backgroundVideoRef.current
+        if (!video || !backVideo) return;
+
+        if (howlRef.current?.playing()) {
+            video.pause();
+            backVideo.pause();
+        } else {
+            video.play().catch(() => {});
+            backVideo.play().catch(() => {});
+        }
+
+        togglePlay();
+    };
 
     return (
         <div className={`${isFullScreen ? "fixed inset-0 bg-black" : "relative h-full"} ${isCursorHidden && "cursor-none"} transition-all duration-300`}>
             <div className="w-full h-full flex relative items-center justify-center overflow-hidden">
-                {!isFullScreen && (
-                    <video 
-                        src={`safe-file://${musicPath}/${currentSong?.video}`}
-                        autoPlay 
-                        loop 
-                        muted 
-                        className="absolute inset-0 w-full h-full object-cover blur-3xl brightness-50 scale-110"
-                    />
-                )}
+                <video 
+                    ref={backgroundVideoRef}
+                    playsInline 
+                    loop 
+                    muted 
+                    className="absolute inset-0 w-full h-full object-cover blur-3xl opacity-60 scale-110"
+                />
                 <video 
                     onDoubleClick={() => {
                         if(!isFullScreen){
@@ -65,7 +102,7 @@ export default function Video() {
                             exitFullScreen()
                         }
                     }}
-                    onClick={player.togglePlay}
+                    onClick={togglePlayVideo}
                     ref={videoRef} 
                     poster={`/music/${currentSong?.image}`} 
                     className={`object-cover object-center ${isFullScreen ? "w-full h-full" : "w-[95%] h-[90%]"} z-50 rounded-2xl`} 

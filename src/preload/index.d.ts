@@ -55,8 +55,8 @@ declare global {
       songs: () => Promise<SongFull[]>
       playlistSongs: () => Promise<PlaylistSong[]>
       
-      createPlaylist: (title: string, color: { accent: string, dark: string }, cover: string | undefined | null) => Promise<PlaylistsFull>
-      updatePlaylist: (id: number | undefined, title: string, color: { accent: string, dark: string }, cover: string | undefined | null) => Promise<PlaylistsFull>
+      createPlaylist: (title: string, cover: string | undefined | null) => Promise<PlaylistsFull>
+      updatePlaylist: (id: number | undefined, title: string, cover: string | undefined | null) => Promise<PlaylistsFull>
       deletePlaylist: (id: number) => Promise<boolean>
       
       downloadSong: (url: string) => Promise<SongFull>

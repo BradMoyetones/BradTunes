@@ -37,8 +37,8 @@ const api = {
   playlistSongs: () => ipcRenderer.invoke('playlistSongs'),
 
   // PLAYLISTS
-  createPlaylist: (title: string, color: string, cover: string | undefined) => ipcRenderer.invoke('createPlaylist', title, color, cover),
-  updatePlaylist: (id: number | undefined, title: string, color: string, cover: string | undefined) => ipcRenderer.invoke('updatePlaylist', id, title, color, cover),
+  createPlaylist: (title: string, cover: string | undefined) => ipcRenderer.invoke('createPlaylist', title, cover),
+  updatePlaylist: (id: number | undefined, title: string, cover: string | undefined) => ipcRenderer.invoke('updatePlaylist', id, title, cover),
   deletePlaylist: (id: number) => ipcRenderer.invoke('deletePlaylist', id),
   
   // SONGS

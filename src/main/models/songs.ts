@@ -543,7 +543,6 @@ export async function updateSong(
     playlist: {
       id: playlists.id,
       title: playlists.title,
-      color: playlists.color,
       cover: playlists.cover,
       date: playlists.date,
     }

@@ -5,7 +5,7 @@ import { getMusicPath } from '../config/storage';
 import { getDb } from '@core/drizzle/client';
 import { playlists as schemaPlaylists, playlistSongs, songs } from '@core/drizzle/schema';
 import { eq, inArray } from 'drizzle-orm';
-import { PlaylistColor, PlaylistWithSongs } from '@core/types/data';
+import { PlaylistWithSongs } from '@core/types/data';
 
 // Definir rutas dinámicamente con is.dev
 export async function playlistsAll(): Promise<PlaylistWithSongs[]> {
@@ -21,7 +21,6 @@ export async function playlistsAll(): Promise<PlaylistWithSongs[]> {
 
   const playlistsWithSongs = allPlaylists.map(p => ({
     ...p,
-    color: JSON.parse(p.color),
     playlist_songs: allPlaylistSongs
       .filter(ps => ps.playlist_songs.playlistId === p.id)
       .map(ps => ({
@@ -45,7 +44,6 @@ const sanitizeFilename = (name: string) => {
 
 export async function createPlaylist(
   title: string,
-  color: { accent: string; dark: string },
   cover: string | undefined | null
 ): Promise<PlaylistWithSongs> {
   const db = await getDb();
@@ -89,7 +87,6 @@ export async function createPlaylist(
     .insert(schemaPlaylists)
     .values({
       title,
-      color: JSON.stringify(color),
       cover: coverPath,
       date,
     })
@@ -99,7 +96,6 @@ export async function createPlaylist(
 
   return {
     ...newPlaylist,
-    color: JSON.parse(newPlaylist.color),
     playlist_songs: [],
   };
 }
@@ -107,7 +103,6 @@ export async function createPlaylist(
 export async function updatePlaylist(
   id: number | undefined,
   title: string,
-  color: { accent: string; dark: string },
   cover: string | undefined
 ): Promise<PlaylistWithSongs> {
   if (!id) throw new Error('Playlist ID is required');
@@ -162,7 +157,6 @@ export async function updatePlaylist(
     .update(schemaPlaylists)
     .set({
       title,
-      color: JSON.stringify(color),
       ...(coverPath ? { cover: coverPath } : {}),
     })
     .where(eq(schemaPlaylists.id, id));
@@ -189,7 +183,7 @@ export async function updatePlaylist(
     .all();
 
   return {
-    ...updatedPlaylist as PlaylistColor,
+    ...updatedPlaylist,
     playlist_songs: related.map(r => ({
       ...r.playlist_songs,
       song: r.songs

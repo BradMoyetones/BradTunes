@@ -18,7 +18,6 @@ export const songs = sqliteTable("songs", {
 export const playlists = sqliteTable("playlists", {
     id: integer("id").primaryKey({ autoIncrement: true }),
     title: text("title").notNull(),
-    color: text("color").notNull(),
     cover: text("cover"),
     date: text("date").notNull(),
 });

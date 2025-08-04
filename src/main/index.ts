@@ -264,11 +264,11 @@ ipcMain.on('close', () => {
 ipcMain.handle('playlists', (_event) => {
   return playlistsAll();
 });
-ipcMain.handle('createPlaylist', (_event, title: string, color: { accent: string, dark: string }, cover: string | undefined) => {
-  return createPlaylist(title, color, cover);
+ipcMain.handle('createPlaylist', (_event, title: string, cover: string | undefined) => {
+  return createPlaylist(title, cover);
 });
-ipcMain.handle('updatePlaylist', (_event, id: number | undefined, title: string, color: { accent: string, dark: string }, cover: string | undefined) => {
-  return updatePlaylist(id, title, color, cover);
+ipcMain.handle('updatePlaylist', (_event, id: number | undefined, title: string, cover: string | undefined) => {
+  return updatePlaylist(id, title, cover);
 });
 ipcMain.handle('deletePlaylist', (_event, id: number) => {
   return deletePlaylist(id);

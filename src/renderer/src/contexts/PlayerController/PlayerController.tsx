@@ -1,4 +1,4 @@
-import { createContext, useEffect, useMemo, useState } from "react";
+import { createContext, useEffect, useMemo, useRef, useState } from "react";
 import { PlaybackMode, usePlayerStore } from "@/store/usePlayerStore";
 import { Playlist, Song } from "@core/types/data";
 import { useMusicPathStore } from "@/store/useMusicPathStore/useMusicPathStore";
@@ -6,6 +6,15 @@ import { PlayerControllerContextValue } from "./PlayerController.types";
 import { useData } from "../DataProvider";
 import {Howl} from 'howler';
 import { shuffleArray } from "@/utils/array";
+
+type HowlWithPrivate = Howl & {
+    _sounds: {
+        _node: HTMLAudioElement & {
+            setSinkId?: (sinkId: string) => Promise<void>;
+        };
+    }[];
+};
+
 
 export const PlayerControllerContext = createContext<PlayerControllerContextValue | null>(null);
 
@@ -22,18 +31,21 @@ export const PlayerControllerProvider = ({ children }: { children: React.ReactNo
         currentTime,
         volume,
         setPlaybackMode,
+        selectedDeviceId,
         setVolume: setVolumeStore
     } = usePlayerStore();
 
     const [originalQueue, setOriginalQueue] = useState<Song[]>([]);
     const [playQueue, setPlayQueue] = useState<Song[]>([]);
-    const [howlInstance, setHowlInstance] = useState<Howl | null>(null);
+    const howlRef = useRef<Howl | null>(null);
 
     const {musicPath} = useMusicPathStore();
     const {songs, playlistSongs} = useData();
     const [isPlaying, setIsPlaying] = useState(false)
+    const playNextRef = useRef<() => void>(() => {});
 
     const setVolumeAndSync = (newVolume: number) => {
+        const howlInstance = howlRef.current
         if (howlInstance) {
             howlInstance.volume(newVolume);
         }
@@ -41,6 +53,7 @@ export const PlayerControllerProvider = ({ children }: { children: React.ReactNo
     };
 
     const setSeekAndSync = (value: number) => {
+        const howlInstance = howlRef.current
         if (howlInstance) {
             howlInstance.seek(value);
         }
@@ -49,6 +62,7 @@ export const PlayerControllerProvider = ({ children }: { children: React.ReactNo
 
     // Cargar canciones de una playlist
     const playNext = () => {
+        const howlInstance = howlRef.current
         if (!currentSong || playQueue.length === 0 || !howlInstance) return;
 
         if (playbackMode === "repeat-one") {
@@ -63,18 +77,19 @@ export const PlayerControllerProvider = ({ children }: { children: React.ReactNo
         if (isLast) {
             if (playbackMode === "repeat-all") {
                 const first = playQueue[0];
-                loadAndPlay(first);
+                fadeToNewSong(first);
             } else if (playbackMode === "none") {
                 howlInstance.stop();
                 setIsPlaying(false);
             }
         } else {
             const next = playQueue[currentIdx + 1];
-            loadAndPlay(next);
+            fadeToNewSong(next);
         }
     };
 
     const playPrevious = () => {
+        const howlInstance = howlRef.current
         if (!currentSong || playQueue.length === 0 || !howlInstance) return;
 
         if (playbackMode === "repeat-one") {
@@ -97,25 +112,48 @@ export const PlayerControllerProvider = ({ children }: { children: React.ReactNo
         if (isFirst) {
             if (playbackMode === "repeat-all") {
                 const last = playQueue[playQueue.length - 1];
-                loadAndPlay(last); 
+                fadeToNewSong(last); 
             } else if (playbackMode === "none") {
                 howlInstance.stop();
                 setIsPlaying(false);
             }
         } else {
             const previous = playQueue[currentIdx - 1];
-            loadAndPlay(previous);
+            fadeToNewSong(previous);
         }
     };
 
-    const loadAndPlay = (song: Song) => {
-        howlInstance?.unload(); // descarga anterior
+    const fadeToNewSong = (targetSong: Song) => {
+        const howl = howlRef.current;
+        if (!howl) return;
+
+        // Fade out actual canción
+        howl.fade(howl.volume(), 0, 500); // 500ms fade out
+
+        setTimeout(() => {
+            howl.stop(); // Detenemos después del fade
+            loadAndPlay(targetSong, {
+                fadeIn: true,
+            }); 
+        }, 500);
+    };
+
+    const loadAndPlay = (song: Song, options?: { fadeIn?: boolean }) => {
+        const howlInstance = howlRef.current
+        if(howlInstance){
+            howlInstance.unload(); // descarga anterior
+        }
 
         const newHowl = new Howl({
             src: [`safe-file://${musicPath}/${song.song}`],
             volume,
             html5: true,
-            onend: playNext,
+            onend: () => playNextRef.current(),
+            onplay: () => {
+                if (options?.fadeIn) {
+                    newHowl.fade(0, 1, 500); // Fade in suave
+                }
+            },
         });
 
         newHowl.once("load", () => {
@@ -124,7 +162,7 @@ export const PlayerControllerProvider = ({ children }: { children: React.ReactNo
             setIsPlaying(true);
         });
 
-        setHowlInstance(newHowl);
+        howlRef.current = newHowl;
         setCurrentSong(song);
     };
 
@@ -158,6 +196,8 @@ export const PlayerControllerProvider = ({ children }: { children: React.ReactNo
     };
 
     const togglePlay = () => {
+        const howlInstance = howlRef.current
+        
         if (!howlInstance) return;
 
         if (howlInstance.playing()) {
@@ -170,12 +210,14 @@ export const PlayerControllerProvider = ({ children }: { children: React.ReactNo
     };
 
     const pause = () => {
+        const howlInstance = howlRef.current
         if (!howlInstance) return;
         howlInstance.pause();
         setIsPlaying(false);
     };
 
     const resume = () => {
+        const howlInstance = howlRef.current
         if (!howlInstance) return;
         howlInstance.play();
         setIsPlaying(true);
@@ -204,59 +246,73 @@ export const PlayerControllerProvider = ({ children }: { children: React.ReactNo
     
     // Efecto que inicializa el howler con los datos del store
     useEffect(() => {
+        const howlInstance = howlRef.current
         if(!currentSong) return
+
+        if(howlInstance){
+            howlInstance.unload(); // descarga anterior
+        }
+        
         const newHowl = new Howl({
             src: [`safe-file://${musicPath}/${currentSong.song}`],
             volume,
             html5: true,
-            onend: playNext,
+            onend: () => playNextRef.current(),
         });
 
         newHowl.once('load', function(){
             newHowl.seek(currentTime)
         });
         
-        setHowlInstance(newHowl)
+        howlRef.current = newHowl;
         generatePlayQueue(currentSong, currentPlaylist)
     }, [musicPath, playlistSongs, songs])
     
-    // Efecto para actualizar el currentTime del store
+    // Efecto creado para establecer un ref de playNext para que howl pueda usarlo de forma contextualizada
     useEffect(() => {
-        if (!howlInstance) return;
+        playNextRef.current = playNext;
+    }, [playNext]);
 
-        let animationFrameId: number;
-
-        const updateCurrentTime = () => {
-            const loop = () => {
-                if (!howlInstance || !howlInstance.playing()) {
-                    animationFrameId = requestAnimationFrame(loop); // Sigue esperando
-                    return;
-                }
-
-                const time = howlInstance.seek();
-                setCurrentTime(time);
-                animationFrameId = requestAnimationFrame(loop);
-            };
-            loop();
+    useEffect(() => {
+        if (!howlRef.current) return;
+    
+        const updateTime = () => {
+          const time = howlRef.current?.seek() ?? 0;
+          setCurrentTime(time);
         };
+    
+        const intervalId = setInterval(() => {
+          if (howlRef.current?.playing()) {
+            updateTime();
+          }
+        }, 1000);
+    
+        return () => clearInterval(intervalId);
+    }, []);
 
-        // Solo empieza el loop una vez haya empezado a reproducirse
-        howlInstance.once('play', updateCurrentTime);
+    // Efecto para cambiar dinamicamente el dispositivo de salida de audio
+    useEffect(() => {
+        if (selectedDeviceId && howlRef.current) {
+            const howl = howlRef.current as HowlWithPrivate;
+            const audioElement = howl._sounds?.[0]?._node;
 
-        // También lo reiniciamos si hacen seek manual
-        howlInstance.on('seek', updateCurrentTime);
-
-        return () => {
-            cancelAnimationFrame(animationFrameId);
-            howlInstance.off('seek', updateCurrentTime);
-            howlInstance.off('play', updateCurrentTime);
-        };
-    }, [howlInstance]);
+            if (audioElement && typeof audioElement.setSinkId === "function") {
+                audioElement
+                    .setSinkId(selectedDeviceId)
+                    .then(() => {
+                        console.log("Audio output successfully redirected.");
+                    })
+                    .catch((error) => {
+                        console.error("Error redirecting audio output:", error);
+                    });
+            }
+        }
+    }, [selectedDeviceId])
 
     return (
         <PlayerControllerContext.Provider 
             value={{ 
-                howlInstance, 
+                howlRef, 
                 isSameSong,
                 playNext, 
                 playPrevious, 
@@ -270,7 +326,8 @@ export const PlayerControllerProvider = ({ children }: { children: React.ReactNo
                 setSeekAndSync,
                 pause,
                 resume,
-                loadAndPlay
+                loadAndPlay,
+                fadeToNewSong
             }}
         >
             {children}

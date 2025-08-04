@@ -6,29 +6,28 @@ import { usePlayerController } from "@/contexts";
 import { useVideoFullScreen } from "@/contexts/VideoFullScreenContext";
 
 export const PlayerSoundControl = () => {
-  const { currentTime, setCurrentTime, currentSong } = usePlayerStore();
-  const { howlInstance, setSeekAndSync } = usePlayerController();
+  const { currentSong, currentTime } = usePlayerStore();
+  const { howlRef, setSeekAndSync } = usePlayerController();
   const { isFullScreen } = useVideoFullScreen();
 
   const [isDragging, setIsDragging] = useState(false);
   const [hoverTime, setHoverTime] = useState<number | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState(0);
   const sliderRef = useRef<HTMLDivElement>(null);
-
   const updateTooltip = (eventOrValue: React.MouseEvent<HTMLDivElement> | number) => {
-    if (!howlInstance || !sliderRef.current || howlInstance?.duration() === 0) return;
+    if (!howlRef.current || !sliderRef.current || howlRef.current?.duration() === 0) return;
 
     let newTime: number;
     let offsetX: number;
 
     if (typeof eventOrValue === "number") {
       newTime = eventOrValue;
-      offsetX = (newTime / howlInstance.duration()) * sliderRef.current.clientWidth;
+      offsetX = (newTime / howlRef.current.duration()) * sliderRef.current.clientWidth;
     } else {
       const rect = sliderRef.current.getBoundingClientRect();
       offsetX = eventOrValue.clientX - rect.left;
       const percentage = Math.max(0, Math.min(1, offsetX / rect.width));
-      newTime = percentage * howlInstance.duration();
+      newTime = percentage * howlRef.current.duration();
     }
 
     setHoverTime(newTime);

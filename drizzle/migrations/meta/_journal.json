@@ -36,6 +36,13 @@
       "when": 1754265143434,
       "tag": "0004_smooth_fixer",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1754336035120,
+      "tag": "0005_clear_wild_pack",
+      "breakpoints": true
     }
   ]
 }
