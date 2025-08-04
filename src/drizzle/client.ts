@@ -51,23 +51,26 @@ const openDatabase = async (): Promise<Database.Database> => {
 };
 
 export const getDb = async () => {
+    const musicPath = await getMusicPath();
+    const dbPath = path.join(musicPath, '../musicData.db');
+
+    // 🔥 Elimina primero si no existe la tabla de migraciones
+    const rawTmp = new Database(dbPath); // sin drizzle todavía
+    const table: any = rawTmp
+        .prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='__drizzle_migrations';`)
+        .get();
+    rawTmp.close();
+
+    if (!table || table.name !== '__drizzle_migrations') {
+        console.warn('[DB] 🧨 No existe tabla de migraciones. Eliminando archivo DB...');
+        fs.unlinkSync(dbPath);
+    }
+
+    // Ahora sí, abre la conexión definitiva
     const raw = await openDatabase();
     const client = drizzle(raw, { schema });
 
-    const tables: any = raw.prepare(
-        `SELECT name FROM sqlite_master WHERE type='table' AND name='__drizzle_migrations';`
-    ).get();
-
-    if (!tables || tables.name !== '__drizzle_migrations') {
-        console.warn('[DB] 🧨 No existe tabla de migraciones. Dropeando todas las tablas existentes.');
-
-        const allTables: any = raw.prepare(`SELECT name FROM sqlite_master WHERE type='table';`).all();
-        for (const { name } of allTables) {
-            raw.prepare(`DROP TABLE IF EXISTS "${name}";`).run();
-        }
-    }
-
-    // 🔄 Ejecutar migraciones si es necesario
+    // Ejecutar migraciones
     migrate(client, {
         migrationsFolder: getMigrationsPath(),
     });

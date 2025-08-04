@@ -14,5 +14,9 @@ export interface PlayerControllerContextValue {
     togglePlay: () => void;
     toggleShuffle: () => void;
     isPlaying: boolean;
-    setIsPlaying: React.Dispatch<SetStateAction<boolean>>
+    setIsPlaying: React.Dispatch<SetStateAction<boolean>>;
+
+    pause: () => void;
+    resume: () => void;
+    loadAndPlay: (song: Song) => void;
 }

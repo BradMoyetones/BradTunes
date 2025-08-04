@@ -51,7 +51,7 @@ const api = {
 
   // PLAYLIST SONGS
   playlistSong: (playlistId: number, songId: number) => ipcRenderer.invoke('playlistSong', playlistId, songId),
-  addMusicToPlaylist: (playlistId: string, songId: string, date: string) => ipcRenderer.invoke('addMusicToPlaylist', playlistId, songId, date),
+  addMusicToPlaylist: (playlistId: string, songId: string) => ipcRenderer.invoke('addMusicToPlaylist', playlistId, songId),
   deletePlaylistSong: (playlistId: number, songId: number) => ipcRenderer.invoke('deletePlaylistSong', playlistId, songId),
 
   // YOUTUBE

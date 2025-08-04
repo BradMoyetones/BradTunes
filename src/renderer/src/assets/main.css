@@ -266,3 +266,41 @@ body {
   backface-visibility: hidden !important; /* Evita que las caras traseras de los elementos sean visibles */
   transform: translateZ(0) !important; /* Asegura que se utilice el renderizado en 3D */
 }
+
+/* ANIMACION DE TEXTO */
+@keyframes marquee {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 8s linear infinite;
+}
+
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Variante alternativa con pausa al inicio y final */
+@keyframes marquee-smooth {
+  0% {
+    transform: translateX(100%);
+  }
+  10% {
+    transform: translateX(100%);
+  }
+  90% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-marquee-smooth {
+  animation: marquee-smooth 10s linear infinite;
+}

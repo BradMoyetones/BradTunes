@@ -12,16 +12,6 @@ export function formatDate(dateString: string | null): string {
     return `${day}/${month}/${year}`;
 }
 
-// Helper para obtener la hora en hh:mm:ss
-export function formatTime(dateString: string): string {
-    const date = new Date(dateString);
-    const hours = String(date.getHours()).padStart(2, '0'); // Asegura que la hora tenga dos dígitos
-    const minutes = String(date.getMinutes()).padStart(2, '0'); // Asegura que los minutos tengan dos dígitos
-    const seconds = String(date.getSeconds()).padStart(2, '0'); // Asegura que los segundos tengan dos dígitos
-
-    return `${hours}:${minutes}:${seconds}`;
-}
-
 export function getTimestamp(): string {
     const now = new Date();
 

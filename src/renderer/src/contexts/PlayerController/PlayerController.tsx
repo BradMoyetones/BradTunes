@@ -1,4 +1,4 @@
-import { createContext, useCallback, useEffect, useMemo, useState } from "react";
+import { createContext, useEffect, useMemo, useState } from "react";
 import { PlaybackMode, usePlayerStore } from "@/store/usePlayerStore";
 import { Playlist, Song } from "@core/types/data";
 import { useMusicPathStore } from "@/store/useMusicPathStore/useMusicPathStore";
@@ -16,6 +16,7 @@ export const PlayerControllerProvider = ({ children }: { children: React.ReactNo
         playbackMode, 
         isShuffle, 
         setCurrentSong, 
+        setCurrentPlaylist,
         setIsShuffle,
         setCurrentTime,
         currentTime,
@@ -24,8 +25,8 @@ export const PlayerControllerProvider = ({ children }: { children: React.ReactNo
         setVolume: setVolumeStore
     } = usePlayerStore();
 
+    const [originalQueue, setOriginalQueue] = useState<Song[]>([]);
     const [playQueue, setPlayQueue] = useState<Song[]>([]);
-    const [currentIndex, setCurrentIndex] = useState(0);
     const [howlInstance, setHowlInstance] = useState<Howl | null>(null);
 
     const {musicPath} = useMusicPathStore();
@@ -48,45 +49,83 @@ export const PlayerControllerProvider = ({ children }: { children: React.ReactNo
 
     // Cargar canciones de una playlist
     const playNext = () => {
+        if (!currentSong || playQueue.length === 0 || !howlInstance) return;
+
         if (playbackMode === "repeat-one") {
-            howlInstance?.seek(0);
-            howlInstance?.play();
+            howlInstance.seek(0);
+            howlInstance.play();
             return;
         }
 
-        const isLast = currentIndex === playQueue.length - 1;
+        const currentIdx = playQueue.findIndex(song => song.id === currentSong.id);
+        const isLast = currentIdx === playQueue.length - 1;
 
         if (isLast) {
             if (playbackMode === "repeat-all") {
-                setCurrentIndex(0);
+                const first = playQueue[0];
+                loadAndPlay(first);
             } else if (playbackMode === "none") {
-                howlInstance?.stop();
+                howlInstance.stop();
                 setIsPlaying(false);
             }
         } else {
-            setCurrentIndex(currentIndex + 1);
+            const next = playQueue[currentIdx + 1];
+            loadAndPlay(next);
         }
     };
 
     const playPrevious = () => {
+        if (!currentSong || playQueue.length === 0 || !howlInstance) return;
+
         if (playbackMode === "repeat-one") {
-            howlInstance?.seek(0);
-            howlInstance?.play();
+            howlInstance.seek(0);
+            howlInstance.play();
             return;
         }
 
-        const isFirst = currentIndex === 0;
+        const currentIdx = playQueue.findIndex(song => song.id === currentSong.id);
+        const isFirst = currentIdx === 0;
+
+        const currentSeek = howlInstance.seek() ?? 0;
+
+        if (currentSeek > 3) {
+            howlInstance.seek(0);
+            howlInstance.play();
+            return;
+        }
 
         if (isFirst) {
             if (playbackMode === "repeat-all") {
-                setCurrentIndex(playQueue.length - 1);
+                const last = playQueue[playQueue.length - 1];
+                loadAndPlay(last); 
             } else if (playbackMode === "none") {
-                howlInstance?.stop();
+                howlInstance.stop();
                 setIsPlaying(false);
             }
         } else {
-            setCurrentIndex(currentIndex - 1);
+            const previous = playQueue[currentIdx - 1];
+            loadAndPlay(previous);
         }
+    };
+
+    const loadAndPlay = (song: Song) => {
+        howlInstance?.unload(); // descarga anterior
+
+        const newHowl = new Howl({
+            src: [`safe-file://${musicPath}/${song.song}`],
+            volume,
+            html5: true,
+            onend: playNext,
+        });
+
+        newHowl.once("load", () => {
+            newHowl.seek(0); // empieza desde 0
+            newHowl.play();
+            setIsPlaying(true);
+        });
+
+        setHowlInstance(newHowl);
+        setCurrentSong(song);
     };
 
     const isSameSong = useMemo(() => {
@@ -103,66 +142,56 @@ export const PlayerControllerProvider = ({ children }: { children: React.ReactNo
 
     const generatePlayQueue = (selectedSong: Song, playlist?: Playlist | null) => {
         const list = playlist
-            ? songs.filter((s) => playlistSongs.some((ps) => ps.playlistId === playlist.id && ps.songId === s.id))
+            ? songs.filter((s) =>
+                playlistSongs.some((ps) => ps.playlistId === playlist.id && ps.songId === s.id))
             : songs;
 
+        const index = list.findIndex((s) => s.id === selectedSong.id);
         const shuffled = isShuffle
-            ? [selectedSong, ...shuffleArray(list.filter(s => s.id !== selectedSong.id))]
+            ? [list[index], ...shuffleArray(list.filter((s) => s.id !== selectedSong.id))]
             : list;
 
+        setOriginalQueue(list);
         setPlayQueue(shuffled);
-        const index = shuffled.findIndex(s => s.id === selectedSong.id);
-        setCurrentIndex(index);
+        setCurrentSong(selectedSong);
+        setCurrentPlaylist(playlist || null);
     };
 
-    const togglePlay = useCallback(() => {
+    const togglePlay = () => {
         if (!howlInstance) return;
 
-        // Si ya está reproduciendo, pausamos
         if (howlInstance.playing()) {
             howlInstance.pause();
             setIsPlaying(false);
-            return;
-        }
-
-        // Si está en el último índice y en modo "none", volver al inicio
-        const isAtEnd = currentIndex === playQueue.length - 1;
-        if (playbackMode === "none" && isAtEnd) {
-            const firstSong = playQueue[0];
-            setCurrentIndex(0);
-            setCurrentSong(firstSong);
-
-            // Destruye el howl actual si existe
-            howlInstance.unload();
-
-            const newHowl = new Howl({
-                src: [`safe-file://${musicPath}/${firstSong.song}`],
-                volume,
-                html5: true,
-                onend: playNext,
-            });
-
-            setHowlInstance(newHowl);
-            newHowl.play();
+        } else {
+            howlInstance.play();
             setIsPlaying(true);
-            return;
         }
+    };
 
-        // Si todo normal, solo damos play
+    const pause = () => {
+        if (!howlInstance) return;
+        howlInstance.pause();
+        setIsPlaying(false);
+    };
+
+    const resume = () => {
+        if (!howlInstance) return;
         howlInstance.play();
         setIsPlaying(true);
-    }, [howlInstance, currentSong, playbackMode, currentPlaylist, musicPath, currentIndex]);
+    };
 
     const toggleShuffle = () => {
-        const current = playQueue[currentIndex];
-        const rest = playQueue.filter((_, i) => i !== currentIndex);
+        if (!currentSong) return;
 
-        const shuffled = isShuffle
-            ? [current, ...rest] // volver al orden original (opcional: ordenar)
-            : [current, ...shuffleArray(rest)];
+        const current = currentSong;
+        const rest = originalQueue.filter((value) => value.id !== current.id);
 
-        setPlayQueue(shuffled);
-        setCurrentIndex(0);
+        const newQueue = !isShuffle
+            ? [current, ...shuffleArray(rest)]
+            : originalQueue;
+
+        setPlayQueue(newQueue);
         setIsShuffle(!isShuffle);
     };
 
@@ -175,8 +204,9 @@ export const PlayerControllerProvider = ({ children }: { children: React.ReactNo
     
     // Efecto que inicializa el howler con los datos del store
     useEffect(() => {
+        if(!currentSong) return
         const newHowl = new Howl({
-            src: [`safe-file://${musicPath}/${currentSong?.song}`],
+            src: [`safe-file://${musicPath}/${currentSong.song}`],
             volume,
             html5: true,
             onend: playNext,
@@ -187,7 +217,8 @@ export const PlayerControllerProvider = ({ children }: { children: React.ReactNo
         });
         
         setHowlInstance(newHowl)
-    }, [musicPath])
+        generatePlayQueue(currentSong, currentPlaylist)
+    }, [musicPath, playlistSongs, songs])
     
     // Efecto para actualizar el currentTime del store
     useEffect(() => {
@@ -202,7 +233,7 @@ export const PlayerControllerProvider = ({ children }: { children: React.ReactNo
                     return;
                 }
 
-                const time = howlInstance.seek() as number;
+                const time = howlInstance.seek();
                 setCurrentTime(time);
                 animationFrameId = requestAnimationFrame(loop);
             };
@@ -236,7 +267,10 @@ export const PlayerControllerProvider = ({ children }: { children: React.ReactNo
                 isPlaying,
                 setIsPlaying,
                 setVolumeAndSync,
-                setSeekAndSync
+                setSeekAndSync,
+                pause,
+                resume,
+                loadAndPlay
             }}
         >
             {children}

@@ -1,5 +1,6 @@
 import {
   ContextMenu,
+  ContextMenuCheckboxItem,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuLabel,
@@ -14,13 +15,17 @@ import { Link, useViewTransitionState } from "react-router";
 import { useMusicPathStore } from "@/store";
 import { Card } from "@/components/ui/card";
 import { handleDownloadMedia } from "@/components/handleDownloadMP3";
-import { Song } from "@core/types/data";
-import { usePlayerController } from "@/contexts";
+import { SongFull } from "@core/types/data";
+import { useData, usePlayerController } from "@/contexts";
 import { Button } from "@/components/ui/button";
 import { MusicVisualizer } from "../MusicVisualizer";
+import { useMemo, useState } from "react";
+import { Input } from "@/components/ui/input";
+import { InfiniteSlider } from "@/components/ui/infinite-slider";
+import usePlaylistMusicActions from "@/hooks/usePlaylistMusicActions";
 
 interface PlayListItemCardProps {
-  song: Song;
+  song: SongFull;
 }
 
 export function SongItemCard({ song }: PlayListItemCardProps) {
@@ -28,7 +33,16 @@ export function SongItemCard({ song }: PlayListItemCardProps) {
   const href = `/song/${id}`;
   const isTransitioning = useViewTransitionState(href);
   const { musicPath } = useMusicPathStore();
-  const {generatePlayQueue, isSameSong, isPlaying} = usePlayerController()
+  const {generatePlayQueue, isSameSong, isPlaying, togglePlay, loadAndPlay} = usePlayerController()
+  const {playlists, songs, setPlaylists, setSongs} = useData()
+  const [query, setQuery] = useState("")
+
+  const {addMusicToPlaylist, deleteMusic} = usePlaylistMusicActions({
+    playlists, 
+    songs, 
+    setSongs, 
+    setPlaylists
+  })
   
   const handleMouseMove = (evt: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     const { clientX, clientY, currentTarget } = evt;
@@ -63,7 +77,13 @@ export function SongItemCard({ song }: PlayListItemCardProps) {
     `;
   };
 
-  const isPlay = isSameSong(song) && isPlaying
+  const isPlay = isSameSong(song)
+
+  const filteredData = useMemo(() => {
+    return playlists.filter(s =>
+      s.title.toLowerCase().includes(query.toLowerCase().trim())
+    );
+  }, [playlists, query]);
 
   return (
     <ContextMenu>
@@ -79,8 +99,18 @@ export function SongItemCard({ song }: PlayListItemCardProps) {
               group-hover:translate-y-0 group-hover:opacity-100
               z-10"
           >
-            <Button onClick={() => generatePlayQueue(song)} className="flex items-center justify-center rounded-full" size={"icon"}>
-              {isPlay ? <Pause className="fill-primary-foreground" /> : <Play className="fill-primary-foreground" />}
+            <Button 
+              onClick={() => {
+                if(isPlay){
+                  togglePlay()
+                }else {
+                  generatePlayQueue(song)
+                  loadAndPlay(song)
+                }
+              }} 
+              className="flex items-center justify-center rounded-full" size={"icon"}
+            >
+              {isPlay && isPlaying ? <Pause className="fill-primary-foreground" /> : <Play className="fill-primary-foreground" />}
             </Button>
           </div>
 
@@ -102,21 +132,32 @@ export function SongItemCard({ song }: PlayListItemCardProps) {
 
               <div className="flex flex-auto flex-col px-2">
                 <div className="flex">
-                  <div className="flex-shrink-0">
-                    {isPlay && (
+                  <div className="flex-shrink-0 relative">
+                    {isPlay && isPlaying && (
                       <MusicVisualizer numBars={5} width={20} height={18} />
                     )}
                   </div>
-                  <h4 
-                    className={`${isPlay && "text-primary"} text-sm truncate font-semibold`}
-                    style={{
-                      viewTransitionName: isTransitioning
-                        ? `song-title-${id}`
-                        : "none",
-                    }}
-                  >
-                    {title}
-                  </h4>
+                  
+                    <h4 
+                      className={`${isPlay && "text-primary"} text-sm truncate font-semibold`}
+                      style={{
+                        viewTransitionName: isTransitioning
+                          ? `song-title-${id}`
+                          : "none",
+                      }}
+                    >
+                      {isPlay && isPlaying ? (
+                        <InfiniteSlider
+                          speedOnHover={20}
+                          speed={40}
+                          gap={20}
+                        >
+                          <span>{title}</span>
+                        </InfiniteSlider>
+                      ): (
+                        <span>{title}</span>
+                      )}
+                    </h4>
                 </div>
 
                 <span
@@ -142,15 +183,15 @@ export function SongItemCard({ song }: PlayListItemCardProps) {
           <ContextMenuSubContent className="w-48">
             <ContextMenuLabel className="flex items-center">
               <Search className="mr-2 h-4 w-4 flex-none" />
-              {/* <Input className="h-7" onChange={(query) => setSearchQuery(query.target.value)} /> */}
+              <Input className="h-7" onChange={(query) => setQuery(query.target.value)} />
             </ContextMenuLabel>
             <ContextMenuSeparator />
-            {/* {filteredData.length > 0 ? filteredData.map(playlist => (
+            {filteredData.length > 0 ? filteredData.map(playlist => (
               <ContextMenuCheckboxItem 
                 key={playlist.id+"add-to-playlist"}
-                onClick={() => addMusicToPlaylist(song, playlist, currentMusic, setCurrentMusic, setPlaylists, setSongs)}
-                disabled={song.playlist_songs.some(ps => ps.playlist_id === playlist.id)}
-                checked={song.playlist_songs.some(ps => ps.playlist_id === playlist.id)}
+                onClick={() => addMusicToPlaylist({song, playlist})}
+                disabled={song.playlist_songs.some(ps => ps.playlistId === playlist.id)}
+                checked={song.playlist_songs.some(ps => ps.playlistId === playlist.id)}
               >
                 <span className="sr-only">Word</span>
                 {playlist.title}
@@ -159,7 +200,7 @@ export function SongItemCard({ song }: PlayListItemCardProps) {
               <ContextMenuLabel className="flex items-center">
                 <span className="text-gray-400">No results found</span>
               </ContextMenuLabel>
-            )} */}
+            )}
           </ContextMenuSubContent>
         </ContextMenuSub>
         <ContextMenuSeparator />
@@ -172,7 +213,10 @@ export function SongItemCard({ song }: PlayListItemCardProps) {
             Edit
           </Link>
         </ContextMenuItem>
-        <ContextMenuItem className="text-destructive hover:!text-destructive">
+        <ContextMenuItem 
+          className="text-destructive hover:!text-destructive"
+          onClick={() => {deleteMusic({song})}}
+        >
           <Trash2 className="mr-2 h-4 w-4" />
           Delete
         </ContextMenuItem>

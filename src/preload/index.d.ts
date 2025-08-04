@@ -1,4 +1,4 @@
-import { Song, Playlist, PlaylistWithSongs, PlaylistSong, PlaylistSongFull, SongFull, CurrentMusic } from '@core/types/data'
+import { PlaylistWithSongs, PlaylistSong, PlaylistSongFull, SongFull, CurrentMusic } from '@core/types/data'
 import { ElectronAPI } from '@electron-toolkit/preload'
 
 declare global {
@@ -66,8 +66,8 @@ declare global {
       deleteSong: (id: number) => Promise<boolean>
       updateSong: (id: number, title: string, artist: string, image: string | undefined) => Promise<SongFull>
 
-      playlistSong: (playlistId: number, songId: number) => Promise<PlaylistSongs | false>
-      addMusicToPlaylist: (playlistId: number, songId: number, date: string) => Promise<PlaylistSongFull>
+      playlistSong: (playlistId: number, songId: number) => Promise<PlaylistSong | false>
+      addMusicToPlaylist: (playlistId: number, songId: number) => Promise<PlaylistSongFull>
       deletePlaylistSong: (playlistId: number, songId: number) => Promise<boolean>
 
       createNewWindow: (url: string) => Promise<void>

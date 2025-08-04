@@ -76,14 +76,14 @@ export default function AsideMenu() {
                         Your Library
                     </SideMenuItem>
 
-                    {/* {playlists.length > 0 ? playlists.map((playlist) => <SideMenuCard key={`Playlist-card-${playlist.id}`} playlist={playlist} />) : (
+                    {playlists.length > 0 ? playlists.map((playlist) => <SideMenuCard key={`Playlist-card-${playlist.id}`} playlist={playlist} />) : (
                         <div className="flex flex-col justify-center items-center py-10 text-muted-foreground">
                             <AlertCircle />
                             <p>
                                 No playlists found
                             </p>
                         </div>
-                    )} */}
+                    )}
                 </ul>
             </Card>
             <PlaylistDialog setIsOpen={setIsOpen} isOpen={isOpen} />

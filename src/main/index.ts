@@ -6,7 +6,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { deleteSong, downloadAndSaveSong, songsAll, updateSong, songsXplaylist, verifyVersion, installLatestVersion, getSongById, verifyVersionApp, installLatestVersionApp, ytDlpPath, ffmpegPath } from './models/songs'
 import { createPlaylist, deletePlaylist, playlistsAll, updatePlaylist } from './models/playlists'
-import { addMusicToPlaylist, deletePlaylistSong, playlistSong } from './models/playlist_songs'
+import { addMusicToPlaylist, deletePlaylistSong, playlistSong, playlistSongAll } from './models/playlist_songs'
 import { getMusicPath, isDefaultMusicPath, resetMusicPath, setMusicPath } from './config/storage'
 import fs from 'node:fs'
 
@@ -316,10 +316,15 @@ ipcMain.handle('updateSong', (_event, id: number, title: string, artist: string,
 
 // PLAYLIST SONGS
 ipcMain.handle('playlistSongs', (_event) => {
-  return playlistSong();
+  return playlistSongAll();
 });
-ipcMain.handle('addMusicToPlaylist', (_event, playlistId: number, songId: number, date: string) => {
-  return addMusicToPlaylist(playlistId, songId, date);
+
+ipcMain.handle('playlistSong', (_event, playlistId: number, songId: number) => {
+  return playlistSong(playlistId, songId);
+});
+
+ipcMain.handle('addMusicToPlaylist', (_event, playlistId: number, songId: number) => {
+  return addMusicToPlaylist(playlistId, songId);
 });
 ipcMain.handle('deletePlaylistSong', (_event, playlistId: number, songId: number) => {
   return deletePlaylistSong(playlistId, songId);

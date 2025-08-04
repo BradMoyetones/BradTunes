@@ -9,20 +9,22 @@ import {
 } from "@/components/ui/context-menu"
 import { Pen, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useMusicPathStore } from "@/store/useMusicPathStore/useMusicPathStore";
 import { useImageExists } from "@/hooks/use-image-exists";
-import { PlaylistColor } from "@core/types/data";
+import { PlaylistWithSongs } from "@core/types/data";
 import { PlaylistDialog } from "./shared";
+import { useMusicPathStore } from "@/store";
 
 interface Props {
-  playlist: PlaylistColor,
-  onClick?: (data: PlaylistColor) => void,
+  playlist: PlaylistWithSongs,
+  onClick?: (data: PlaylistWithSongs) => void,
 }
 
 export default function SideMenuCard({ playlist, onClick }: Props) {
 
   const { id, cover, title } = playlist;
-  const artistsString = "No artists found"
+  const artistsString = playlist.playlist_songs.length > 0
+                    ? playlist.playlist_songs.map((e) => e.song?.artist).join(", ")
+                    : "No artists found";
   const [ isOpen, setIsOpen ] = useState(false);
   const { musicPath } = useMusicPathStore();
 
@@ -56,7 +58,7 @@ export default function SideMenuCard({ playlist, onClick }: Props) {
               {title}
             </h4>
 
-            <span className="text-xs text-zinc-600 dark:text-gray-400">
+            <span className="text-xs text-muted-foreground">
               {artistsString}
             </span>
           </div>

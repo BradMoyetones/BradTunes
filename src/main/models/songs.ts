@@ -11,7 +11,7 @@ import { platform } from 'node:os';
 import { basePath, getMusicPath } from '../config/storage';
 import { getDb } from '@core/drizzle/client';
 import { playlists, playlistSongs, songs } from '@core/drizzle/schema';
-import { CurrentMusic, Playlist, PlaylistWithSongs, Song, SongFull } from '@core/types/data';
+import { SongFull } from '@core/types/data';
 import { eq, inArray } from 'drizzle-orm';
 import { deleteFile } from '@core/utils/deleteFile';
 
@@ -300,7 +300,7 @@ export async function installLatestVersion() {
 const sanitizeFilename = (name: string) =>
   name.replace(/[\\/:*?"<>|]/g, '_').replace(/\s+/g, ' ').trim();
 
-export async function downloadAndSaveSong(videoUrl: string) {
+export async function downloadAndSaveSong(videoUrl: string): Promise<SongFull> {
   const db = await getDb();
   const musicPath = await getMusicPath();
   const imgDir = path.join(musicPath, 'img');
@@ -333,10 +333,8 @@ export async function downloadAndSaveSong(videoUrl: string) {
   // const command = `"${ytDlpPath}" -x --audio-format mp3 --write-thumbnail -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}" && "${ytDlpPath}" -f mp4 -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}"`;
   // const command = `"${ytDlpPath}" -x --audio-format mp3 --write-thumbnail -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}" && "${ytDlpPath}" -f "bv*[ext=mp4][height<=720]+ba[ext=m4a]/b[ext=mp4]" --merge-output-format mp4 -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}"`;
   // const command = `"${ytDlpPath}" --ffmpeg-location ${ffmpegPath} -x --audio-format mp3 --write-thumbnail -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}" && "${ytDlpPath}" --ffmpeg-location ${ffmpegPath} -f "bv*[ext=mp4][height<=720]+ba[ext=m4a]/b[ext=mp4]" --merge-output-format mp4 -o "${outputDir}/${timestamp}.%(ext)s" "${videoUrl}"`;
-  const command = `
-    "${ytDlpPath}" --ffmpeg-location ${ffmpegPath} -x --audio-format mp3 --write-thumbnail -o "${musicPath}/${timestamp}.%(ext)s" "${videoUrl}" &&
-    "${ytDlpPath}" --ffmpeg-location ${ffmpegPath} -f "bv*[ext=mp4][height<=720]+ba[ext=m4a]/b[ext=mp4]" --merge-output-format mp4 -o "${musicPath}/${timestamp}.%(ext)s" "${videoUrl}"
-  `;
+  
+  const command = `"${ytDlpPath}" --ffmpeg-location ${ffmpegPath} -x --audio-format mp3 --write-thumbnail -o "${musicPath}/${timestamp}.%(ext)s" "${videoUrl}" && "${ytDlpPath}" --ffmpeg-location ${ffmpegPath} -f "bv*[ext=mp4][height<=720]+ba[ext=m4a]/b[ext=mp4]" --merge-output-format mp4 -o "${musicPath}/${timestamp}.%(ext)s" "${videoUrl}"`;
 
   await new Promise((resolve, reject) => {
     exec(command, (err, _stdout, stderr) => {
@@ -368,7 +366,20 @@ export async function downloadAndSaveSong(videoUrl: string) {
     })
     .returning();
 
-  return inserted[0];
+  const songInserted = inserted[0];
+
+  const songFull = await db.query.songs.findFirst({
+    where: (s, { eq }) => eq(s.id, songInserted.id),
+    with: {
+      playlist_songs: true,
+    },
+  });
+
+  if (!songFull) {
+    throw new Error("Inserted song could not be retrieved");
+  }
+
+  return songFull;
 }
 
 export async function songsAll(): Promise<SongFull[]> {

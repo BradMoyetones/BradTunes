@@ -24,3 +24,7 @@ export type PlaylistSongFull = PlaylistSong & {
 export type SongFull = Song & {
     playlist_songs: PlaylistSong[];
 };
+
+export type PlaylistFull = PlaylistColor & {
+    playlist_songs: PlaylistSong[];
+};

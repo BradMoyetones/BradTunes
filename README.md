@@ -77,6 +77,11 @@ $ npm run build:win
 $ npm run build:mac
 ```
 
+## UI Libraries
+- tailark ([Official web](https://tailark.com))
+- shadcn/ui ([Official web](https://ui.shadcn.com))
+
+
 ## ⚖ License
 
 [MIT](https://choosealicense.com/licenses/mit/)

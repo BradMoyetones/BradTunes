@@ -2,8 +2,9 @@ import { playlists, playlistSongs, songs } from '@core/drizzle/schema';
 import { PlaylistSong, PlaylistSongFull } from '@core/types/data';
 import { getDb } from '@core/drizzle/client';
 import { and, eq } from 'drizzle-orm';
+import { getTimestamp } from '../config/helpers';
 
-export async function playlistSong(): Promise<PlaylistSong[]> {
+export async function playlistSongAll(): Promise<PlaylistSong[]> {
   const db = await getDb();
 
   let rows = await db.query.playlistSongs.findMany();
@@ -11,13 +12,26 @@ export async function playlistSong(): Promise<PlaylistSong[]> {
   return rows;
 }
 
+export async function playlistSong(playlistId: number, songId: number): Promise<PlaylistSong | false> {
+  const db = await getDb();
+
+  const result = await db.select().from(playlistSongs)
+    .where(
+      and(
+        eq(playlistSongs.playlistId, playlistId),
+        eq(playlistSongs.songId, songId)
+      )
+    );
+
+  return result[0] || false;
+}
+
 export async function addMusicToPlaylist(
   playlistId: number,
   songId: number,
-  date: string
 ): Promise<PlaylistSongFull> {
   const db = await getDb();
-
+  const date = getTimestamp()
   // 1. Insertar en la tabla playlist_songs
   const [inserted] = await db
     .insert(playlistSongs)

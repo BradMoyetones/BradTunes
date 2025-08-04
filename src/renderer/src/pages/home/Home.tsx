@@ -22,7 +22,7 @@ export default function Home() {
                     {songs.length > 0 ? songs.map((song) => (
                         <SongItemCard key={`Sound-card-${song.id}`} song={song} />
                     )): (
-                        <div className="flex flex-col gap-2 text-muted-foreground py-10 items-center justify-center w-full">
+                        <div className="flex flex-col gap-2 text-primary-foreground py-10 items-center justify-center w-full">
                             <AlertCircle />
                             <p>
                                 No songs found

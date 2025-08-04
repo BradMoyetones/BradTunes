@@ -274,7 +274,7 @@ const ThemePresetSelect: React.FC<ThemePresetSelectProps> = ({
             <ChevronDown className="size-4 shrink-0" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[300px] p-0 z-[9999]" align="center">
+        <PopoverContent className="w-[300px] p-0" align="center">
           <Command className=" w-full">
             <div className="flex w-full items-center">
               <div className="flex w-full items-center border-b px-3 py-1">

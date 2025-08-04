@@ -1,12 +1,13 @@
 import React from 'react';
 import { MusicVisualizerProps } from './MusicVisualizer.types';
+import { cn } from '@/lib/utils';
 
-export const MusicVisualizer: React.FC<MusicVisualizerProps> = ({ numBars, width, height }) => {
+export const MusicVisualizer: React.FC<MusicVisualizerProps> = ({ numBars, width, height, className, ...rest }) => {
     // Crear un array de barras basado en el número de barras
     const bars = Array.from({ length: numBars }, (_, i) => i);
 
     return (
-        <div className="flex gap-[1px] overflow-hidden justify-center items-end" style={{ width: width, height: height }}>
+        <div className={cn("flex gap-[1px] overflow-hidden justify-center items-end", className)} style={{ width: width, height: height }} {...rest}>
             {bars.map((_, index) => (
                 <div 
                     key={index+_} 
