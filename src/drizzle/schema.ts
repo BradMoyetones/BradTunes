@@ -1,10 +1,11 @@
 // drizzle/schema.ts
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
+import { v4 as uuidv4 } from 'uuid';
 
 // Tablas base
 export const songs = sqliteTable("songs", {
-    id: integer("id").primaryKey({ autoIncrement: true }),
+    id: text("id").primaryKey().$defaultFn(() => uuidv4()),
     title: text("title").notNull(),
     artist: text("artist").notNull(),
     song: text("song").notNull(),
@@ -16,20 +17,20 @@ export const songs = sqliteTable("songs", {
 });
 
 export const playlists = sqliteTable("playlists", {
-    id: integer("id").primaryKey({ autoIncrement: true }),
+    id: text("id").primaryKey().$defaultFn(() => uuidv4()),
     title: text("title").notNull(),
     cover: text("cover"),
     date: text("date").notNull(),
 });
 
 export const playlistSongs = sqliteTable("playlist_songs", {
-    id: integer("id").primaryKey({ autoIncrement: true }),
-    playlistId: integer("playlist_id")
+    id: text("id").primaryKey().$defaultFn(() => uuidv4()),
+    playlistId: text("playlist_id")
         .notNull()
-        .references(() => playlists.id, { onDelete: "cascade" }),
-    songId: integer("song_id")
+        .references(() => playlists.id, { onDelete: "cascade", onUpdate: "cascade" }),
+    songId: text("song_id")
         .notNull()
-        .references(() => songs.id, { onDelete: "cascade" }),
+        .references(() => songs.id, { onDelete: "cascade", onUpdate: "cascade" }),
     date: text("date").notNull(),
 });
 

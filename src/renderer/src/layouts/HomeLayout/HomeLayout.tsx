@@ -1,12 +1,12 @@
 import AsideMenu from "@/layouts/HomeLayout/components/AsideMenu/AsideMenu";
 import Player from "@/layouts/HomeLayout/components/Player/Player";
-import { VideoFullScreenProvider } from "@/contexts/VideoFullScreenContext";
 import { driver } from "driver.js";
 import JSConfetti from "js-confetti";
 import { Suspense, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import "driver.js/dist/driver.css";
 import { TitleBar } from "./components";
+import { VideoFullScreenProvider } from "@/contexts";
 
 export default function HomeLayout() {
     

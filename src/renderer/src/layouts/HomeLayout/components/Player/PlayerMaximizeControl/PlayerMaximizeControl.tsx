@@ -1,7 +1,7 @@
-import { useVideoFullScreen } from "@/contexts/VideoFullScreenContext";
 import { Maximize, Minimize } from "lucide-react";
 import { useNavigate, useLocation } from "react-router";
 import { useEffect, useState } from "react";
+import { useVideoFullScreen } from "@/contexts";
 
 export function PlayerMaximizeControl() {
     const { enterFullScreen, exitFullScreen, isFullScreen } = useVideoFullScreen();

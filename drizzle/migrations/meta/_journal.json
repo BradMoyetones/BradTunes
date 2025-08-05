@@ -43,6 +43,27 @@
       "when": 1754336035120,
       "tag": "0005_clear_wild_pack",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1754421731832,
+      "tag": "0006_flimsy_nightshade",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1754422494759,
+      "tag": "0007_messy_black_panther",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1754423554551,
+      "tag": "0008_peaceful_gauntlet",
+      "breakpoints": true
     }
   ]
 }

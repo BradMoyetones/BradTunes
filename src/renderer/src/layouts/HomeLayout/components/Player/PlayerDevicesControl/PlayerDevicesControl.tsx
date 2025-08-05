@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Check, Speaker } from "lucide-react";
 import { usePlayerStore } from "@/store/usePlayerStore";
-import { useVideoFullScreen } from "@/contexts/VideoFullScreenContext";
+import { useVideoFullScreen } from "@/contexts";
 
 export function PlayerDevicesControl() {
     const { selectedDeviceId, setSelectedDeviceId } = usePlayerStore();

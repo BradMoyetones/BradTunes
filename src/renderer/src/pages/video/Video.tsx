@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useVideoFullScreen } from "@/contexts/VideoFullScreenContext";
-import { useMusicPath, usePlayerController } from "@/contexts";
+import { useMusicPath, usePlayerController, useVideoFullScreen } from "@/contexts";
 import { usePlayerStore } from "@/store";
 
 export default function Video() {

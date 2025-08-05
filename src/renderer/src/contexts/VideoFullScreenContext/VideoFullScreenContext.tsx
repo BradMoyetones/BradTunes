@@ -1,15 +1,9 @@
-import { createContext, useContext, useState, useEffect, useRef } from "react";
+import { createContext, useState, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
+import { VideoFullScreenContextType } from "./VideoFullScreenContext.types";
 
-interface VideoFullScreenContextType {
-    isFullScreen: boolean;
-    isButtonVisible: boolean;
-    isCursorHidden: boolean;
-    enterFullScreen: () => void;
-    exitFullScreen: () => void;
-}
 
-const VideoFullScreenContext = createContext<VideoFullScreenContextType | undefined>(undefined);
+export const VideoFullScreenContext = createContext<VideoFullScreenContextType | undefined>(undefined);
 
 export function VideoFullScreenProvider({ children }: { children: React.ReactNode }) {
     const [isFullScreen, setIsFullScreen] = useState(false);
@@ -73,12 +67,4 @@ export function VideoFullScreenProvider({ children }: { children: React.ReactNod
             {children}
         </VideoFullScreenContext.Provider>
     );
-}
-
-export function useVideoFullScreen() {
-    const context = useContext(VideoFullScreenContext);
-    if (!context) {
-        throw new Error("useVideoFullScreen debe estar dentro de un VideoFullScreenProvider");
-    }
-    return context;
 }

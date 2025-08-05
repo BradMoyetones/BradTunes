@@ -1,10 +1,11 @@
 import { usePlayerStore } from "@/store";
-import { PlayerControlButtonBar } from "./PlayerControlButtonBar/PlayerControlButtonBar";
 import { PlayerCurrentSong } from "./PlayerCurrentSong/PlayerCurrentSong";
 import { PlayerSoundControl } from "./PlayerSoundControl/PlayerSoundControl";
-import { useVideoFullScreen } from "@/contexts/VideoFullScreenContext";
 import { PlayerVolumeControl } from "./PlayerVolumeControl";
 import { PlayerDevicesControl } from "./PlayerDevicesControl";
+import { PlayerMaximizeControl } from "./PlayerMaximizeControl";
+import { PlayerControlButtonBar } from "./PlayerControlButtonBar";
+import { useVideoFullScreen } from "@/contexts";
 
 export default function Player() {
     const {currentSong} = usePlayerStore();
@@ -24,7 +25,7 @@ export default function Player() {
             </div>
 
             <div className="place-content-center max-w-[300px] w-full flex justify-end items-center gap-4">
-                {/* <PlayerMaximizeControl /> */}
+                <PlayerMaximizeControl />
                 <PlayerDevicesControl />
                 <PlayerVolumeControl />
             </div>
