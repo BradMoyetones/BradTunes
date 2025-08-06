@@ -1,8 +1,7 @@
 import { Next, Pause, Play, Prev } from "@/icons/PlayerIcons";
 import { Repeat, Repeat1, Shuffle } from "lucide-react";
-import { useVideoFullScreen } from "@/contexts/VideoFullScreenContext";
 import { usePlayerStore } from "@/store";
-import { usePlayerController } from "@/contexts";
+import { usePlayerController, useVideoFullScreen } from "@/contexts";
 
 export function PlayerControlButtonBar() {
   const {playbackMode, isShuffle} = usePlayerStore();

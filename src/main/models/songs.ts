@@ -395,7 +395,7 @@ export async function songsAll(): Promise<SongFull[]> {
   return rows
 }
 
-export async function songsXplaylist(playlistId: number): Promise<SongFull[]> {
+export async function songsXplaylist(playlistId: string): Promise<SongFull[]> {
   const db = await getDb();
   
   // 1. Obtener relaciones playlist_songs por playlistId
@@ -416,7 +416,7 @@ export async function songsXplaylist(playlistId: number): Promise<SongFull[]> {
     .where(inArray(songs.id, songIds));
 
   // 4. Agrupar playlistSongs por canción
-  const map = new Map<number, SongFull>();
+  const map = new Map<string, SongFull>();
 
   for (const song of songRows) {
     map.set(song.id, {
@@ -435,7 +435,7 @@ export async function songsXplaylist(playlistId: number): Promise<SongFull[]> {
   return Array.from(map.values());
 }
 
-export async function getSongById(id: number): Promise<SongFull | null> {
+export async function getSongById(id: string): Promise<SongFull | null> {
   const db = await getDb();
 
   const songRow = await db.query.songs.findFirst({
@@ -468,7 +468,7 @@ export async function getSongById(id: number): Promise<SongFull | null> {
 }
 
 export async function updateSong(
-  id: number,
+  id: string,
   title: string,
   artist: string,
   image: string | undefined
@@ -571,7 +571,7 @@ export async function updateSong(
   return result;
 }
 
-export async function deleteSong(id: number): Promise<boolean> {
+export async function deleteSong(id: string): Promise<boolean> {
   const db = await getDb();
   const musicPath = await getMusicPath();
   const outputDir = musicPath;

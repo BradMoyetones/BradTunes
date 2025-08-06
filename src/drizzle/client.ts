@@ -31,7 +31,7 @@ const isDatabaseCorrupt = (dbPath: string): boolean => {
 
 const openDatabase = async (): Promise<Database.Database> => {
     const musicPath = await getMusicPath();
-    const newDbPath = path.join(musicPath, '../musicData.db');
+    const newDbPath = path.join(musicPath, '../musicData_new.db');
 
     if (db && newDbPath === currentDbPath) return db;
 
@@ -52,7 +52,7 @@ const openDatabase = async (): Promise<Database.Database> => {
 
 export const getDb = async () => {
     const musicPath = await getMusicPath();
-    const dbPath = path.join(musicPath, '../musicData.db');
+    const dbPath = path.join(musicPath, '../musicData_new.db');
 
     // 🔥 Elimina primero si no existe la tabla de migraciones
     const rawTmp = new Database(dbPath); // sin drizzle todavía
@@ -77,3 +77,26 @@ export const getDb = async () => {
 
     return client;
 };
+
+export const getDbOld = async () => {
+    const musicPath = await getMusicPath();
+    const dbPath = path.join(musicPath, '../musicData.db');
+    
+    const rawTmp = await new Database(dbPath); // sin drizzle todavía
+
+    const client = drizzle(rawTmp, { schema });
+
+    return client
+}
+
+const prueba = async() => {
+
+    const oldDb = await getDbOld()
+
+    const get = await oldDb.query.songs.findMany()
+
+    console.log(get);
+    
+}
+
+prueba()

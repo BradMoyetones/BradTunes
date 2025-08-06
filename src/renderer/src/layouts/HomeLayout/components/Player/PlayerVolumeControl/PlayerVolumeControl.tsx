@@ -1,8 +1,7 @@
 import { Slider } from "@/components/ui/slider";
-import { useVideoFullScreen } from "@/contexts/VideoFullScreenContext";
-import { usePlayerController } from "@/contexts";
-import { PlayerVolumeIconComponent } from "../PlayerVolumeIconComponent/PlayerVolumeIconComponent";
+import { usePlayerController, useVideoFullScreen } from "@/contexts";
 import { usePlayerStore } from "@/store";
+import { PlayerVolumeIconComponent } from "./PlayerVolumeIconComponent";
 
 export const PlayerVolumeControl = () => {
   const { isFullScreen } = useVideoFullScreen();

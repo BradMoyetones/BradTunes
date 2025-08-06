@@ -2,8 +2,7 @@ import { useState, useRef, useMemo } from "react";
 import { Slider } from "@/components/ui/slider";
 import { usePlayerStore } from "@/store";
 import { formatTime } from "@/utils/time";
-import { usePlayerController } from "@/contexts";
-import { useVideoFullScreen } from "@/contexts/VideoFullScreenContext";
+import { usePlayerController, useVideoFullScreen } from "@/contexts";
 
 export const PlayerSoundControl = () => {
   const { currentSong, currentTime } = usePlayerStore();

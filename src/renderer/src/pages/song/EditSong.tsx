@@ -1,4 +1,3 @@
-import { CardPlayButton } from "@/components/CardPlayButton";
 import { colors } from "@/lib/colors";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -6,13 +5,13 @@ import { useNavigate, useParams } from "react-router";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormField } from "@/components/ui/form";
-import ToastNotification from "@/components/ToastNotification";
-import { ArrowLeft, Bug, Music } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { usePlayer } from "@/contexts/PlayerProvider";
-import { SongFull } from "@/types/data";
-import { useData } from "@/contexts/DataProvider/DataProvider";
-import { useMusicPathStore } from "@/store/useMusicPathStore/useMusicPathStore";
+import { useMusicPathStore, usePlayerStore } from "@/store";
+import { useData } from "@/contexts";
+import { SongFull } from "@core/types/data";
+import { useArrayDataManager } from "@/hooks/useArrayDataManager";
+import { toast } from "sonner";
 
 // Actualización del schema para aceptar un archivo de imagen
 const FormSchema = z.object({
@@ -28,8 +27,8 @@ const FormSchema = z.object({
 });
 
 export default function EditSong() {
-    const { currentMusic, setCurrentMusic } = usePlayer();
     const { playlists, setSongs } = useData();
+    const {onUpdate} = useArrayDataManager<SongFull>(setSongs)
     
     const { id, playlistSongId } = useParams<{ id: string, playlistSongId: string }>();
     const [ randomColorKey, setRandomColorKey ] = useState("");
@@ -40,7 +39,7 @@ export default function EditSong() {
     const navigate = useNavigate()
     const { musicPath } = useMusicPathStore();
 
-    const playlist = playlists.find((data) => data.id === Number(playlistSongId))
+    const playlist = playlists.find((data) => data.id === playlistSongId)
 
     const getSong = async() => {
         const response = await window.api.getSongById(Number(id));
@@ -95,51 +94,16 @@ export default function EditSong() {
         try {
             const updatedSong = await window.api.updateSong(Number(id), values.title, values.artist, values.image);
             if(updatedSong){
+                onUpdate(updatedSong);
 
-                // Actualizar la canción en `songs`
-                const updatedSongs = currentMusic.songs.map(song =>
-                    song.id === updatedSong.id ? updatedSong : song
-                );
-
-                // Actualizar `song` si es la misma que se está editando
-                const updatedCurrentSong = currentMusic.song?.id === updatedSong.id 
-                    ? updatedSong 
-                    : currentMusic.song;
-
-                setCurrentMusic({
-                    ...currentMusic,
-                    songs: updatedSongs,
-                    song: updatedCurrentSong
-                });
-
-                // Actualizar `setSongs`
-                setSongs(prevSongs =>
-                    prevSongs.map(song => 
-                        song.id === updatedSong.id ? updatedSong : song
-                    )
-                );
-
-
-                ToastNotification({
-                    title: "Update successffuly",
-                    description: "The song has been updated successfully",
-                    Icon: Music,
-                })
+                toast.success("The song has been updated successfully")
                 setIsEdited(false);  // Resetear la edición
             }
         } catch (error) {
             if (error instanceof Error) {
-                ToastNotification({
-                    title: "Update failed",
-                    description: error.message,
-                    Icon: Bug,
-                })
+                toast.error(error.message)
             } else {
-                ToastNotification({
-                    title: "Update failed",
-                    description: "Error: An unknown error occurred",
-                    Icon: Bug,
-                })
+                toast.error("Error: An unknown error occurred")
             }
 
             console.log(error);
@@ -267,9 +231,9 @@ export default function EditSong() {
                             </div>
                         </div>
                         <div className="mx-auto">
-                            {song && (
+                            {/* {song && (
                                 <CardPlayButton song={song} playlist={playlist} />
-                            )}
+                            )} */}
                             
                         </div>
 
