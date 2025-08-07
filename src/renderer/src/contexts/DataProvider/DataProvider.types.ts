@@ -1,4 +1,4 @@
-import { PlaylistWithSongs, PlaylistSong, SongFull } from "@core/types/data"
+import { PlaylistWithSongs, PlaylistSong, SongFull, Song, Playlist } from "@core/types/data"
 
 export interface PlaylistsContextType {
     // IMPLEMENT YOUR CONTEXT METHODS HERE
@@ -9,4 +9,15 @@ export interface PlaylistsContextType {
 
     playlistSongs: PlaylistSong[]
     setPlaylistSongs: React.Dispatch<React.SetStateAction<PlaylistSong[]>>
+
+    oldData: {
+        oldSongs: Song[];
+        oldPlaylists: Playlist[];
+        oldPlaylistSongs: PlaylistSong[];
+    }
+    setOldData: React.Dispatch<React.SetStateAction<{
+        oldSongs: Song[];
+        oldPlaylists: Playlist[];
+        oldPlaylistSongs: PlaylistSong[];
+    }>>
 }

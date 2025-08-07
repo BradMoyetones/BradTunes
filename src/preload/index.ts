@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
+import { Playlist, PlaylistSong, PlaylistWithSongs, Song } from '@core/types/data'
 
 // Custom APIs for renderer
 const api = {
@@ -32,7 +33,7 @@ const api = {
   isMaximized: () => ipcRenderer.invoke("isMaximized"),
   close: () => ipcRenderer.send("close"),
 
-  playlists: () => ipcRenderer.invoke('playlists'),
+  playlists: (): Promise<PlaylistWithSongs[]> => ipcRenderer.invoke('playlists'),
   songs: () => ipcRenderer.invoke('songs'),
   playlistSongs: () => ipcRenderer.invoke('playlistSongs'),
 
@@ -56,7 +57,16 @@ const api = {
 
   // YOUTUBE
   createNewWindow: (url: string) => ipcRenderer.invoke('open-new-window', url),
+
+  // Data of old database
+  getOldDataAll: (): Promise<{
+    oldSongs: Song[],
+    oldPlaylists: Playlist[],
+    oldPlaylistSongs: PlaylistSong[]
+  }> => ipcRenderer.invoke('getOldDataAll')
 }
+
+export type Api = typeof api
 
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise

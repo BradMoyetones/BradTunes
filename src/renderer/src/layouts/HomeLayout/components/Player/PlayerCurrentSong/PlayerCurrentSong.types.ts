@@ -1,5 +1,5 @@
 export interface PlayerCurrentSongProps {
-    id?: number;
+    id?: string;
     image?: string;
     title?: string;
     artist?: string;

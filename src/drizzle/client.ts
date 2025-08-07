@@ -89,14 +89,27 @@ export const getDbOld = async () => {
     return client
 }
 
-const prueba = async() => {
+export const getOldDataAll = async() => {
 
     const oldDb = await getDbOld()
 
-    const get = await oldDb.query.songs.findMany()
+    try {
+        const getSongs = await oldDb.query.songs.findMany()
+        const getPlaylists = await oldDb.query.playlists.findMany()
+        const getPlaylistSongs = await oldDb.query.playlistSongs.findMany()
 
-    console.log(get);
+        return {
+            oldSongs: getSongs,
+            oldPlaylists: getPlaylists,
+            oldPlaylistSongs: getPlaylistSongs
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            oldSongs: [],
+            oldPlaylists: [],
+            oldPlaylistSongs: [],
+        }
+    }
     
 }
-
-prueba()

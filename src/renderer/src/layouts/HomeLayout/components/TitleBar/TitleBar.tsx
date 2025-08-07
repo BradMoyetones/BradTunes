@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { Button } from "../../../../components/ui/button";
 import HomeIcon from "@/icons/Home"
 import { useNavigate } from "react-router";
-import { Notificaciones } from "../../../../components/Notifications";
 import ThemePresetSelect from "@/components/theme-preset-select";
 import GlobalSearch from "@/components/GlobalSearch";
 
@@ -43,7 +42,7 @@ export function TitleBar() {
     return (
         <div
             id="titleBarApp"
-            className="[grid-area:title] h-16 justify-between flex"
+            className="[grid-area:title] h-16 justify-between flex z-[10000] backdrop-blur-2xl"
         >
             <div
                 className="no-drag flex items-center gap-2 pl-4"

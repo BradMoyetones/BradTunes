@@ -85,14 +85,11 @@ export default function Settings() {
     })).filter((section) => section.links.length > 0);
 
     return (
-        <div className="fixed top-0 left-0 right-0 bottom-0 bg-slate-100 dark:bg-zinc-900 z-[1000] flex">
-            <div className="max-w-xl w-full min-h-screen mx-auto flex justify-end flex-1">
-
-
-                <ScrollArea className="h-screen max-w-52 w-full !pt-16 p-2 sticky top-0">
+        <div className="fixed top-0 left-0 right-0 bottom-0 bg-background z-[11] flex">
+            <div className="max-w-xl w-full flex justify-end flex-1 pt-28">
+                <ScrollArea className="max-w-52 w-full p-2 sticky top-0">
                     <div className="relative p-0.5">
                         <Input 
-                            className="bg-slate-200 dark:bg-zinc-800 pr-8 border-white dark:border-zinc-700" 
                             placeholder="Search" 
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
@@ -177,13 +174,13 @@ export default function Settings() {
                 </ScrollArea>
 
             </div>
-            <div className="md:w-[740px] w-full mx-auto min-h-screen bg-white dark:bg-zinc-800 overflow-auto pt-16 p-8">
+            <div className="md:w-[740px] w-full mx-auto min-h-screen bg-muted/40 overflow-auto pt-30 p-8">
                 <Suspense fallback={<Spinner />}>
                     <Outlet />
                 </Suspense>
             </div>
 
-            <div className="h-screen w-full !pt-16 p-2 sticky top-0 flex-1">
+            <div className="h-screen w-full p-2 sticky top-0 flex-1 pt-28">
                 <button
                     onClick={() => navigate("/", { viewTransition: true, replace: true })}
                     className={buttonVariants({variant: "outline", size: "icon"})+" !rounded-full"}

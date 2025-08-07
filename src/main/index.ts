@@ -9,6 +9,7 @@ import { createPlaylist, deletePlaylist, playlistsAll, updatePlaylist } from './
 import { addMusicToPlaylist, deletePlaylistSong, playlistSong, playlistSongAll } from './models/playlist_songs'
 import { getMusicPath, isDefaultMusicPath, resetMusicPath, setMusicPath } from './config/storage'
 import fs from 'node:fs'
+import { getOldDataAll } from '@core/drizzle/client'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -307,10 +308,10 @@ ipcMain.handle('songsXplaylist', (_event, playlistId) => {
 ipcMain.handle('getSongById', (_event, id) => {
   return getSongById(id);
 });
-ipcMain.handle('deleteSong', (_event, id: number) => {
+ipcMain.handle('deleteSong', (_event, id: string) => {
   return deleteSong(id);
 });
-ipcMain.handle('updateSong', (_event, id: number, title: string, artist: string, image: string | undefined) => {
+ipcMain.handle('updateSong', (_event, id: string, title: string, artist: string, image: string | undefined) => {
   return updateSong(id, title, artist, image);
 });
 
@@ -333,4 +334,9 @@ ipcMain.handle('deletePlaylistSong', (_event, playlistId: number, songId: number
 // YOUTUBE
 ipcMain.handle('open-new-window', (_event, url: string) => {
   createNewWindow(url);
+});
+
+// Data of old database
+ipcMain.handle('getOldDataAll', (_event) => {
+  return getOldDataAll();
 });
