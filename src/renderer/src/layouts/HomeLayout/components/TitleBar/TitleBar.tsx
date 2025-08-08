@@ -42,7 +42,7 @@ export function TitleBar() {
     return (
         <div
             id="titleBarApp"
-            className="[grid-area:title] h-16 justify-between flex z-[10000] backdrop-blur-2xl"
+            className="[grid-area:title] h-16 justify-between flex z-50 backdrop-blur-2xl"
         >
             <div
                 className="no-drag flex items-center gap-2 pl-4"
