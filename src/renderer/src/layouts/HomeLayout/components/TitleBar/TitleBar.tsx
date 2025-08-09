@@ -13,17 +13,20 @@ export function TitleBar() {
     const navigate = useNavigate()
 
     useEffect(() => {
-        // Obtén la plataforma desde el proceso principal
-        const plat = async () => {
-            setLoading(true)
-            const value = await window.api.getPlatform()
-            setPlatform(value)
-            setLoading(false)
-        }
-        plat();
+        const init = async () => {
+            setLoading(true);
+            const value = await window.api.getPlatform();
+            setPlatform(value);
+            setLoading(false);
+            window.api.isMaximized().then(setMaximize);
+        };
 
-        // Verifica si la ventana está maximizada
-        window.api.isMaximized().then(setMaximize);
+        init();
+
+        // 🔹 Escuchar evento en tiempo real
+        window.api.onMaximizeChanged((isMax) => {
+            setMaximize(isMax);
+        });
     }, []);
     
     const handleMinimize = () => {

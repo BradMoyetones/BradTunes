@@ -32,6 +32,9 @@ const api = {
   maximize: () => ipcRenderer.invoke("maximize"),
   isMaximized: () => ipcRenderer.invoke("isMaximized"),
   close: () => ipcRenderer.send("close"),
+  onMaximizeChanged: (callback: (isMax: boolean) => void) => {
+    ipcRenderer.on("maximize-changed", (_, value) => callback(value));
+  },
 
   playlists: (): Promise<PlaylistWithSongs[]> => ipcRenderer.invoke('playlists'),
   songs: () => ipcRenderer.invoke('songs'),
