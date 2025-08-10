@@ -85,11 +85,11 @@ export default function Settings() {
     })).filter((section) => section.links.length > 0);
 
     return (
-        <div className="fixed top-0 left-0 right-0 bottom-0 bg-background z-[11] flex">
+        <div className="fixed top-0 left-0 right-0 bottom-0 bg-background z-[11] flex animate-scaleIn">
             <div className="max-w-xl w-full flex justify-end flex-1 pt-28">
                 <ScrollArea className="max-w-52 w-full p-2 sticky top-0">
                     <div className="relative p-0.5">
-                        <Input 
+                        <Input
                             placeholder="Search" 
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
@@ -108,7 +108,7 @@ export default function Settings() {
                                         <LinkSidebarSettings key={subLink.href + subLink.title} link={subLink} />
                                     ))}
                                 </div>
-                                <Separator className="bg-slate-300 dark:bg-zinc-700 mb-4" />
+                                <Separator className="mb-4" />
                             </div>
                         ))
                     ) : (

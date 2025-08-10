@@ -4,7 +4,7 @@ import { useImageExists } from '@/hooks/use-image-exists';
 import Search from '@/icons/Search';
 import { useMusicPathStore, usePlayerStore } from '@/store';
 import { FilterX, Pause, Play } from 'lucide-react';
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { MusicTable } from './components';
 import { usePlaylist } from './contexts';
 
@@ -46,7 +46,13 @@ export default function PlaylistView() {
         );
     }, [songs, q]);
     
-    const validUrl = useImageExists(`safe-file://${musicPath}/img/playlists/${playlist?.cover}`)
+    const [img, setImg] = useState("")
+    const validUrl = useImageExists(img)
+
+    useEffect(() => {
+        if(!musicPath.trim() || !playlist.cover) return
+        setImg(`safe-file://${musicPath}/img/playlists/${playlist.cover}`)
+    }, [musicPath, playlist])
 
     // if(!loading){
     //     return (

@@ -20,4 +20,6 @@ export interface PlaylistsContextType {
         oldPlaylists: Playlist[];
         oldPlaylistSongs: PlaylistSong[];
     }>>
+
+    fetchDataInitial: () => Promise<void>
 }

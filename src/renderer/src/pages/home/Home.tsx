@@ -10,7 +10,7 @@ export default function Home() {
     return (
         <div
             id="playlist-container"
-            className="relative transition-all duration-1000  rounded-lg"
+            className="relative transition-all duration-1000 rounded-lg"
         >
             <div className="relative z-10 px-6 pt-10 pb-6">
                 <Greeting />

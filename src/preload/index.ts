@@ -40,6 +40,19 @@ const api = {
   songs: () => ipcRenderer.invoke('songs'),
   playlistSongs: () => ipcRenderer.invoke('playlistSongs'),
 
+  // Restore music and playlists in new update
+  restoreBackup: (data: {
+    songs: {
+        id: number;
+    }[];
+    playlists: {
+        id: number;
+    }[];
+    playlistSongs: {
+        id: number;
+    }[];
+  }): Promise<boolean> => ipcRenderer.invoke('restoreBackup', data),
+
   // PLAYLISTS
   createPlaylist: (title: string, cover: string | undefined) => ipcRenderer.invoke('createPlaylist', title, cover),
   updatePlaylist: (id: number | undefined, title: string, cover: string | undefined) => ipcRenderer.invoke('updatePlaylist', id, title, cover),
@@ -48,7 +61,7 @@ const api = {
   // SONGS
   downloadSong: (url: string) => ipcRenderer.invoke('download-song', url),
   downloadMedia: (url: string) => ipcRenderer.invoke('download-media', url),
-  songsXplaylist: (playlistId: number) => ipcRenderer.invoke('songsXplaylist', playlistId),
+  songsXplaylist: (playlistId: string | undefined) => ipcRenderer.invoke('songsXplaylist', playlistId),
   getSongById: (id: number) => ipcRenderer.invoke('getSongById', id),
   deleteSong: (id: number) => ipcRenderer.invoke('deleteSong', id),
   updateSong: (id: number, title: string, artist: string, image: string | undefined) => ipcRenderer.invoke('updateSong', id, title, artist, image),

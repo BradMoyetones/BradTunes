@@ -2,7 +2,6 @@ import { createContext, useEffect, useMemo, useState } from "react";
 import { PlaylistProviderProps } from "./PlaylistProvider.types";
 import { useData } from "@/contexts";
 import { PlaylistWithSongs, SongFull } from "@core/types/data";
-import { ColorType } from "@core/lib/colors";
 
 export const PlaylistContext = createContext<PlaylistProviderProps | null>(null);
 
@@ -12,12 +11,8 @@ export const PlaylistProvider = ({ children, id }: { children: React.ReactNode, 
     const [artistsString, setArtistsString] = useState<string>("");
     const { playlists } = useData();
     const [playlist, setPlaylist] = useState<PlaylistWithSongs>({
-        id: 0,
+        id: "0",
         title: "Not Found",
-        color: {
-            accent: "",
-            dark: ""
-        } as ColorType & string,
         cover: "",
         date: "",
         playlist_songs: []
@@ -29,7 +24,7 @@ export const PlaylistProvider = ({ children, id }: { children: React.ReactNode, 
         const fetchSongs = async () => {
             setLoading(true)
             try {
-                const result = await window.api.songsXplaylist(Number(id));
+                const result = await window.api.songsXplaylist(id);
 
                 const artists = result.length > 0
                     ? result.map((e) => e.artist).join(", ")

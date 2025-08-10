@@ -9,7 +9,7 @@ import { createPlaylist, deletePlaylist, playlistsAll, updatePlaylist } from './
 import { addMusicToPlaylist, deletePlaylistSong, playlistSong, playlistSongAll } from './models/playlist_songs'
 import { getMusicPath, isDefaultMusicPath, resetMusicPath, setMusicPath } from './config/storage'
 import fs from 'node:fs'
-import { getOldDataAll } from '@core/drizzle/client'
+import { getOldDataAll, restoreOldData } from '@core/drizzle/client'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -347,4 +347,9 @@ ipcMain.handle('open-new-window', (_event, url: string) => {
 // Data of old database
 ipcMain.handle('getOldDataAll', (_event) => {
   return getOldDataAll();
+});
+
+// Restauracion de datos
+ipcMain.handle('restoreBackup', (_event, data: any) => {
+  return restoreOldData(data);
 });

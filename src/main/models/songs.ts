@@ -395,7 +395,8 @@ export async function songsAll(): Promise<SongFull[]> {
   return rows
 }
 
-export async function songsXplaylist(playlistId: string): Promise<SongFull[]> {
+export async function songsXplaylist(playlistId: string | undefined): Promise<SongFull[]> {
+  if(!playlistId) return []
   const db = await getDb();
   
   // 1. Obtener relaciones playlist_songs por playlistId

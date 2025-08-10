@@ -18,26 +18,26 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         oldSongs: []
     })
     
+    const fetchDataInitial = async () => {
+        try {
+            const resultSongs = await window.api.songs();
+            const resultPlaylists = await window.api.playlists();
+            const resultPlaylistSongs = await window.api.playlistSongs();
+            const resultsOldData = await window.api.getOldDataAll()
+
+            // console.log(resultSongs, resultPlaylists, resultPlaylistSongs);
+
+            setSongs(resultSongs);
+            setPlaylists(resultPlaylists);
+            setPlaylistSongs(resultPlaylistSongs);
+
+            setOldData(resultsOldData)
+        } catch (error) {
+            console.error("❌ Error fetching currentMusic:", error);
+        }
+    };
+
     useEffect(() => {
-        const fetchDataInitial = async () => {
-            try {
-                const resultSongs = await window.api.songs();
-                const resultPlaylists = await window.api.playlists();
-                const resultPlaylistSongs = await window.api.playlistSongs();
-                const resultsOldData = await window.api.getOldDataAll()
-
-                // console.log(resultSongs, resultPlaylists, resultPlaylistSongs);
-
-                setSongs(resultSongs);
-                setPlaylists(resultPlaylists);
-                setPlaylistSongs(resultPlaylistSongs);
-
-                setOldData(resultsOldData)
-            } catch (error) {
-                console.error("❌ Error fetching currentMusic:", error);
-            }
-        };
-
         fetchDataInitial(); // Llamamos cuando se monta el componente
     }, []);
 
@@ -54,7 +54,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
                 setSongs,
 
                 oldData,
-                setOldData
+                setOldData,
+
+                fetchDataInitial
             }}
         >
             {children}

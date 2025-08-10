@@ -94,9 +94,9 @@ export function SongItemCard({ song }: PlayListItemCardProps) {
           style={{ transition: "box-shadow .1s, transform .1s, background-color .1s", viewTransitionName: isTransitioning ? `box-song-${id}` : "none", }}
         >
           <div
-            className="absolute right-4 bottom-20 translate-y-4
+            className="absolute right-4 bottom-20 translate-y-10 opacity-0
               transition-all duration-200 
-              group-hover:translate-y-0 group-hover:opacity-100
+              group-hover:translate-y-4 group-hover:opacity-100
               z-10"
           >
             <Button 

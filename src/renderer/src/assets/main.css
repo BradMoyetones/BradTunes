@@ -304,3 +304,18 @@ body {
 .animate-marquee-smooth {
   animation: marquee-smooth 10s linear infinite;
 }
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.2s ease-out forwards;
+}
