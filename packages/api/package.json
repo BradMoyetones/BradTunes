@@ -1,0 +1,25 @@
+{
+    "name": "@xtunes/api",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsup",
+        "dev": "tsup --watch",
+        "typecheck": "tsc --noEmit"
+    },
+    "dependencies": {
+        "@tauri-apps/api": "^2",
+        "@tauri-apps/plugin-dialog": "^2",
+        "@tauri-apps/plugin-os": "^2",
+        "@tauri-apps/plugin-process": "^2",
+        "@tauri-apps/plugin-store": "^2",
+        "@tauri-apps/plugin-updater": "^2"
+    },
+    "devDependencies": {
+        "tsup": "^8.5.1",
+        "typescript": "^5.4.5"
+    }
+}

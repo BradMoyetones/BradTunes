@@ -1,0 +1,23 @@
+@import "tailwindcss";
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@source "../../../node_modules/@xtunes/ui";
+
+@import "@xtunes/ui/styles.css";
+
+@custom-variant dark (&:is(.dark *));
+ 
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+
+    body {
+        @apply text-foreground;
+    }
+
+    html {
+        @apply font-sans;
+    }
+}

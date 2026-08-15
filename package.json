@@ -1,13 +1,14 @@
 {
-    "name": "x-tunes",
-    "version": "0.1.0",
+    "name": "xtunes",
     "description": "A desktop music player built with Tauri, TypeScript and yt-dlp",
     "author": "Brad Moyetones",
+    "type": "module",
+    "private": true,
     "license": "MIT",
     "packageManager": "pnpm@11.21.0",
     "repository": {
         "type": "git",
-        "url": "https://github.com/BradMoyetones/x-tunes"
+        "url": "https://github.com/BradMoyetones/xtunes"
     },
     "scripts": {
         "typecheck": "turbo run typecheck",
@@ -16,7 +17,6 @@
         "typecheck-api": "cd packages/api && pnpm typecheck",
         "build": "turbo run build",
         "dev": "turbo run dev",
-        "tauri": "tauri",
         "lint": "turbo run lint",
         "format": "prettier --write \"**/*.{ts,tsx,md,css,json}\"",
         "version-packages": "changeset version"
