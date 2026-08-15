@@ -1,5 +1,5 @@
 {
-    "name": "xtunes",
+    "name": "@xtunes/desktop",
     "private": true,
     "version": "0.1.0",
     "type": "module",
@@ -18,6 +18,7 @@
         "version-packages": "changeset version && node scripts/sync-release.js"
     },
     "dependencies": {
+        "@fontsource-variable/geist": "^5.3.0",
         "@tailwindcss/vite": "^4.3.3",
         "@xtunes/api": "workspace:*",
         "@xtunes/ui": "workspace:*",
