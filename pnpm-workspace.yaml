@@ -1,0 +1,9 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+allowBuilds:
+  '@esbuild/darwin-arm64': true
+  '@esbuild/darwin-x64': true
+  '@parcel/watcher': true
+  core-js: true
+  esbuild: true
