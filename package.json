@@ -19,7 +19,8 @@
         "dev": "turbo run dev",
         "lint": "turbo run lint",
         "format": "prettier --write \"**/*.{ts,tsx,md,css,json}\"",
-        "version-packages": "changeset version"
+        "version-packages": "changeset version",
+        "tree": "node scripts/tree.js"
     },
     "devDependencies": {
         "prettier": "^3.9.3",

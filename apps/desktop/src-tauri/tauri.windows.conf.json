@@ -1,0 +1,34 @@
+{
+    "app": {
+        "windows": [
+            {
+                "label": "main",
+                "visible": false,
+                "title": "",
+                "width": 1050,
+                "height": 750,
+                "minWidth": 800,
+                "minHeight": 600,
+                "resizable": true,
+                "transparent": true,
+                "decorations": false,
+                "dragDropEnabled": false,
+                "hiddenTitle": true
+            },
+            {
+                "label": "splashscreen",
+                "url": "splashscreen.html",
+                "width": 400,
+                "height": 300,
+                "center": true,
+                "resizable": false,
+                "maximizable": false,
+                "minimizable": false,
+                "decorations": false,
+                "transparent": true,
+                "alwaysOnTop": true,
+                "hiddenTitle": true
+            }
+        ]
+    }
+}

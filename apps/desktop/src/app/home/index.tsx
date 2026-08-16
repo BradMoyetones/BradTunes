@@ -1,16 +1,19 @@
-import { Button, Card, CardContent, CardDescription, CardTitle } from '@xtunes/ui';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@xtunes/ui";
+
 export default function Home() {
     return (
         <div>
-            Este es el home <br />
-            <Button variant="destructive">Home</Button>
-
-            <Card>
-                <CardTitle>Card</CardTitle>
-                <CardDescription>Card Description</CardDescription>
+            <Card className="bg-card/30">
+                <CardHeader>
+                    <CardTitle>Card Title</CardTitle>
+                    <CardDescription>Card Description</CardDescription>
+                </CardHeader>
                 <CardContent>
-                    Card Content
+                    <CardDescription>Card Content</CardDescription>
                 </CardContent>
+                <CardFooter>
+                    <CardDescription>Card Footer</CardDescription>
+                </CardFooter>
             </Card>
         </div>
     );

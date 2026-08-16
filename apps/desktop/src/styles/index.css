@@ -1,14 +1,13 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 @import '@fontsource-variable/geist';
 
-@source "../../../node_modules/@xtunes/ui";
-
-@import "@xtunes/ui/styles.css";
+@source "../../node_modules/@xtunes/ui";
+@import '@xtunes/ui/styles.css';
 
 @custom-variant dark (&:is(.dark *));
- 
+
 @layer base {
     * {
         @apply border-border outline-ring/50;
@@ -21,4 +20,14 @@
     html {
         @apply font-sans;
     }
+}
+
+.app-layout {
+    display: grid;
+    grid-template-areas:
+        'title title'
+        'aside main'
+        'player player';
+    grid-template-columns: 350px 1fr;
+    grid-template-rows: auto 1fr auto;
 }

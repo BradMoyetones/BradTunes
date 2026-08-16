@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en" class="dark">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Starting xTunes...</title>
+        <link rel="stylesheet" href="/splash.css" />
+    </head>
+    <body
+        data-tauri-drag-region
+        class="select-none cursor-default bg-background text-foreground h-screen w-screen overflow-hidden flex flex-col items-center justify-center rounded-xl border-border shadow-2xl antialiased"
+    >
+        <!-- Icon/Logo -->
+        <img
+            data-tauri-drag-region
+            src="/app-icon.svg"
+            alt="xTunes"
+            width="100"
+            height="100"
+            draggable="false" 
+            oncontextmenu="return false;"
+            class="pointer-events-none mb-2"
+        >
+
+        <h1 data-tauri-drag-region class="text-3xl font-bold tracking-tight mb-2">xTunes</h1>
+        <p data-tauri-drag-region class="text-sm text-muted-foreground mb-8">Verificando...</p>
+
+        <!-- Spinner -->
+        <div
+            data-tauri-drag-region
+            class="w-8 h-8 aspect-square border-4 border-primary/30 border-t-primary rounded-full animate-spin"
+        ></div>
+    </body>
+</html>
