@@ -1,6 +1,6 @@
 mod commands;
 mod errors;
-use tauri::Manager;
+use tauri::{Manager, RunEvent};
 use tauri_plugin_os;
 
 use window_vibrancy::*;
