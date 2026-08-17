@@ -1,4 +1,5 @@
 mod commands;
+pub mod models;
 mod errors;
 use tauri::{Manager, RunEvent};
 use tauri_plugin_os;
