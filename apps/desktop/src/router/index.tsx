@@ -1,4 +1,4 @@
-import { createBrowserRouter, isRouteErrorResponse, useRouteError } from "react-router";
+import { createBrowserRouter, isRouteErrorResponse, Link, useRouteError } from "react-router";
 import Home from "@/app/home";
 import MainLayout from "@/layouts/main";
 import { ErrorBoundary } from "@/components/error-boundary";
@@ -30,9 +30,15 @@ const router = createBrowserRouter([
             {
                 index: true,
                 element: <Home />
+            },
+            {
+                path: "settings",
+                element: <div className="flex flex-col items-center justify-center min-h-screen">
+                    <Link to="/">Home</Link>
+                </div>
             }
         ]
-    }
+    },
 ])
 
 export default router

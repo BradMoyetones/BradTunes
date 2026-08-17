@@ -20,7 +20,7 @@ export function Titlebar() {
     handle();
   }, []);
     return (
-        <div data-tauri-drag-region className="flex z-1000 relative h-11 items-stretch justify-between bg-background/0 select-none overflow-hidden border-b border-border/50 pointer-events-auto!">
+        <div data-tauri-drag-region className="flex z-1000 relative h-11 items-stretch justify-between bg-background/0 select-none overflow-hidden pointer-events-auto!">
             {/* LEFT ZONE: Logo & macOS Margin */}
             <div data-tauri-drag-region className="flex items-center shrink-0">
                 <div className={cn({

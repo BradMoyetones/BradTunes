@@ -22,12 +22,4 @@
     }
 }
 
-.app-layout {
-    display: grid;
-    grid-template-areas:
-        'title title'
-        'aside main'
-        'player player';
-    grid-template-columns: 350px 1fr;
-    grid-template-rows: auto 1fr auto;
-}
+
