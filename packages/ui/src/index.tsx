@@ -17,5 +17,6 @@ export * from "./components/switch";
 export * from "./components/progress";
 export * from "./components/scroll-area";
 export * from "./components/select";
+export * from "./components/spinner";
 
 export * from "./utils/animations";

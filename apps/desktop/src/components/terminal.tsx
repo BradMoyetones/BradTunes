@@ -23,8 +23,8 @@ export function Terminal() {
       fontSize: 14,
       theme: {
         background: 'transparent',
-        foreground: isDark ? '#f8f8f2' : '#272822',
-        cursor: isDark ? '#f8f8f2' : '#272822',
+        foreground: isDark ? '#f8f8f2' : '#f8f8f2',
+        cursor: isDark ? '#f8f8f2' : '#f8f8f2',
       },
       convertEol: true,
     });

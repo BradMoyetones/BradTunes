@@ -5,7 +5,8 @@ import {
     Alert, AlertDescription, AlertTitle, 
     Tabs, TabsContent, TabsList, TabsTrigger, 
     Input, Label, Switch, Button, Progress,
-    Select, SelectContent, SelectItem, SelectTrigger, SelectValue
+    Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+    Spinner
 } from '@xtunes/ui';
 import { AlertTriangle, Download as DownloadIcon, Terminal as TerminalIcon, Settings2, CodeSquare, Disc, Video, Music, Subtitles, Image as ImageIcon, Tags } from 'lucide-react';
 import { toast } from 'sonner';
@@ -132,6 +133,12 @@ export default function DownloadPage() {
 
             {(ytdlpState !== 'READY' || ffmpegState !== 'READY') && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {(ytdlpState === 'CHECKING' || ffmpegState === 'CHECKING') && (
+                        <Alert className="col-span-2 flex items-center justify-center">
+                            <Spinner className="h-6 w-6" />
+                            <AlertTitle>Checking engines...</AlertTitle>
+                        </Alert>
+                    )}
                     {/* yt-dlp Status */}
                     {ytdlpState === 'MISSING' && (
                         <Alert variant="destructive" className="bg-destructive/10 border-destructive/20 text-destructive-foreground">
@@ -286,7 +293,7 @@ export default function DownloadPage() {
 
                         {/* Extra Features Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="flex flex-col justify-between rounded-lg border border-border/50 p-4 bg-background/30 hover:bg-background/50 transition-colors">
+                            <div className="flex flex-col justify-between rounded-lg border border-border p-4 bg-background shadow-sm transition-colors">
                                 <div className="space-y-1 mb-4">
                                     <Label className="text-sm font-semibold flex items-center gap-2"><Tags className="w-4 h-4"/> Metadata</Label>
                                     <p className="text-xs text-muted-foreground leading-relaxed">Embed artist, title, and album info into the file.</p>
@@ -294,7 +301,7 @@ export default function DownloadPage() {
                                 <Switch checked={embedMetadata} onCheckedChange={setEmbedMetadata} />
                             </div>
 
-                            <div className="flex flex-col justify-between rounded-lg border border-border/50 p-4 bg-background/30 hover:bg-background/50 transition-colors">
+                            <div className="flex flex-col justify-between rounded-lg border border-border p-4 bg-background shadow-sm transition-colors">
                                 <div className="space-y-1 mb-4">
                                     <Label className="text-sm font-semibold flex items-center gap-2"><ImageIcon className="w-4 h-4"/> Thumbnail</Label>
                                     <p className="text-xs text-muted-foreground leading-relaxed">Download and embed cover art into the media.</p>
@@ -302,7 +309,7 @@ export default function DownloadPage() {
                                 <Switch checked={embedThumbnail} onCheckedChange={setEmbedThumbnail} />
                             </div>
 
-                            <div className={`flex flex-col justify-between rounded-lg border border-border/50 p-4 transition-colors ${extractAudio ? 'bg-background/10 opacity-50 cursor-not-allowed' : 'bg-background/30 hover:bg-background/50'}`}>
+                            <div className={`flex flex-col justify-between rounded-lg border border-border/50 p-4 transition-colors ${extractAudio ? 'bg-background/10 opacity-50 cursor-not-allowed' : 'bg-background shadow-sm'}`}>
                                 <div className="space-y-1 mb-4">
                                     <Label className="text-sm font-semibold flex items-center gap-2"><Subtitles className="w-4 h-4"/> Subtitles</Label>
                                     <p className="text-xs text-muted-foreground leading-relaxed">Download and embed subtitles (Video only).</p>
