@@ -4,7 +4,8 @@ import { useUpdater } from '@/hooks/use-updater';
 import { useEffect } from 'react';
 import { api } from '@xtunes/api';
 import { AnimatePresence, motion } from 'motion/react';
-import { pageTransition } from '@xtunes/ui';
+import { Button, pageTransition } from '@xtunes/ui';
+import { Download, House, Settings } from 'lucide-react';
 
 function UpdaterComponent() {
     const { checkForUpdates, promptUpdate } = useUpdater();
@@ -44,7 +45,23 @@ export default function MainLayout() {
                     
                     {/* Isla: Sidebar */}
                     <aside className="w-64 flex-none rounded-2xl border border-border/50 bg-card/60 shadow-sm flex flex-col p-4">
-                        <nav className="flex-1 space-y-2 h-full">{/* Elementos de navegación aquí */}</nav>
+                        <header className="flex flex-col gap-2">
+                            <Button variant="ghost" size={"lg"} className="w-full justify-start">
+                                <House />
+                                Home
+                            </Button>
+                            <Button variant="ghost" size={"lg"} className="w-full justify-start">
+                                <Download />
+                                Download
+                            </Button>
+                            <Button variant="ghost" size={"lg"} className="w-full justify-start">
+                                <Settings />
+                                Settings
+                            </Button>
+                        </header>
+                        <nav className="flex-1 space-y-2 h-full">
+
+                        </nav>
                     </aside>
 
                     {/* Isla: Main Content */}

@@ -1,3 +1,4 @@
+pub mod services;
 mod commands;
 pub mod models;
 mod errors;
@@ -31,6 +32,22 @@ pub fn run() {
             #[cfg(target_os = "windows")]
             apply_acrylic(&window, Some((0, 0, 0, 0)))
                 .expect("Unsupported platform! 'apply_blur' is only supported on Windows");
+
+            // Configurar AppDataDir para DB y Vault
+            let app_data_dir = app.path().app_data_dir().unwrap();
+            std::fs::create_dir_all(&app_data_dir).unwrap();
+            
+            let db_path = app_data_dir.join("vault.db");
+            let db = std::sync::Arc::new(services::db::Database::new(db_path).expect("Failed to initialize database"));
+            
+            let vault_path = app_data_dir.join("vault");
+            std::fs::create_dir_all(&vault_path).unwrap();
+            
+            // Iniciar Watcher asíncrono
+            services::watcher::start_watcher(app.handle().clone(), vault_path, db.clone());
+            
+            // Inyectar DB en el estado de Tauri
+            app.manage(db);
 
             Ok(())
         })

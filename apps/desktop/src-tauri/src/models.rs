@@ -46,3 +46,22 @@ pub struct ConsoleLogEvent {
     pub source: String,
     pub line: String,
 }
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct VaultItem {
+    pub id: String,
+    pub title: String,
+    pub artist: Option<String>,
+    pub duration_sec: Option<i64>,
+    pub has_video: bool,
+    pub has_audio: bool,
+    pub has_cover: bool,
+}
+
+#[derive(Serialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct VaultEvent {
+    pub event_type: String, // "INSERTED", "UPDATED", "DELETED"
+    pub item: VaultItem,
+}
