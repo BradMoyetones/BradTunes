@@ -14,7 +14,7 @@ import {
 } from '@/components/custom-toast';
 
 import { useNavigate } from 'react-router';
-import { useReleaseNotesStore } from '@/stores/release-notes-store';
+import { useReleaseNotesStore } from '@/store/release-notes-store';
 
 const useUpdater = () => {
     const navigate = useNavigate();

@@ -1,27 +1,22 @@
-import { api, VaultItem } from "@xtunes/api";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { MediaCard } from "./components/media-card";
 import { Library, FolderOpen } from "lucide-react";
 
+import { useVaultStore } from "../../store/vault";
+
 export default function Home() {
-    const [data, setData] = useState<VaultItem[]>([]);
+    const { items: data, fetchItems, startListening } = useVaultStore();
 
     useEffect(() => {
-        api.vault.getAllItems().then((res) => setData(res)).catch(console.error);
+        fetchItems();
         
-        // Listen to vault updates dynamically
-        const unlisten = api.vault.onVaultEvent((event) => {
-            if (event.eventType === "INSERTED") {
-                setData(prev => [event.item, ...prev]);
-            } else if (event.eventType === "DELETED") {
-                setData(prev => prev.filter(i => i.id !== event.item.id));
-            } else if (event.eventType === "UPDATED") {
-                setData(prev => prev.map(i => i.id === event.item.id ? event.item : i));
-            }
-        });
+        let cleanup: (() => void) | undefined;
+        startListening().then(unlisten => {
+            cleanup = unlisten;
+        }).catch(console.error);
 
         return () => {
-            unlisten.then(fn => fn());
+            if (cleanup) cleanup();
         };
     }, []);
 
@@ -45,7 +40,7 @@ export default function Home() {
                         </div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-6">
                         {data.map(item => (
                             <MediaCard key={item.id} item={item} />
                         ))}

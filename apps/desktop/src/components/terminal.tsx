@@ -135,7 +135,7 @@ export function Terminal() {
   }, [resolvedTheme]);
 
   return (
-    <div className="relative w-full h-full min-h-[300px] bg-background/50 backdrop-blur-md rounded-xl border border-border/50 shadow-inner overflow-hidden">
+    <div className="relative w-full h-full min-h-75 bg-background/50 backdrop-blur-md rounded-xl border border-border/50 shadow-inner overflow-hidden">
       <div className="absolute inset-0 p-4">
         <div ref={terminalRef} className="w-full h-full overflow-hidden" />
       </div>

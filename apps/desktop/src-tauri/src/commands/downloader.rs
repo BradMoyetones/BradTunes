@@ -44,10 +44,17 @@ fn build_args(config: &DownloadConfig, app: &AppHandle) -> Result<(Vec<String>, 
         let vq = config.video_quality.as_deref().unwrap_or("best");
         
         let format_str = if vq == "best" {
-            format!("bestvideo[ext={}]+bestaudio/best", vf)
+            if vf == "mp4" {
+                "bestvideo[vcodec^=avc]+bestaudio[ext=m4a]/bestvideo[ext=mp4]+bestaudio/best".to_string()
+            } else {
+                format!("bestvideo[ext={}]+bestaudio/best", vf).to_string()
+            }
         } else {
-            // Ejemplo de resolucion: vq = 1080
-            format!("bestvideo[height<={}][ext={}]+bestaudio/best", vq, vf)
+            if vf == "mp4" {
+                format!("bestvideo[height<={}][vcodec^=avc]+bestaudio[ext=m4a]/bestvideo[height<={}][ext=mp4]+bestaudio/best", vq, vq).to_string()
+            } else {
+                format!("bestvideo[height<={}][ext={}]+bestaudio/best", vq, vf).to_string()
+            }
         };
         args.push("-f".into());
         args.push(format_str);

@@ -327,7 +327,7 @@ export default function DownloadPage() {
 
                     {/* Simple Log Output view during download for the assistant */}
                     {isDownloadingMedia && (
-                        <div className="flex-1 min-h-[250px] flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-4">
+                        <div className="flex-1 min-h-62.5 flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-4">
                             <Label className="flex items-center gap-2 text-primary"><CodeSquare className="w-4 h-4"/> Live Output</Label>
                             <div className="flex-1 relative rounded-xl overflow-hidden shadow-inner border border-border/50">
                                 <Terminal />

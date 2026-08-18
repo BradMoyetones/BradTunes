@@ -31,22 +31,32 @@ pub fn start_watcher(app: AppHandle, vault_path: PathBuf, db: Arc<Database>) {
 }
 
 fn handle_event(app: &AppHandle, db: &Database, vault_root: &PathBuf, event: Event) {
-    if !matches!(event.kind, EventKind::Remove(_)) {
-        return; // Por ahora solo nos interesa sincronizar eliminaciones "out-of-band"
+    // macOS FSEvents a veces emite EventKind::Modify(Any) o EventKind::Other
+    // Filtramos solo los eventos de lectura de datos o metadata puros para no saturar.
+    match event.kind {
+        EventKind::Access(_) | EventKind::Modify(notify::event::ModifyKind::Data(_)) | EventKind::Modify(notify::event::ModifyKind::Metadata(_)) => return,
+        _ => {}
     }
 
     for path in event.paths {
-        // La estructura es vault_root / ID / archivo
         if let Ok(rel_path) = path.strip_prefix(vault_root) {
             let components: Vec<_> = rel_path.components().collect();
-            if components.len() == 1 {
-                // Se borró la carpeta entera del ID
-                let id = components[0].as_os_str().to_string_lossy().to_string();
-                if let Ok(_) = db.delete(&id) {
+            if components.is_empty() { continue; }
+            
+            let id = components[0].as_os_str().to_string_lossy().to_string();
+            let folder_path = vault_root.join(&id);
+
+            // Obtenemos el item actual para comparar si realmente hubo cambios (Organic Debounce)
+            let current_item = db.get_item(&id).unwrap_or(None);
+
+            if !folder_path.exists() {
+                // Se borró la carpeta entera (o se movió a la papelera)
+                if current_item.is_some() {
+                    let _ = db.delete(&id);
                     let _ = app.emit("vault-event", VaultEvent {
                         event_type: "DELETED".into(),
                         item: VaultItem {
-                            id,
+                            id: id.clone(),
                             title: "".into(),
                             artist: None,
                             duration_sec: None,
@@ -59,70 +69,46 @@ fn handle_event(app: &AppHandle, db: &Database, vault_root: &PathBuf, event: Eve
                         }
                     });
                 }
-            } else if components.len() == 2 {
-                // Se borró un archivo dentro de la carpeta ID
-                let id = components[0].as_os_str().to_string_lossy().to_string();
-                
-                // Re-escaneamos la carpeta para ver qué quedó
-                let folder_path = vault_root.join(&id);
-                if !folder_path.exists() {
-                    // Si no existe, se borró todo
-                    let _ = db.delete(&id);
-                    let _ = app.emit("vault-event", VaultEvent {
-                        event_type: "DELETED".into(),
-                        item: VaultItem {
-                            id,
-                            title: "".into(),
-                            artist: None,
-                            duration_sec: None,
-                            has_video: false,
-                            has_audio: false,
-                            has_cover: false,
-                            video_filename: None,
-                            audio_filename: None,
-                            cover_filename: None,
-                        }
-                    });
-                } else {
-                    // Verificamos qué archivos quedan
-                    let mut video_filename = None;
-                    let mut audio_filename = None;
-                    let mut cover_filename = None;
+            } else {
+                // Se borró/movió/agregó un archivo dentro de la carpeta. Re-escaneamos:
+                let mut video_filename = None;
+                let mut audio_filename = None;
+                let mut cover_filename = None;
 
-                    if let Ok(entries) = fs::read_dir(&folder_path) {
-                        for entry in entries.flatten() {
-                            let path = entry.path();
-                            if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
-                                if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
-                                    match ext {
-                                        "mp4" | "mkv" | "webm" => video_filename = Some(name.to_string()),
-                                        "mp3" | "m4a" | "wav" | "ogg" | "flac" => audio_filename = Some(name.to_string()),
-                                        "jpg" | "jpeg" | "png" | "webp" => cover_filename = Some(name.to_string()),
-                                        _ => {}
-                                    }
+                if let Ok(entries) = fs::read_dir(&folder_path) {
+                    for entry in entries.flatten() {
+                        let path = entry.path();
+                        if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
+                            if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
+                                match ext {
+                                    "mp4" | "mkv" | "webm" => video_filename = Some(name.to_string()),
+                                    "mp3" | "m4a" | "wav" | "ogg" | "flac" => audio_filename = Some(name.to_string()),
+                                    "jpg" | "jpeg" | "png" | "webp" => cover_filename = Some(name.to_string()),
+                                    _ => {}
                                 }
                             }
                         }
                     }
+                }
 
-                    // Actualizamos DB
-                    if let Ok(_) = db.update_paths(&id, video_filename.clone(), audio_filename.clone(), cover_filename.clone()) {
-                        // Omitir título y otros metadatos en el evento para evitar DB hits extras. El frontend puede hacer merge de `has_video`, etc.
-                        let _ = app.emit("vault-event", VaultEvent {
-                            event_type: "UPDATED".into(),
-                            item: VaultItem {
-                                id,
-                                title: "".into(),
-                                artist: None,
-                                duration_sec: None,
-                                has_video: video_filename.is_some(),
-                                has_audio: audio_filename.is_some(),
-                                has_cover: cover_filename.is_some(),
-                                video_filename,
-                                audio_filename,
-                                cover_filename,
-                            }
-                        });
+                let mut has_changes = true;
+                if let Some(item) = &current_item {
+                    if item.video_filename == video_filename 
+                        && item.audio_filename == audio_filename 
+                        && item.cover_filename == cover_filename {
+                        has_changes = false;
+                    }
+                }
+
+                // Solo actualizamos DB y emitimos si realmente las extensiones/archivos cambiaron
+                if has_changes {
+                    if let Ok(_) = db.update_paths(&id, video_filename, audio_filename, cover_filename) {
+                        if let Ok(Some(full_item)) = db.get_item(&id) {
+                            let _ = app.emit("vault-event", VaultEvent {
+                                event_type: "UPDATED".into(),
+                                item: full_item,
+                            });
+                        }
                     }
                 }
             }

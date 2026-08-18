@@ -1,5 +1,5 @@
 import { VaultItem } from "@xtunes/api";
-import { Card, CardContent } from "@xtunes/ui";
+import { Card, CardFooter } from "@xtunes/ui";
 import { Play, MoreVertical, Music, Video, Clock } from "lucide-react";
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { appDataDir } from '@tauri-apps/api/path';
@@ -35,7 +35,7 @@ export function MediaCard({ item, onClick }: MediaCardProps) {
 
     return (
         <Card 
-            className="group relative overflow-hidden bg-card/40 backdrop-blur-md border-border/50 hover:bg-card/60 transition-all cursor-pointer shadow-sm hover:shadow-lg"
+            className="group relative overflow-hidden p-0 gap-0 "
             onClick={onClick}
         >
             <div className="aspect-square w-full relative bg-muted/30 overflow-hidden">
@@ -48,14 +48,14 @@ export function MediaCard({ item, onClick }: MediaCardProps) {
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center bg-background/50">
-                        {item.hasVideo ? <Video className="w-12 h-12 text-muted-foreground/30" /> : <Music className="w-12 h-12 text-muted-foreground/30" />}
+                        {item.hasVideo ? <Video className="w-12 h-12 text-muted-foreground/30 fill-current" /> : <Music className="w-12 h-12 text-muted-foreground/30 fill-current" />}
                     </div>
                 )}
                 
                 {/* Play Overlay */}
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
                     <div className="w-12 h-12 rounded-full bg-primary/90 flex items-center justify-center text-primary-foreground shadow-xl scale-90 group-hover:scale-100 transition-transform">
-                        <Play className="w-5 h-5 ml-1" />
+                        <Play className="w-5 h-5 ml-1 fill-current" />
                     </div>
                 </div>
 
@@ -81,7 +81,7 @@ export function MediaCard({ item, onClick }: MediaCardProps) {
                 )}
             </div>
 
-            <CardContent className="p-4 flex gap-3 items-start justify-between">
+            <CardFooter className="p-4 flex gap-3 items-start justify-between">
                 <div className="min-w-0 flex-1">
                     <h3 className="font-semibold text-sm leading-tight truncate" title={item.title}>
                         {item.title}
@@ -91,10 +91,10 @@ export function MediaCard({ item, onClick }: MediaCardProps) {
                     </p>
                 </div>
                 
-                <button className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-background/50 flex-shrink-0" onClick={(e) => { e.stopPropagation(); /* TODO: Open Context Menu */ }}>
+                <button className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-background/50 shrink-0" onClick={(e) => { e.stopPropagation(); /* TODO: Open Context Menu */ }}>
                     <MoreVertical className="w-4 h-4" />
                 </button>
-            </CardContent>
+            </CardFooter>
         </Card>
     );
 }
