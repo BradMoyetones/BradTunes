@@ -35,10 +35,14 @@ pub struct DownloadProgressPayload {
 #[serde(rename_all = "camelCase")]
 pub struct DownloadConfig {
     pub url: String,
-    pub format: String,
     pub extract_audio: bool,
+    pub video_format: Option<String>,
+    pub video_quality: Option<String>,
     pub audio_format: Option<String>,
+    pub audio_quality: Option<String>,
     pub embed_subs: bool,
+    pub embed_metadata: bool,
+    pub embed_thumbnail: bool,
 }
 
 #[derive(Serialize, Clone, Debug)]
@@ -57,6 +61,9 @@ pub struct VaultItem {
     pub has_video: bool,
     pub has_audio: bool,
     pub has_cover: bool,
+    pub video_filename: Option<String>,
+    pub audio_filename: Option<String>,
+    pub cover_filename: Option<String>,
 }
 
 #[derive(Serialize, Clone, Debug)]

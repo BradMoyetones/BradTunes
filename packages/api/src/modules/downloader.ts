@@ -3,17 +3,21 @@ import { listen, UnlistenFn } from '@tauri-apps/api/event';
 
 export interface DownloadConfig {
   url: string;
-  format: string;
   extractAudio: boolean;
-  audioFormat?: string;
+  videoFormat?: string; // mp4, webm, mkv
+  videoQuality?: string; // best, 1080, 720, 480
+  audioFormat?: string; // mp3, flac, wav, m4a
+  audioQuality?: string; // 320, 256, 192, 128
   embedSubs: boolean;
+  embedMetadata: boolean;
+  embedThumbnail: boolean;
 }
 
 export const downloader = {
   /**
    * Ejecuta yt-dlp usando una configuración estructurada
    */
-  async executeDownload(config: DownloadConfig): Promise<void> {
+  async executeDownload(config: DownloadConfig): Promise<any> {
     return invoke('execute_download', { config });
   },
 

@@ -1,5 +1,6 @@
 import { createBrowserRouter, isRouteErrorResponse, Link, useRouteError } from "react-router";
 import Home from "@/app/home";
+import DownloadPage from "@/app/download";
 import MainLayout from "@/layouts/main";
 import { ErrorBoundary } from "@/components/error-boundary";
 
@@ -30,6 +31,10 @@ const router = createBrowserRouter([
             {
                 index: true,
                 element: <Home />
+            },
+            {
+                path: "download",
+                element: <DownloadPage />
             },
             {
                 path: "settings",

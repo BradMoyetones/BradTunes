@@ -85,26 +85,28 @@ pub async fn install_binary(app: AppHandle, binary: String) -> Result<(), String
     let url = match binary.as_str() {
         "yt-dlp" => {
             #[cfg(target_os = "windows")]
-            let url = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe";
+            let url = "https://github.com/yt-dlp/yt-dlp-master-builds/releases/latest/download/yt-dlp.exe";
             #[cfg(target_os = "macos")]
-            let url = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_macos";
+            let url = "https://github.com/yt-dlp/yt-dlp-master-builds/releases/latest/download/yt-dlp_macos";
             #[cfg(target_os = "linux")]
-            let url = "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp";
+            let url = "https://github.com/yt-dlp/yt-dlp-master-builds/releases/latest/download/yt-dlp";
             url
         }
         "ffmpeg" => {
-            // Placeholder: ffmpeg requires unzipping depending on the OS
-            // En un sistema real usaríamos un endpoint de builds estáticos de ffmpeg
-            // Por simplicidad en este blueprint asumiremos una descarga directa
-            "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz"
+            #[cfg(target_os = "macos")]
+            let url = "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v6.1/ffmpeg-6.1-macos-64.zip";
+            #[cfg(target_os = "windows")]
+            let url = "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v6.1/ffmpeg-6.1-win-64.zip";
+            #[cfg(target_os = "linux")]
+            let url = "https://github.com/ffbinaries/ffbinaries-prebuilt/releases/download/v6.1/ffmpeg-6.1-linux-64.zip";
+            url
         }
         _ => return Err("Binario no soportado".into()),
     };
 
-    let path = if binary == "ffmpeg" {
-        // En una app real, aquí descargaríamos el zip y lo extraeríamos en get_ffmpeg_dir()
+    let download_path = if binary == "ffmpeg" {
         let mut p = get_ffmpeg_dir(&app)?;
-        p.push("ffmpeg");
+        p.push("ffmpeg.zip");
         p
     } else {
         get_binary_path(&app, &binary)?
@@ -113,7 +115,7 @@ pub async fn install_binary(app: AppHandle, binary: String) -> Result<(), String
     let res = reqwest::get(url).await.map_err(|e| e.to_string())?;
     let total_bytes = res.content_length().unwrap_or(0);
     
-    let mut file = fs::File::create(&path).await.map_err(|e| e.to_string())?;
+    let mut file = fs::File::create(&download_path).await.map_err(|e| e.to_string())?;
     let mut stream = res.bytes_stream();
     let mut downloaded_bytes = 0;
 
@@ -136,12 +138,53 @@ pub async fn install_binary(app: AppHandle, binary: String) -> Result<(), String
         });
     }
 
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::PermissionsExt;
-        let mut perms = fs::metadata(&path).await.map_err(|e| e.to_string())?.permissions();
-        perms.set_mode(0o755);
-        fs::set_permissions(&path, perms).await.map_err(|e| e.to_string())?;
+    if binary == "ffmpeg" {
+        let extract_dir = get_ffmpeg_dir(&app)?;
+        
+        #[cfg(unix)]
+        let status = std::process::Command::new("unzip")
+            .arg("-o")
+            .arg(&download_path)
+            .arg("-d")
+            .arg(&extract_dir)
+            .status()
+            .map_err(|e| format!("Failed to extract zip: {}", e))?;
+
+        #[cfg(windows)]
+        let status = std::process::Command::new("tar")
+            .arg("-xf")
+            .arg(&download_path)
+            .arg("-C")
+            .arg(&extract_dir)
+            .status()
+            .map_err(|e| format!("Failed to extract zip: {}", e))?;
+
+        if !status.success() {
+            return Err("Failed to extract ffmpeg zip archive".into());
+        }
+
+        // Limpiar el zip
+        let _ = std::fs::remove_file(&download_path);
+
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let mut exe_path = extract_dir.clone();
+            exe_path.push("ffmpeg");
+            if exe_path.exists() {
+                let mut perms = fs::metadata(&exe_path).await.map_err(|e| e.to_string())?.permissions();
+                perms.set_mode(0o755);
+                fs::set_permissions(&exe_path, perms).await.map_err(|e| e.to_string())?;
+            }
+        }
+    } else {
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let mut perms = fs::metadata(&download_path).await.map_err(|e| e.to_string())?.permissions();
+            perms.set_mode(0o755);
+            fs::set_permissions(&download_path, perms).await.map_err(|e| e.to_string())?;
+        }
     }
 
     Ok(())

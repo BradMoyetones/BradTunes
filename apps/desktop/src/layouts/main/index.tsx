@@ -1,4 +1,4 @@
-import { useLocation, useOutlet } from 'react-router';
+import { useLocation, useOutlet, Link } from 'react-router';
 import { Titlebar } from '@/components/titlebar';
 import { useUpdater } from '@/hooks/use-updater';
 import { useEffect } from 'react';
@@ -46,18 +46,24 @@ export default function MainLayout() {
                     {/* Isla: Sidebar */}
                     <aside className="w-64 flex-none rounded-2xl border border-border/50 bg-card/60 shadow-sm flex flex-col p-4">
                         <header className="flex flex-col gap-2">
-                            <Button variant="ghost" size={"lg"} className="w-full justify-start">
-                                <House />
-                                Home
-                            </Button>
-                            <Button variant="ghost" size={"lg"} className="w-full justify-start">
-                                <Download />
-                                Download
-                            </Button>
-                            <Button variant="ghost" size={"lg"} className="w-full justify-start">
-                                <Settings />
-                                Settings
-                            </Button>
+                            <Link to="/" className="w-full">
+                                <Button variant="ghost" size={"lg"} className="w-full justify-start">
+                                    <House className="mr-2" />
+                                    Home
+                                </Button>
+                            </Link>
+                            <Link to="/download" className="w-full">
+                                <Button variant="ghost" size={"lg"} className="w-full justify-start">
+                                    <Download className="mr-2" />
+                                    Download
+                                </Button>
+                            </Link>
+                            <Link to="/settings" className="w-full">
+                                <Button variant="ghost" size={"lg"} className="w-full justify-start">
+                                    <Settings className="mr-2" />
+                                    Settings
+                                </Button>
+                            </Link>
                         </header>
                         <nav className="flex-1 space-y-2 h-full">
 

@@ -53,6 +53,9 @@ fn handle_event(app: &AppHandle, db: &Database, vault_root: &PathBuf, event: Eve
                             has_video: false,
                             has_audio: false,
                             has_cover: false,
+                            video_filename: None,
+                            audio_filename: None,
+                            cover_filename: None,
                         }
                     });
                 }
@@ -75,30 +78,35 @@ fn handle_event(app: &AppHandle, db: &Database, vault_root: &PathBuf, event: Eve
                             has_video: false,
                             has_audio: false,
                             has_cover: false,
+                            video_filename: None,
+                            audio_filename: None,
+                            cover_filename: None,
                         }
                     });
                 } else {
                     // Verificamos qué archivos quedan
-                    let mut path_video = None;
-                    let mut path_audio = None;
-                    let mut path_cover = None;
+                    let mut video_filename = None;
+                    let mut audio_filename = None;
+                    let mut cover_filename = None;
 
                     if let Ok(entries) = fs::read_dir(&folder_path) {
                         for entry in entries.flatten() {
                             let path = entry.path();
                             if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
-                                match ext {
-                                    "mp4" | "mkv" | "webm" => path_video = Some(path.to_string_lossy().to_string()),
-                                    "mp3" | "m4a" | "wav" | "ogg" | "flac" => path_audio = Some(path.to_string_lossy().to_string()),
-                                    "jpg" | "jpeg" | "png" | "webp" => path_cover = Some(path.to_string_lossy().to_string()),
-                                    _ => {}
+                                if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
+                                    match ext {
+                                        "mp4" | "mkv" | "webm" => video_filename = Some(name.to_string()),
+                                        "mp3" | "m4a" | "wav" | "ogg" | "flac" => audio_filename = Some(name.to_string()),
+                                        "jpg" | "jpeg" | "png" | "webp" => cover_filename = Some(name.to_string()),
+                                        _ => {}
+                                    }
                                 }
                             }
                         }
                     }
 
                     // Actualizamos DB
-                    if let Ok(_) = db.update_paths(&id, path_video.clone(), path_audio.clone(), path_cover.clone()) {
+                    if let Ok(_) = db.update_paths(&id, video_filename.clone(), audio_filename.clone(), cover_filename.clone()) {
                         // Omitir título y otros metadatos en el evento para evitar DB hits extras. El frontend puede hacer merge de `has_video`, etc.
                         let _ = app.emit("vault-event", VaultEvent {
                             event_type: "UPDATED".into(),
@@ -107,9 +115,12 @@ fn handle_event(app: &AppHandle, db: &Database, vault_root: &PathBuf, event: Eve
                                 title: "".into(),
                                 artist: None,
                                 duration_sec: None,
-                                has_video: path_video.is_some(),
-                                has_audio: path_audio.is_some(),
-                                has_cover: path_cover.is_some(),
+                                has_video: video_filename.is_some(),
+                                has_audio: audio_filename.is_some(),
+                                has_cover: cover_filename.is_some(),
+                                video_filename,
+                                audio_filename,
+                                cover_filename,
                             }
                         });
                     }

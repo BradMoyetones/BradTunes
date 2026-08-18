@@ -9,6 +9,9 @@ export interface VaultItem {
   hasVideo: boolean;
   hasAudio: boolean;
   hasCover: boolean;
+  videoFilename?: string;
+  audioFilename?: string;
+  coverFilename?: string;
 }
 
 export interface VaultEvent {
